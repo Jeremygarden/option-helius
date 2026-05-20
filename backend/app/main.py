@@ -2,8 +2,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import json
-from .routers import options, sentiment, macro, picks
-from .mock.options_chain import get_mock_chain, get_mock_summary
+from .routers import options, sentiment, macro, picks, report, analyze
+from .mock.options_chain import get_mock_options_chain
 
 app = FastAPI(title="Options Helius API")
 
@@ -19,6 +19,8 @@ app.include_router(options.router, prefix="/api/options", tags=["options"])
 app.include_router(sentiment.router, prefix="/api/sentiment", tags=["sentiment"])
 app.include_router(macro.router, prefix="/api/macro", tags=["macro"])
 app.include_router(picks.router, prefix="/api/picks", tags=["picks"])
+app.include_router(report.router, prefix="/api/report", tags=["report"])
+app.include_router(analyze.router, prefix="/api/analyze", tags=["analyze"])
 
 @app.get("/")
 async def root():
@@ -31,7 +33,7 @@ async def websocket_endpoint(websocket: WebSocket, ticker: str):
         while True:
             # Send mock data every 5 seconds
             data = {
-                "summary": get_mock_summary(ticker),
+                "summary": get_mock_options_chain(ticker),
                 "timestamp": asyncio.get_event_loop().time()
             }
             await websocket.send_text(json.dumps(data))
