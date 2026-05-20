@@ -1,0 +1,78 @@
+def get_mock_picks():
+    return [
+        {
+            "ticker": "NVDA",
+            "strategy": "Sell Cash-Secured Put",
+            "score": 9,
+            "type": "core",
+            "entry": "Strike $105, Limit $2.50",
+            "target": "Price > $120",
+            "stop": "$98",
+            "max_risk": "$10,500 per contract",
+            "return": "15% annualized",
+            "duration": "45 Days",
+            "thesis": "Support at 100MA + RSI Oversold",
+            "risks": "Semi-conductor cyclical downturn",
+            "margin": "$2,500"
+        },
+        {
+            "ticker": "SPY",
+            "strategy": "Iron Condor",
+            "score": 8,
+            "type": "conservative",
+            "entry": "540/545/580/585",
+            "target": "Full credit retention",
+            "stop": "2x credit received",
+            "max_risk": "$400 per wing",
+            "return": "8% per month",
+            "duration": "14 Days",
+            "thesis": "Low VIX environment, range bound",
+            "risks": "Unexpected CPI data print",
+            "margin": "$500"
+        },
+        {
+            "ticker": "TSLA",
+            "strategy": "Bull Put Spread",
+            "score": 7,
+            "type": "aggressive",
+            "entry": "170/175",
+            "target": "50% Max Profit",
+            "stop": "$165",
+            "max_risk": "$350",
+            "return": "25%",
+            "duration": "21 Days",
+            "thesis": "Delivery numbers anticipation",
+            "risks": "Elon tweets",
+            "margin": "$500"
+        },
+        {
+            "ticker": "AAPL",
+            "strategy": "Covered Call",
+            "score": 8,
+            "type": "core",
+            "entry": "Buy @ 210, Sell 225 Call",
+            "target": "225 Assignment",
+            "stop": "None (Long Stock)",
+            "max_risk": "$21,000",
+            "return": "12% + Dividends",
+            "duration": "60 Days",
+            "thesis": "Steady growth + Buybacks",
+            "risks": "Iphone sales slowing",
+            "margin": "100% Stock Value"
+        },
+        {
+            "ticker": "QQQ",
+            "strategy": "Sell Put",
+            "score": 9,
+            "type": "core",
+            "entry": "Strike $450",
+            "target": "Premium collection",
+            "stop": "$440",
+            "max_risk": "$45,000",
+            "return": "10%",
+            "duration": "30 Days",
+            "thesis": "Big tech leadership",
+            "risks": "Interest rate spikes",
+            "margin": "$9,000"
+        }
+    ]

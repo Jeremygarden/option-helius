@@ -1,0 +1,21 @@
+[project]
+name = "options-helius-backend"
+version = "0.1.0"
+description = "Options Helius Backend"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "pydantic-settings",
+    "redis",
+    "asyncpg",
+    "numpy",
+    "pandas",
+    "scipy",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
