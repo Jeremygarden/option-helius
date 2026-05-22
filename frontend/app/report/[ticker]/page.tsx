@@ -53,7 +53,7 @@ const ReportPage = () => {
           {activeTab === '概览' && <Overview data={data} />}
           {activeTab === '期权链' && <Chain ticker={ticker as string} />}
           {activeTab === 'Greeks' && <Greeks ticker={ticker as string} />}
-          {activeTab === '情景测试' && <Scenarios ticker={ticker as string} />}
+          {activeTab === '情景测试' && <Scenarios data={data} />}
           {activeTab === 'AI分析' && <AIAnalysis ticker={ticker as string} />}
         </div>
       </div>
@@ -150,45 +150,134 @@ const Greeks = ({ ticker }: { ticker: string }) => {
   );
 };
 
-const Scenarios = ({ ticker }: { ticker: string }) => {
-  const [scenarios, setScenarios] = useState<any[]>([]);
+const Scenarios = ({ data }: { data: any }) => {
+  const [selected, setSelected] = useState(data.scenarios[0]);
+  const [customParams, setCustomParams] = useState({ ds: -15, dv: 0.8, dt: 1, dr: 0 });
+  const [isCustom, setIsCustom] = useState(false);
+  const [customResult, setCustomResult] = useState<any>(null);
 
-  useEffect(() => {
-    fetch(`http://localhost:8000/api/analyze/scenarios/${ticker}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify([{strike: 850, dte: 30, vol: 0.45, type: 'put', size: -1}])
-    }).then(res => res.json()).then(setScenarios).catch(err => console.error(err));
-  }, [ticker]);
+  const handleCustomChange = (field: string, val: number) => {
+    const next = { ...customParams, [field]: val };
+    setCustomParams(next);
+    fetch(`http://localhost:8000/api/report/${data.ticker}/scenarios/custom?ds=${next.ds}&dv=${next.dv}&dt=${next.dt}&dr=${next.dr}`)
+      .then(res => res.json())
+      .then(setCustomResult);
+  };
+
+  const current = isCustom ? (customResult || data.scenarios[0]) : selected;
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse border border-green-900/30 text-sm">
-        <thead>
-          <tr className="bg-green-900/20">
-            <th className="border border-green-900/30 p-2 text-left">情景</th>
-            <th className="border border-green-900/30 p-2 text-left">触发条件</th>
-            <th className="border border-green-900/30 p-2 text-right">P&L影响</th>
-            <th className="border border-green-900/30 p-2 text-right">Greeks变化</th>
-            <th className="border border-green-900/30 p-2 text-center">建议对冲</th>
-          </tr>
-        </thead>
-        <tbody>
-          {scenarios.map((sc, i) => (
-            <tr key={i} className="hover:bg-green-900/10">
-              <td className="border border-green-900/30 p-2">{sc.scenario}</td>
-              <td className="border border-green-900/30 p-2 text-gray-400">{sc.trigger}</td>
-              <td className={`border border-green-900/30 p-2 text-right ${sc.pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {sc.pnl >= 0 ? '+' : ''}${sc.pnl.toLocaleString()}
-              </td>
-              <td className="border border-green-900/30 p-2 text-right text-blue-400">Delta: {sc.delta_change}</td>
-              <td className="border border-green-900/30 p-2 text-center">
-                <span className="px-2 py-0.5 border border-green-500 text-xs rounded">{sc.advice}</span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="flex gap-6 h-full">
+      {/* Sidebar: Scenario Selection */}
+      <div className="w-1/3 space-y-2 border-r border-green-900/30 pr-4">
+        <div className="text-xs text-gray-500 mb-4 uppercase">Scenario Library</div>
+        {data.scenarios.map((sc: any, i: number) => (
+          <div 
+            key={i}
+            onClick={() => { setSelected(sc); setIsCustom(false); }}
+            className={`p-3 border cursor-pointer transition-all ${!isCustom && selected?.name === sc.name ? 'border-green-500 bg-green-500/10' : 'border-green-900/30 hover:border-green-700'}`}
+          >
+            <div className="flex justify-between items-center">
+              <span className="font-bold">{sc.name}</span>
+              <span className={`text-xs ${sc.total_pnl >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                {sc.total_pnl >= 0 ? '+' : ''}${sc.total_pnl}
+              </span>
+            </div>
+            <div className="text-[10px] text-gray-500 mt-1">{sc.trigger}</div>
+          </div>
+        ))}
+        
+        <div className="h-px bg-green-900/30 my-4" />
+        
+        <div 
+          onClick={() => { setIsCustom(true); handleCustomChange('ds', customParams.ds); }}
+          className={`p-3 border cursor-pointer ${isCustom ? 'border-green-500 bg-green-500/10' : 'border-green-900/30'}`}
+        >
+          <div className="font-bold mb-3">自定义情景 (Custom)</div>
+          <div className="space-y-4 text-xs">
+             <div>
+                <div className="flex justify-between mb-1">
+                   <span>标的变动: {customParams.ds}%</span>
+                </div>
+                <input type="range" min="-50" max="50" step="1" value={customParams.ds} onChange={e => handleCustomChange('ds', parseInt(e.target.value))} className="w-full accent-green-500" />
+             </div>
+             <div>
+                <div className="flex justify-between mb-1">
+                   <span>IV变动: +{Math.round(customParams.dv * 100)}pts</span>
+                </div>
+                <input type="range" min="-1" max="2" step="0.01" value={customParams.dv} onChange={e => handleCustomChange('dv', parseFloat(e.target.value))} className="w-full accent-orange-500" />
+             </div>
+             <div>
+                <div className="flex justify-between mb-1">
+                   <span>时间流逝: {customParams.dt} 天</span>
+                </div>
+                <input type="range" min="0" max="90" step="1" value={customParams.dt} onChange={e => handleCustomChange('dt', parseInt(e.target.value))} className="w-full accent-blue-500" />
+             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Panel: Results */}
+      <div className="flex-1 space-y-6">
+        <div className="bg-green-900/5 border border-green-900/30 p-6 rounded">
+          <div className="flex justify-between items-start mb-6">
+             <div>
+                <div className="text-gray-500 text-xs mb-1">RESULT_PANEL // {isCustom ? 'CUSTOM_SIMULATION' : current.name}</div>
+                <div className="text-2xl font-bold flex items-baseline gap-2">
+                  总P&L: <span className={current.total_pnl >= 0 ? 'text-green-500' : 'text-red-500'}>
+                    {current.total_pnl >= 0 ? '+' : ''}${current.total_pnl.toLocaleString()}
+                  </span>
+                  <span className="text-sm font-normal text-gray-500">
+                    ({current.pnl_pct_of_max_risk}%)
+                  </span>
+                </div>
+             </div>
+             <div className={`px-4 py-2 border rounded font-bold ${current.survival ? 'border-green-500 text-green-500' : 'border-red-500 text-red-500 animate-pulse'}`}>
+                {current.survival ? 'STATUS: SURVIVED' : 'STATUS: MARGIN_CALL'}
+             </div>
+          </div>
+
+          <div className="space-y-4">
+             <div className="text-xs text-gray-500 uppercase tracking-widest">P&L Breakdown (Taylor Series)</div>
+             {[
+               { label: 'Delta贡献', val: current.breakdown.delta_pnl, color: 'bg-blue-500' },
+               { label: 'Vega贡献', val: current.breakdown.vega_pnl, color: 'bg-orange-500' },
+               { label: 'Gamma贡献', val: current.breakdown.gamma_pnl, color: 'bg-purple-500' },
+               { label: 'Theta贡献', val: current.breakdown.theta_pnl, color: 'bg-yellow-500' },
+               { label: 'Rho贡献', val: current.breakdown.rho_pnl, color: 'bg-gray-500' },
+             ].map((item, idx) => {
+                const totalAbs = Object.values(current.breakdown).reduce((a: any, b: any) => Math.abs(a) + Math.abs(b), 0);
+                const width = totalAbs > 0 ? (Math.abs(item.val) / totalAbs * 100) : 0;
+                return (
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <span>{item.label}: <span className={item.val >= 0 ? 'text-green-400' : 'text-red-400'}>{item.val >= 0 ? '+' : ''}${item.val}</span></span>
+                      {current.dominant_risk.toLowerCase().includes(item.label.slice(0, 4).toLowerCase()) && <span className="text-orange-500 text-[10px]">← 主要风险因子</span>}
+                    </div>
+                    <div className="h-2 bg-green-900/10 rounded-full overflow-hidden">
+                      <div className={`h-full ${item.color}`} style={{ width: `${width}%` }}></div>
+                    </div>
+                  </div>
+                );
+             })}
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-green-900/30">
+             <div className="text-xs text-gray-500 mb-3 uppercase"> 对冲建议 (Hedge Recommendations) </div>
+             <div className="grid grid-cols-2 gap-4">
+                {current.hedges?.map((h: any, i: number) => (
+                  <div key={i} className="p-3 border border-green-900/30 bg-black/40 rounded">
+                     <div className="text-sm font-bold text-green-400 mb-1">{h.hedge}</div>
+                     <div className="flex justify-between text-[10px] text-gray-500">
+                        <span>Cost: {h.cost_estimate}</span>
+                        <span className="text-blue-400">Effect: {h.effectiveness}</span>
+                     </div>
+                  </div>
+                )) || <div className="text-gray-500 text-xs italic">No specific hedge needed.</div>}
+             </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
