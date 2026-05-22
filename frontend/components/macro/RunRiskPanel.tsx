@@ -47,6 +47,23 @@ interface IndicatorCard {
   description: string;      // brief Chinese description of what it measures
 }
 
+interface SentinelIndicator {
+  id: string;
+  icon: string;
+  title: string;
+  subtitle: string;
+  value: number;
+  display: string;
+  threshold: number;
+  threshold_display: string;
+  threshold_direction: "above" | "below";
+  lead_time: string;
+  description: string;
+  triggered: boolean;
+  distance: string;
+  proximity_pct: number;
+}
+
 // ── Color helpers ──────────────────────────────────────────────
 const SIGNAL_COLORS = {
   1: { bg: "bg-green-900/30", border: "border-green-500", text: "text-green-400", dot: "bg-green-400" },
@@ -262,6 +279,140 @@ function CategoryFilteredCards({ indicators }: { indicators: IndicatorCard[] }) 
   );
 }
 
+function SentinelCard({ s }: { s: SentinelIndicator }) {
+  const isNearThreshold = s.proximity_pct >= 80 && !s.triggered;
+  
+  const cardClass = s.triggered
+    ? "border-red-500 bg-red-950/60 shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+    : isNearThreshold
+    ? "border-orange-500 bg-orange-950/30"
+    : "border-gray-700 bg-gray-900/50";
+
+  const valueClass = s.triggered ? "text-red-300" : isNearThreshold ? "text-orange-300" : "text-gray-100";
+  
+  const barColor = s.triggered || s.proximity_pct >= 95
+    ? "bg-red-500"
+    : s.proximity_pct >= 80 ? "bg-orange-500"
+    : s.proximity_pct >= 60 ? "bg-yellow-500"
+    : "bg-green-500";
+
+  return (
+    <div className={`rounded-xl border-2 p-4 transition-all duration-500 ${cardClass} ${s.triggered ? "animate-pulse" : ""}`}>
+      {/* Header */}
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <div className="text-lg">{s.icon}</div>
+          <div className="text-sm font-bold text-gray-200 mt-0.5">{s.title}</div>
+          <div className="text-[11px] text-gray-500">{s.subtitle}</div>
+        </div>
+        <div className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full border
+          ${s.triggered
+            ? "border-red-500 text-red-300 bg-red-950"
+            : isNearThreshold
+            ? "border-orange-500 text-orange-300 bg-orange-950/50"
+            : "border-green-700 text-green-400 bg-green-950/30"}`}>
+          {s.triggered ? (
+            <><span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse inline-block" />已触发</>
+          ) : (
+            <><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />未触发</>
+          )}
+        </div>
+      </div>
+
+      {/* Value */}
+      <div className={`text-3xl font-black font-mono mb-1 ${valueClass}`}>
+        {s.display}
+      </div>
+      <div className="text-[11px] text-gray-500 mb-3">
+        触发阈值：<span className="text-gray-300 font-mono">{s.threshold_display}</span>
+      </div>
+
+      {/* Proximity progress bar */}
+      <div className="mb-2">
+        <div className="flex justify-between text-[10px] text-gray-600 mb-1">
+          <span>接近程度</span>
+          <span className={s.proximity_pct >= 80 ? "text-orange-400" : "text-gray-500"}>
+            {Math.min(100, s.proximity_pct).toFixed(0)}%
+          </span>
+        </div>
+        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all duration-700 ${barColor} ${s.triggered ? "animate-pulse" : ""}`}
+            style={{ width: `${Math.min(100, s.proximity_pct)}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Distance */}
+      <div className={`text-xs font-mono mb-2 ${s.triggered ? "text-red-400" : "text-gray-400"}`}>
+        {s.distance}
+      </div>
+
+      {/* Lead time + description */}
+      <div className="border-t border-gray-800 pt-2 mt-1 space-y-0.5">
+        <div className="text-[10px] text-blue-400">⏱ {s.lead_time}</div>
+        <div className="text-[10px] text-gray-600 leading-relaxed">{s.description}</div>
+      </div>
+    </div>
+  );
+}
+
+function SentinelSection({ sentinels }: { sentinels: SentinelIndicator[] }) {
+  const triggeredCount = sentinels.filter(s => s.triggered).length;
+  const nuclearAlert = triggeredCount >= 2;
+  
+  return (
+    <div className="space-y-3">
+      {/* Nuclear alert banner — only shows when 2+ triggered */}
+      {nuclearAlert && (
+        <div className="rounded-xl border-2 border-red-500 bg-red-950/80 p-4 animate-pulse">
+          <div className="flex items-center gap-2 text-red-300 font-bold text-sm">
+            <span className="text-xl">🚨</span>
+            <span>最高警戒 — {triggeredCount}/3 哨兵触发 · 综合分已失效 · 立即行动</span>
+          </div>
+          <div className="mt-2 text-red-400 text-xs">
+            {sentinels.filter(s => s.triggered).map(s => s.subtitle).join(" + ")} 同时触发
+          </div>
+          <div className="mt-1 text-red-500 text-xs">
+            历史数据：两哨兵同时触发后，市场平均在 2-8 个月内崩盘 20%+
+          </div>
+        </div>
+      )}
+      
+      {/* Section header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-gray-200">⚡ 三大哨兵指标</span>
+          <span className="text-[11px] text-gray-500">任意两个触发 → 立即升级警戒（不管综合分）</span>
+        </div>
+        <div className={`text-xs px-2 py-0.5 rounded-full border font-mono
+          ${triggeredCount === 0 ? "border-green-700 text-green-400 bg-green-950/30" :
+            triggeredCount === 1 ? "border-orange-600 text-orange-400 bg-orange-950/30" :
+            "border-red-500 text-red-300 bg-red-950/50 animate-pulse"}`}>
+          {triggeredCount}/3 触发
+        </div>
+      </div>
+
+      {/* Three sentinel cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {sentinels.map(s => <SentinelCard key={s.id} s={s} />)}
+      </div>
+
+      {/* Distance summary bar */}
+      <div className="flex gap-4 text-[11px] text-gray-500 px-1">
+        {sentinels.map(s => (
+          <span key={s.id}>
+            <span className="text-gray-600">{s.subtitle}: </span>
+            <span className={s.triggered ? "text-red-400 font-semibold" : "text-gray-400"}>
+              {s.distance}
+            </span>
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ── Main Component ─────────────────────────────────────────────
 export default function RunRiskPanel() {
   const [data, setData] = useState<RunRiskData>(MOCK_DATA);
@@ -287,8 +438,81 @@ export default function RunRiskPanel() {
   // Sort indicators: most dangerous first (by weighted contribution)
   const sortedIndicators = [...data.indicators].sort((a, b) => b.weighted_contribution - a.weighted_contribution);
 
+  // Derived Sentinels
+  const moveInd = data.indicators.find(i => i.id === "move")!;
+  const hyOasInd = data.indicators.find(i => i.id === "hy_oas")!;
+  const yieldCurveInd = data.indicators.find(i => i.id === "yield_curve")!;
+
+  const sentinels: SentinelIndicator[] = [
+    {
+      id: "move",
+      icon: "📡",
+      title: "债市压力",
+      subtitle: "MOVE 指数",
+      value: moveInd.value,
+      display: moveInd.value_display,
+      threshold: 120,
+      threshold_display: "> 120",
+      threshold_direction: "above",
+      lead_time: "领先股市 3-6 个月",
+      description: "债市开始为流动性危机定价，银行间市场压力上升",
+      triggered: moveInd.value > 120,
+      distance: moveInd.value > 120 ? `已超出 ${(moveInd.value - 120).toFixed(1)}` : `距阈值 +${(120 - moveInd.value).toFixed(1)}`,
+      proximity_pct: (moveInd.value / 120) * 100,
+    },
+    {
+      id: "hy_oas",
+      icon: "💀",
+      title: "信用危机",
+      subtitle: "HY OAS 利差",
+      value: hyOasInd.value,
+      display: hyOasInd.value_display,
+      threshold: 450,
+      threshold_display: "> 450 bps",
+      threshold_direction: "above",
+      lead_time: "领先崩盘 3-6 个月",
+      description: "高收益债市场开始为大规模违约定价",
+      triggered: hyOasInd.value > 450,
+      distance: hyOasInd.value > 450 ? `已超出 ${(hyOasInd.value - 450).toFixed(0)} bps` : `距阈值 +${(450 - hyOasInd.value).toFixed(0)} bps`,
+      proximity_pct: (hyOasInd.value / 450) * 100,
+    },
+    {
+      id: "yield_curve",
+      icon: "📉",
+      title: "收益率倒挂",
+      subtitle: "10Y-2Y 曲线",
+      value: yieldCurveInd.value,
+      display: yieldCurveInd.value_display,
+      threshold: -30,
+      threshold_display: "< -30 bps",
+      threshold_direction: "below",
+      lead_time: "领先衰退 12-18 个月",
+      description: "最可靠的衰退预言，历史命中率 100%（1960年后）",
+      triggered: yieldCurveInd.value < -30,
+      distance: yieldCurveInd.value < -30 ? `已倒挂 ${(Math.abs(yieldCurveInd.value - (-30))).toFixed(0)} bps` : `距阈值 +${(yieldCurveInd.value - (-30)).toFixed(0)} bps`,
+      proximity_pct: Math.max(0, (yieldCurveInd.value - 100) / (-30 - 100) * 100),
+    },
+  ];
+
+  const nuclearAlert = sentinels.filter(s => s.triggered).length >= 2;
+
   return (
     <div className="space-y-4 p-4 bg-[#0d1117] min-h-screen text-white">
+      {/* Nuclear Alert at the very top if triggered */}
+      {nuclearAlert && (
+        <div className="rounded-2xl border-2 border-red-500 bg-red-950/80 p-6 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)] mb-4">
+          <div className="flex items-center gap-3 text-red-300 font-black text-xl">
+            <span className="text-3xl">🚨</span>
+            <span>最高警戒 — {sentinels.filter(s => s.triggered).length}/3 哨兵触发 · 综合分已失效 · 立即行动</span>
+          </div>
+          <div className="mt-3 text-red-400 text-sm font-medium">
+            {sentinels.filter(s => s.triggered).map(s => s.subtitle).join(" + ")} 同时触发
+          </div>
+          <div className="mt-2 text-red-500 text-sm">
+            历史数据：两哨兵同时触发后，市场平均在 2-8 个月内崩盘 20%+
+          </div>
+        </div>
+      )}
       {/* Section Title */}
       <div className="flex items-center gap-2 mb-2">
         <span className="text-lg font-bold text-gray-100">📊 逃顶危险指数</span>
@@ -405,6 +629,11 @@ export default function RunRiskPanel() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* SENTINEL SECTION */}
+      <div className="rounded-2xl border border-gray-800 bg-gray-900/30 p-5">
+        <SentinelSection sentinels={sentinels} />
       </div>
 
       {/* BOTTOM: 18 Factor Cards */}
