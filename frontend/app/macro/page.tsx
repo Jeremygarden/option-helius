@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import WarningIndicators from '@/components/macro/WarningIndicators';
+import RunRiskPanel from '@/components/macro/RunRiskPanel';
 
 export default function MacroPage() {
   const [macroData, setMacroData] = useState<any>(null);
@@ -14,6 +15,31 @@ export default function MacroPage() {
       try {
         // Mocking the API response structure based on the updated backend mock
         const mockResponse = {
+          "run_risk": {
+            "composite_score": 67,
+            "raw_weighted_score": 2.00,
+            "max_raw_score": 3.00,
+            "current_position_pct": 90,
+            "signal": "orange",
+            "signal_label": "橙色预警",
+            "action_label": "建议降仓",
+            "recommended_position": "40-60%",
+            "evaluation_text": "多个核心指标同时预警。历史上类似的指标组合出现在1972年(漂亮50泡沫)、1999年(互联网泡沫)和2021年(后疫情泡沫)。每次后续都发生了超过-20%的修正。建议显著降低仓位。",
+            "action_items": [
+                "将股票仓位降至40-60%（当前90%仓位过高）",
+                "将减仓资金转入短债基金或货币基金（当前YTM 4.6%）",
+                "保留20-30%现金，等待市场修正时分批买入",
+                "对QDII基金：注意汇率风险，人民币若升值会额外损失",
+                "设置止损/止盈纪律，不要让亏损扩大"
+            ],
+            "levels": [
+                {"range": "0-25",  "min": 0,  "max": 25,  "signal": "安心持有", "color": "#3fb950", "accuracy": "—（低风险区间）",    "position": "70-90%", "is_current": false},
+                {"range": "26-50", "min": 26, "max": 50,  "signal": "保持关注", "color": "#d29922", "accuracy": "~60%（部分预警）",   "position": "60-75%", "is_current": false},
+                {"range": "51-70", "min": 51, "max": 70,  "signal": "降仓",    "color": "#f0883e", "accuracy": "~80%（多数正确）",   "position": "40-60%", "is_current": true},
+                {"range": "71-85", "min": 71, "max": 85,  "signal": "大幅降仓", "color": "#f85149", "accuracy": "~90%（高准确率）",  "position": "20-35%", "is_current": false},
+                {"range": "86-100","min": 86, "max": 100, "signal": "清仓",    "color": "#6e7681", "accuracy": "100%（历史无失误）", "position": "<20%",   "is_current": false},
+            ]
+          },
           "warning_indicators": {
             "composite_score": 73,
             "composite_label": "中高风险",
@@ -146,6 +172,10 @@ export default function MacroPage() {
         <h1 className="text-2xl font-bold">宏观概览 / Macro Dashboard</h1>
         <p className="text-[#7d8590] text-sm">Global market regime & cross-asset correlations</p>
       </div>
+
+      {macroData?.run_risk && (
+        <RunRiskPanel data={macroData.run_risk} />
+      )}
 
       {/* 八大预警指标 Section */}
       <section className="space-y-4">
