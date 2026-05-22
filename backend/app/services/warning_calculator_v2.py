@@ -206,6 +206,48 @@ MOCK_MOMENTUM_DATA = {
     "rsp_spy":           (-9.48, -7.0,  3.0),
 }
 
+INDICATOR_WEIGHTS = {
+    "move": 0.12,
+    "m7_concentration": 0.12,
+    "hy_oas": 0.0927,
+    "gold_copper": 0.0880,
+    "dxy": 0.0797,
+    "naaim_exposure": 0.0752,
+    "yield_curve": 0.0713,
+    "pe_gap": 0.0563,
+    "fear_greed": 0.0528,
+    "erp": 0.0520,
+    "sectors_200dma": 0.0520,
+    "cape": 0.02,
+    "vix": 0.02,
+    "skew": 0.02,
+    "trend": 0.02,
+    "aiae": 0.02,
+    "put_call_ratio": 0.02,
+    "rsp_spy": 0.02
+}
+
+WEIGHT_METADATA = {
+    "move": {"cv_std": 0.00, "stable": True, "source": "ensemble_cv_v2"},
+    "m7_concentration": {"cv_std": 0.00, "stable": True, "source": "ensemble_cv_v2"},
+    "hy_oas": {"cv_std": 0.046, "stable": False, "source": "ensemble_cv_v2"},
+    "gold_copper": {"cv_std": 0.047, "stable": False, "source": "ensemble_cv_v2"},
+    "dxy": {"cv_std": 0.047, "stable": False, "source": "ensemble_cv_v2"},
+    "naaim_exposure": {"cv_std": 0.041, "stable": False, "source": "ensemble_cv_v2"},
+    "yield_curve": {"cv_std": 0.041, "stable": False, "source": "ensemble_cv_v2"},
+    "pe_gap": {"cv_std": 0.035, "stable": False, "source": "ensemble_cv_v2"},
+    "fear_greed": {"cv_std": 0.038, "stable": False, "source": "ensemble_cv_v2"},
+    "erp": {"cv_std": 0.047, "stable": False, "source": "ensemble_cv_v2"},
+    "sectors_200dma": {"cv_std": 0.047, "stable": False, "source": "ensemble_cv_v2"},
+    "cape": {"cv_std": 0.00, "stable": True, "source": "ensemble_cv_v2"},
+    "vix": {"cv_std": 0.00, "stable": True, "source": "ensemble_cv_v2"},
+    "skew": {"cv_std": 0.00, "stable": True, "source": "ensemble_cv_v2"},
+    "trend": {"cv_std": 0.00, "stable": True, "source": "ensemble_cv_v2"},
+    "aiae": {"cv_std": 0.00, "stable": True, "source": "ensemble_cv_v2"},
+    "put_call_ratio": {"cv_std": 0.00, "stable": True, "source": "ensemble_cv_v2"},
+    "rsp_spy": {"cv_std": 0.00, "stable": True, "source": "ensemble_cv_v2"},
+}
+
 def get_signal_label(score: float) -> str:
     if score >= 75: return "红色预警"
     if score >= 60: return "橙色警示"
@@ -228,7 +270,8 @@ def compute_score_sigmoid_18(
         # Fallback to defaults for all if none provided, or return 50
         present_ids = list(SIGMOID_PARAMS.keys())
         
-    weight_per_indicator = 1.0 / len(present_ids)
+    # Use optimized weights if possible
+    total_present_weight = sum(INDICATOR_WEIGHTS.get(id, 0) for id in present_ids)
     
     category_map = {
         "valuation": ["cape", "pe_gap", "erp"],
@@ -261,15 +304,20 @@ def compute_score_sigmoid_18(
         f_score = final_score(s_score, m_mult)
         
         # Tracking
-        weighted = f_score * weight_per_indicator
+        # Use normalized optimized weight
+        w_opt = INDICATOR_WEIGHTS.get(ind_id, 1.0/18.0)
+        norm_w = w_opt / total_present_weight
+        
+        weighted = f_score * norm_w
         total_weighted_score += weighted
-        momentum_contribution += (f_score - s_score) * weight_per_indicator
+        momentum_contribution += (f_score - s_score) * norm_w
         
         breakdown[ind_id] = {
             "value": val,
             "sigmoid_score": round(s_score, 2),
             "momentum_mult": round(m_mult, 2),
             "final_score": round(f_score, 2),
+            "weight": round(norm_w, 4),
             "weighted": round(weighted, 2)
         }
         
