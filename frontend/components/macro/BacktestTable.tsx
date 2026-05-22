@@ -1,40 +1,75 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 
 interface BacktestEvent {
   date: string;
   event: string;
-  target: number;
-  computed: number;
-  yr1_return: string;
-  max_drawdown: string;
-  correct: boolean;
+  max_dd: number;
+  return_1y: number;
+  model_a: number;
+  model_b: number;
+  model_c: number;
+  model_d: number;
 }
 
-const HISTORICAL_BACKTEST: BacktestEvent[] = [
-    {"date": "1929-09", "event": "大萧条前夕", "target": 85, "computed": 86.1, "yr1_return": "-38.6%", "max_drawdown": "-86.2%", "correct": true},
-    {"date": "1937-02", "event": "1937二次探底前", "target": 72, "computed": 48.9, "yr1_return": "-35.0%", "max_drawdown": "-60.0%", "correct": true},
-    {"date": "1946-05", "event": "战后通胀回调", "target": 55, "computed": 55.1, "yr1_return": "-12.1%", "max_drawdown": "-29.6%", "correct": true},
-    {"date": "1968-12", "event": "漂亮50泡沫前夕", "target": 68, "computed": 66.0, "yr1_return": "-8.5%", "max_drawdown": "-36.1%", "correct": true},
-    {"date": "1972-12", "event": "漂亮50泡沫顶点", "target": 78, "computed": 71.1, "yr1_return": "-14.7%", "max_drawdown": "-48.2%", "correct": true},
-    {"date": "1987-08", "event": "黑色星期一前夕", "target": 62, "computed": 71.8, "yr1_return": "-12.8%", "max_drawdown": "-33.5%", "correct": true},
-    {"date": "1990-06", "event": "海湾战争前夕", "target": 50, "computed": 47.4, "yr1_return": "-3.1%", "max_drawdown": "-19.9%", "correct": true},
-    {"date": "1999-12", "event": "互联网泡沫顶点", "target": 82, "computed": 91.1, "yr1_return": "-9.1%", "max_drawdown": "-49.1%", "correct": true},
-    {"date": "2007-10", "event": "次贷危机前夕", "target": 75, "computed": 70.9, "yr1_return": "-37.0%", "max_drawdown": "-56.8%", "correct": true},
-    {"date": "2011-04", "event": "欧债危机", "target": 48, "computed": 50.0, "yr1_return": "+2.1%", "max_drawdown": "-19.4%", "correct": false},
-    {"date": "2015-08", "event": "中国股灾溢出", "target": 52, "computed": 29.5, "yr1_return": "+1.4%", "max_drawdown": "-14.2%", "correct": false},
-    {"date": "2020-02", "event": "新冠崩盘前", "target": 55, "computed": 75.8, "yr1_return": "+18.4%", "max_drawdown": "-33.9%", "correct": true},
-    {"date": "2021-12", "event": "后疫情泡沫", "target": 72, "computed": 75.9, "yr1_return": "-18.1%", "max_drawdown": "-25.4%", "correct": true},
-    {"date": "2026-now", "event": "当前行情 (2026)", "target": 67, "computed": 76.6, "yr1_return": "-", "max_drawdown": "-", "correct": true},
-];
+const BacktestTable: React.FC<{ data: BacktestEvent[] }> = ({ data }) => {
+  const [showFalsePositivesOnly, setShowFalsePositivesOnly] = useState(false);
 
-const BacktestTable: React.FC = () => {
+  const orangeThreshold = 55;
+  const redThresholdB = 70;
+  const redThresholdD = 65;
+
+  const isCorrect = (score: number, event: BacktestEvent, redThreshold: number) => {
+    const alert = score > orangeThreshold;
+    const realCrash = event.max_dd < -20;
+    if (alert && realCrash) return true;
+    if (!alert && (!realCrash || event.return_1y > 0)) return true;
+    return false;
+  };
+
+  const isFalsePositive = (score: number, event: BacktestEvent) => {
+    return score > orangeThreshold && event.return_1y > 0 && event.max_dd > -20;
+  };
+
+  const filteredData = useMemo(() => {
+    if (!showFalsePositivesOnly) return data;
+    return data.filter(row => row.date === '2011-04' || row.date === '2015-08');
+  }, [data, showFalsePositivesOnly]);
+
+  const stats = useMemo(() => {
+    if (!data.length) return null;
+    const calc = (modelKey: 'model_a' | 'model_b' | 'model_c' | 'model_d', redThr: number) => {
+      const correct = data.filter(row => isCorrect(row[modelKey], row, redThr)).length;
+      return ((correct / data.length) * 100).toFixed(1) + '%';
+    };
+    return {
+      model_a: calc('model_a', 70),
+      model_b: calc('model_b', 70),
+      model_c: calc('model_c', 70),
+      model_d: calc('model_d', 65),
+    };
+  }, [data]);
+
+  const getScoreStyle = (score: number, redThr: number) => {
+    if (score > redThr) return "bg-red-500/20 text-red-400 font-bold border border-red-500/30";
+    if (score > orangeThreshold) return "bg-orange-500/20 text-orange-400 border border-orange-500/30";
+    return "bg-green-500/10 text-green-400 border border-green-500/20";
+  };
+
   return (
     <div className="mt-8 overflow-hidden rounded-lg border border-slate-700 bg-slate-900/50">
-      <div className="px-4 py-3 border-b border-slate-700">
-        <h3 className="text-lg font-medium text-slate-100">历史回测验证 (RunRisk Backtest)</h3>
-        <p className="text-xs text-slate-400 mt-1">
-          验证模型在过去 100 年重大市场波动中的预警表现。RMSE: 11.5
-        </p>
+      <div className="px-4 py-3 border-b border-slate-700 flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-medium text-slate-100">4模型历史回测对比 (Multi-Model Backtest)</h3>
+          <p className="text-xs text-slate-400 mt-1">
+            对比不同指标权重与阈值组合在过去 100 年重大市场波动中的预警表现。
+          </p>
+        </div>
+        <button 
+          onClick={() => setShowFalsePositivesOnly(!showFalsePositivesOnly)}
+          className={`px-3 py-1 rounded text-xs transition-colors ${showFalsePositivesOnly ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+        >
+          {showFalsePositivesOnly ? '显示全部事件' : '仅显示误报分析 (2011/2015)'}
+        </button>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
@@ -42,47 +77,67 @@ const BacktestTable: React.FC = () => {
             <tr>
               <th className="px-4 py-2 font-medium">时间</th>
               <th className="px-4 py-2 font-medium">事件</th>
-              <th className="px-4 py-2 font-medium">目标值</th>
-              <th className="px-4 py-2 font-medium">计算值</th>
-              <th className="px-4 py-2 font-medium">误差</th>
+              <th className="px-4 py-2 font-medium">Model A (8)</th>
+              <th className="px-4 py-2 font-medium">Model B (18)</th>
+              <th className="px-4 py-2 font-medium">Model C (5F)</th>
+              <th className="px-4 py-2 font-medium">Model D (Opt)</th>
+              <th className="px-4 py-2 font-medium">真实最大回撤</th>
               <th className="px-4 py-2 font-medium">1年后回报</th>
-              <th className="px-4 py-2 font-medium">最大回撤</th>
-              <th className="px-4 py-2 font-medium text-center">正确?</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-800">
-            {HISTORICAL_BACKTEST.map((row, idx) => {
-              const error = row.computed - row.target;
-              const isCurrent = row.date === '2026-now';
-              
-              let scoreColor = "text-slate-300";
-              if (row.target > 70) scoreColor = "text-orange-400 font-bold";
-              else if (row.target > 50) scoreColor = "text-yellow-400";
+            {filteredData.map((row, idx) => (
+              <tr key={idx} className="hover:bg-slate-800/50 transition-colors">
+                <td className="px-4 py-2 text-slate-400">{row.date}</td>
+                <td className="px-4 py-2 font-medium text-slate-200">{row.event}</td>
+                
+                {/* Model A */}
+                <td className="px-4 py-2">
+                  <div className={`px-2 py-0.5 rounded text-center text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_a, 70)}`}>
+                    {row.model_a.toFixed(1)} {isCorrect(row.model_a, row, 70) ? '✅' : '❌'}
+                  </div>
+                </td>
 
-              return (
-                <tr key={idx} className={`${isCurrent ? 'bg-blue-900/20' : 'hover:bg-slate-800/50'} transition-colors`}>
-                  <td className="px-4 py-2 text-slate-400">{row.date}</td>
-                  <td className="px-4 py-2 font-medium text-slate-200">{row.event}</td>
-                  <td className={`px-4 py-2 ${scoreColor}`}>{row.target}</td>
-                  <td className="px-4 py-2 text-slate-200">{row.computed.toFixed(1)}</td>
-                  <td className={`px-4 py-2 ${Math.abs(error) > 15 ? 'text-red-400' : 'text-slate-500'}`}>
-                    {error > 0 ? '+' : ''}{error.toFixed(1)}
-                  </td>
-                  <td className={`px-4 py-2 ${row.yr1_return.startsWith('-') ? 'text-red-400' : row.yr1_return === '-' ? 'text-slate-500' : 'text-green-400'}`}>
-                    {row.yr1_return}
-                  </td>
-                  <td className="px-4 py-2 text-red-400/80">{row.max_drawdown}</td>
-                  <td className="px-4 py-2 text-center">
-                    {row.correct ? (
-                      <span className="text-green-500">✅</span>
-                    ) : (
-                      <span className="text-red-500">❌</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
+                {/* Model B */}
+                <td className="px-4 py-2">
+                  <div className={`px-2 py-0.5 rounded text-center text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_b, 70)}`}>
+                    {row.model_b.toFixed(1)} {isCorrect(row.model_b, row, 70) ? '✅' : '❌'}
+                  </div>
+                </td>
+
+                {/* Model C */}
+                <td className="px-4 py-2">
+                  <div className={`px-2 py-0.5 rounded text-center text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_c, 70)}`}>
+                    {row.model_c.toFixed(1)} {isCorrect(row.model_c, row, 70) ? '✅' : '❌'}
+                  </div>
+                </td>
+
+                {/* Model D */}
+                <td className="px-4 py-2">
+                  <div className={`px-2 py-0.5 rounded text-center text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_d, 65)}`}>
+                    {row.model_d.toFixed(1)} {isCorrect(row.model_d, row, 65) ? '✅' : '❌'}
+                  </div>
+                </td>
+
+                <td className="px-4 py-2 text-red-400/80">{row.max_dd}%</td>
+                <td className={`px-4 py-2 ${row.return_1y < 0 ? 'text-red-400' : 'text-green-400'}`}>
+                  {row.return_1y > 0 ? '+' : ''}{row.return_1y}%
+                </td>
+              </tr>
+            ))}
           </tbody>
+          {stats && (
+            <tfoot className="bg-slate-800/50 font-bold border-t border-slate-700">
+              <tr>
+                <td className="px-4 py-3 text-slate-300" colSpan={2}>模型准确率 (Accuracy)</td>
+                <td className="px-4 py-3 text-blue-400">{stats.model_a}</td>
+                <td className="px-4 py-3 text-blue-400">{stats.model_b}</td>
+                <td className="px-4 py-3 text-blue-400">{stats.model_c}</td>
+                <td className="px-4 py-3 text-green-400">{stats.model_d}</td>
+                <td className="px-4 py-3" colSpan={2}></td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
     </div>

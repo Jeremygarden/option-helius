@@ -47,3 +47,8 @@ async def get_composite_history(service: IndicatorRefreshService = Depends(get_r
         {"date": (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d"), "score": 50 + random.randint(-10, 10)}
         for i in range(30)
     ]
+
+@router.get("/backtest")
+async def get_macro_backtest():
+    from app.services.warning_calculator import run_backtest
+    return run_backtest()

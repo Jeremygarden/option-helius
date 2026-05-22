@@ -1,6 +1,13 @@
-from app.services.warning_calculator import compute_composite_score_v2, INDICATOR_WEIGHTS
+import json
+import os
+import sys
 
-BACKTEST_EVENTS = [
+# Add backend to path to import services if needed, but we'll reimplement to be self-contained for the script
+sys.path.append("/home/azureuser/projects/options-dashboard/backend")
+
+from app.services.warning_calculator import SCORING_FUNCS, INDICATOR_WEIGHTS
+
+HISTORICAL_EVENTS = [
     {"date": "1929-09", "event": "大萧条前夕",      "old_score": 85, "return_1y": -38.6, "max_dd": -86.2, "correct": True},
     {"date": "1937-02", "event": "1937年二次探底前", "old_score": 72, "return_1y": -35.0, "max_dd": -60.0, "correct": True},
     {"date": "1946-05", "event": "战后通胀回调",     "old_score": 55, "return_1y": -12.1, "max_dd": -29.6, "correct": True},
@@ -108,100 +115,140 @@ HISTORICAL_INDICATOR_VALUES = {
         "skew": 132.0, "move": 65.0, "hy_oas": 270.0, "dxy": 4.0,
         "gold_copper": 700.0, "sectors_200dma": 82.0, "rsp_spy": -10.0
     },
-]
+}
 
-def get_mock_macro():
-    # Realistic mock values based on task description
-    current_indicators = {
-        # Original 8
-        "cape": 37.0,
-        "aiae": 0.482,
-        "m7_concentration": 32.8,
-        "vix": 18.1,
-        "yield_curve": 54,
-        "pe_gap": 25.3,
-        "trend": 8,
-        "erp": -0.081,
-        # New 10
-        "fear_greed": 66.94,
-        "put_call_ratio": 1.19,
-        "naaim_exposure": 93.79,
-        "skew": 138.74,
-        "move": 76.78,
-        "hy_oas": 278,
-        "dxy": 2.1, # 3M change %
-        "gold_copper": 762.25,
-        "sectors_200dma": 81.82,
-        "rsp_spy": -9.48
-    }
+# Original optimized weights from weight_optimizer.py
+ORIGINAL_8_WEIGHTS = {
+    "cape": 0.1466,
+    "aiae": 0.2014,
+    "m7_concentration": 0.1118,
+    "vix": 0.0805,
+    "yield_curve": 0.1086,
+    "pe_gap": 0.0863,
+    "trend": 0.2248,
+    "erp": 0.0400
+}
+
+def compute_model_a(ind):
+    score = 0
+    for k, w in ORIGINAL_8_WEIGHTS.items():
+        score += SCORING_FUNCS[k](ind[k]) * w
+    return score
+
+def compute_model_b(ind):
+    score = 0
+    for k, w in INDICATOR_WEIGHTS.items():
+        score += SCORING_FUNCS[k](ind[k]) * w
+    return score
+
+FACTOR_WEIGHTS_C = {
+    "liquidity_factor": 0.28,    # yield_curve(60%) + hy_oas(40%)
+    "positioning_factor": 0.24,  # aiae(50%) + naaim(50%)
+    "sentiment_factor": 0.20,    # fear_greed(40%) + put_call_ratio(30%) + vix(30%)
+    "valuation_factor": 0.16,    # cape(60%) + erp(40%)
+    "structure_factor": 0.12,    # m7_concentration(50%) + rsp_spy(50%)
+}
+
+def compute_model_c(ind):
+    yc_score = SCORING_FUNCS["yield_curve"](ind["yield_curve"])
+    hy_score = SCORING_FUNCS["hy_oas"](ind["hy_oas"])
+    liq = yc_score * 0.60 + hy_score * 0.40
     
-    result = compute_composite_score_v2(current_indicators)
-    breakdown = result["breakdown"]
+    aiae_score = SCORING_FUNCS["aiae"](ind["aiae"])
+    naaim_score = SCORING_FUNCS["naaim_exposure"](ind["naaim_exposure"])
+    pos = aiae_score * 0.50 + naaim_score * 0.50
     
-    # Metadata for UI
-    indicator_meta = {
-        "cape": {"name": "CAPE 估值", "name_en": "Shiller P/E", "display": "37.0x", "source": "FRED"},
-        "aiae": {"name": "AIAE 投资者配置", "name_en": "Household Equity Allocation", "display": "48.2%", "source": "Fed"},
-        "m7_concentration": {"name": "M7 集中度", "name_en": "M7 Concentration", "display": "32.8%", "source": "Mock"},
-        "vix": {"name": "VIX 恐慌指数", "name_en": "VIX Index", "display": "18.1", "source": "CBOE"},
-        "yield_curve": {"name": "收益率曲线", "name_en": "Yield Curve", "display": "54bps", "source": "FRED"},
-        "pe_gap": {"name": "PE 裂口", "name_en": "PE Gap", "display": "25.3%", "source": "Mock"},
-        "trend": {"name": "趋势位置", "name_en": "SPX vs 200DMA", "display": "+8.0%", "source": "YFinance"},
-        "erp": {"name": "股权风险溢价", "name_en": "Equity Risk Premium", "display": "-8.1%", "source": "Mock"},
-        
-        "fear_greed": {"name": "贪婪与恐惧指数", "name_en": "Fear & Greed", "display": "66.9", "source": "CNN"},
-        "put_call_ratio": {"name": "看跌/看涨期权比", "name_en": "Put/Call Ratio", "display": "1.19", "source": "CBOE"},
-        "naaim_exposure": {"name": "NAAIM 机构仓位", "name_en": "NAAIM Exposure", "display": "93.8", "source": "NAAIM"},
-        "skew": {"name": "SKEW 指数", "name_en": "SKEW Index", "display": "138.7", "source": "CBOE"},
-        "move": {"name": "MOVE 债市波动", "name_en": "MOVE Index", "display": "76.8", "source": "YFinance"},
-        "hy_oas": {"name": "高收益债利差", "name_en": "HY Credit Spread", "display": "278bps", "source": "FRED"},
-        "dxy": {"name": "美元指数趋势", "name_en": "DXY 3M Change", "display": "+2.1%", "source": "YFinance"},
-        "gold_copper": {"name": "金/铜比价", "name_en": "Gold/Copper Ratio", "display": "762.3", "source": "YFinance"},
-        "sectors_200dma": {"name": "行业站上均线比例", "name_en": "Sectors > 200DMA", "display": "81.8%", "source": "YFinance"},
-        "rsp_spy": {"name": "等权/市值偏离", "name_en": "RSP/SPY 1Y", "display": "-9.5%", "source": "YFinance"}
-    }
-
-    mock_data = {
-        "summary": {
-            "score": result["score"],
-            "signal": result["signal"],
-            "category_scores": result["category_scores"],
-            "description": "基于18大宏观与情绪指标的综合评估。"
-        },
-        "categories": {}
-    }
-
-    # Map to categories for UI
-    from app.services.warning_calculator import CATEGORY_MAP
+    fg_score = SCORING_FUNCS["fear_greed"](ind["fear_greed"])
+    pcr_score = SCORING_FUNCS["put_call_ratio"](ind["put_call_ratio"])
+    vix_score = SCORING_FUNCS["vix"](ind["vix"])
+    sent = fg_score * 0.40 + pcr_score * 0.30 + vix_score * 0.30
     
-    cat_names_cn = {
-        "volatility": "波动率",
-        "sentiment": "情绪",
-        "cross_asset": "跨资产",
-        "breadth": "广度",
-        "valuation": "估值",
-        "positioning": "资金配置"
+    cape_score = SCORING_FUNCS["cape"](ind["cape"])
+    erp_score = SCORING_FUNCS["erp"](ind["erp"])
+    val = cape_score * 0.60 + erp_score * 0.40
+    
+    m7_score = SCORING_FUNCS["m7_concentration"](ind["m7_concentration"])
+    rsp_score = SCORING_FUNCS["rsp_spy"](ind["rsp_spy"])
+    struc = m7_score * 0.50 + rsp_score * 0.50
+    
+    return (liq * FACTOR_WEIGHTS_C["liquidity_factor"] +
+            pos * FACTOR_WEIGHTS_C["positioning_factor"] +
+            sent * FACTOR_WEIGHTS_C["sentiment_factor"] +
+            val * FACTOR_WEIGHTS_C["valuation_factor"] +
+            struc * FACTOR_WEIGHTS_C["structure_factor"])
+
+def is_correct(score, event_data, orange_threshold=55, red_threshold=70):
+    alert = score > orange_threshold
+    real_crash = event_data["max_dd"] < -20
+    
+    # Define correct = True if:
+    # - Alert triggered AND max_dd < -20% (real systemic risk)
+    # - No alert AND (max_dd > -20% OR return_1y > 0)
+    
+    if alert and real_crash: return True
+    if not alert and (not real_crash or event_data["return_1y"] > 0): return True
+    return False
+
+def is_false_positive(score, event_data, orange_threshold=55):
+    alert = score > orange_threshold
+    # Define false_positive = True if:
+    # - Alert triggered BUT return_1y > 0 AND max_dd > -20%
+    return alert and event_data["return_1y"] > 0 and event_data["max_dd"] > -20
+
+results = []
+for event in HISTORICAL_EVENTS:
+    date = event["date"]
+    ind = HISTORICAL_INDICATOR_VALUES[date]
+    
+    score_a = compute_model_a(ind)
+    score_b = compute_model_b(ind)
+    score_c = compute_model_c(ind)
+    score_d = score_b # Same score as B, different threshold
+    
+    results.append({
+        "date": date,
+        "event": event["event"],
+        "ground_truth": event,
+        "model_a": {"score": score_a, "correct": is_correct(score_a, event)},
+        "model_b": {"score": score_b, "correct": is_correct(score_b, event)},
+        "model_c": {"score": score_c, "correct": is_correct(score_c, event)},
+        "model_d": {"score": score_d, "correct": is_correct(score_d, event, orange_threshold=55, red_threshold=65)}, # Model D uses high threshold
+        "fp_a": is_false_positive(score_a, event),
+        "fp_b": is_false_positive(score_b, event),
+        "fp_c": is_false_positive(score_c, event),
+        "fp_d": is_false_positive(score_d, event, orange_threshold=55) # Model D still 55 for FP definition
+    })
+
+# Metrics
+def calc_metrics(res_list, model_key, orange_threshold=55):
+    correct_count = sum(1 for r in res_list if r[model_key]["correct"])
+    total = len(res_list)
+    accuracy = correct_count / total
+    
+    positives = [r for r in res_list if r[model_key]["score"] > orange_threshold]
+    true_positives = sum(1 for r in positives if r["ground_truth"]["max_dd"] < -20)
+    precision = true_positives / len(positives) if positives else 0
+    
+    negatives = [r for r in res_list if r["ground_truth"]["max_dd"] >= -20 and r["ground_truth"]["return_1y"] > 0]
+    false_positives = sum(1 for r in res_list if is_false_positive(r[model_key]["score"], r["ground_truth"], orange_threshold))
+    fpr = false_positives / len(negatives) if negatives else 0
+    
+    crash_scores = [r[model_key]["score"] for r in res_list if r["ground_truth"]["max_dd"] < -20]
+    non_crash_scores = [r[model_key]["score"] for r in res_list if not (r["ground_truth"]["max_dd"] < -20)]
+    avg_gap = (sum(crash_scores)/len(crash_scores)) - (sum(non_crash_scores)/len(non_crash_scores))
+    
+    return {
+        "accuracy": accuracy,
+        "precision": precision,
+        "fpr": fpr,
+        "avg_gap": avg_gap
     }
 
-    for cat_id, keys in CATEGORY_MAP.items():
-        mock_data["categories"][cat_id] = {
-            "name": cat_names_cn[cat_id],
-            "score": result["category_scores"][cat_id],
-            "indicators": []
-        }
-        for key in keys:
-            meta = indicator_meta.get(key, {})
-            score_val = breakdown[key]["score"]
-            mock_data["categories"][cat_id]["indicators"].append({
-                "id": key,
-                "name": meta.get("name", key),
-                "name_en": meta.get("name_en", ""),
-                "value": current_indicators[key],
-                "value_display": meta.get("display", str(current_indicators[key])),
-                "status": "red" if score_val > 70 else "orange" if score_val > 40 else "green",
-                "severity_pct": score_val,
-                "data_source": meta.get("source", "N/A"),
-                "updated_at": "2026-05-22T08:30:00Z"
-            })
+metrics = {
+    "ModelA": calc_metrics(results, "model_a"),
+    "ModelB": calc_metrics(results, "model_b"),
+    "ModelC": calc_metrics(results, "model_c"),
+    "ModelD": calc_metrics(results, "model_d", orange_threshold=55)
+}
 
-    return mock_data
+print(json.dumps({"results": results, "metrics": metrics}, indent=2))
