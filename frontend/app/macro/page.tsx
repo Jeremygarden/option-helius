@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import WarningIndicators from '@/components/macro/WarningIndicators';
 import RunRiskPanel from '@/components/macro/RunRiskPanel';
+import BacktestTable from '@/components/macro/BacktestTable';
 
 export default function MacroPage() {
   const [macroData, setMacroData] = useState<any>(null);
@@ -185,6 +186,8 @@ export default function MacroPage() {
         </div>
         {macroData && <WarningIndicators data={macroData.warning_indicators} />}
       </section>
+
+      <BacktestTable />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
