@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import WarningIndicators from '@/components/macro/WarningIndicators';
 import RunRiskPanel from '@/components/macro/RunRiskPanel';
 import BacktestTable from '@/components/macro/BacktestTable';
 
@@ -177,15 +176,6 @@ export default function MacroPage() {
       {macroData?.run_risk && (
         <RunRiskPanel />
       )}
-
-      {/* 八大预警指标 Section */}
-      <section className="space-y-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-bold text-white">八大预警指标</h2>
-          <p className="text-[#7d8590] text-xs">基于历史数据的市场风险综合评估</p>
-        </div>
-        {macroData && <WarningIndicators data={macroData.warning_indicators} />}
-      </section>
 
       <BacktestTable />
 
