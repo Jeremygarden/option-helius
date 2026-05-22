@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, BarChart3, TrendingUp, Globe, Star, History, Shuffle } from "lucide-react";
+import { LayoutDashboard, BarChart3, TrendingUp, Globe, Star, History, Shuffle, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
@@ -10,6 +10,7 @@ const navItems = [
   { icon: BarChart3, label: "期权链", sub: "Chain", href: "/chain" },
   { icon: TrendingUp, label: "情绪", sub: "Sentiment", href: "/sentiment" },
   { icon: Star, label: "精选", sub: "Picks", href: "/picks" },
+  { icon: User, label: "个人", sub: "Profile", href: "/profile" },
   { icon: History, label: "回测", sub: "Backtest", href: "#" },
   { icon: Shuffle, label: "交易", sub: "Trade", href: "#" },
 ];

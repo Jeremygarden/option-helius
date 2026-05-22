@@ -2,8 +2,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import json
-from .routers import options, sentiment, macro, picks, report, analyze, strategies
-from .mock.options_chain import get_mock_options_chain
+from .routers import options, sentiment, macro, picks, report, analyze, strategies, notifications
 
 app = FastAPI(title="Options Helius API")
 
@@ -22,6 +21,7 @@ app.include_router(picks.router, prefix="/api/picks", tags=["picks"])
 app.include_router(report.router, prefix="/api/report", tags=["report"])
 app.include_router(analyze.router, prefix="/api/analyze", tags=["analyze"])
 app.include_router(strategies.router, prefix="/api/strategies", tags=["strategies"])
+app.include_router(notifications.router, prefix="/api/notifications", tags=["notifications"])
 
 @app.get("/")
 async def root():
