@@ -175,7 +175,7 @@ export default function MacroPage() {
       </div>
 
       {macroData?.run_risk && (
-        <RunRiskPanel data={macroData.run_risk} />
+        <RunRiskPanel />
       )}
 
       {/* 八大预警指标 Section */}
