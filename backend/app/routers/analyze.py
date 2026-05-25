@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
+from typing import List, Dict, Any
 from ..mock.options_chain import get_mock_chain
 from ..mock.ai_analysis import get_ai_analysis
 from ..services.scenarios import get_all_scenarios
@@ -17,7 +18,7 @@ async def analyze_options(ticker: str):
     }
 
 @router.post("/scenarios/{ticker}")
-async def get_scenarios(ticker: str, positions: list):
+async def get_scenarios(ticker: str, positions: List[Dict[str, Any]] = Body(...)):
     results = get_all_scenarios(positions, position_max_risk=1000)
     return results
 

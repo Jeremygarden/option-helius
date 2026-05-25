@@ -108,7 +108,7 @@ HISTORICAL_INDICATOR_VALUES = {
         "skew": 132.0, "move": 65.0, "hy_oas": 270.0, "dxy": 4.0,
         "gold_copper": 700.0, "sectors_200dma": 82.0, "rsp_spy": -10.0
     },
-]
+}
 
 def get_mock_macro():
     # Realistic mock values based on task description

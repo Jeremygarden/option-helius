@@ -1,3 +1,4 @@
+'use client';
 import React, { useState, useMemo } from 'react';
 
 interface BacktestEvent {
@@ -11,7 +12,7 @@ interface BacktestEvent {
   model_d: number;
 }
 
-const BacktestTable: React.FC<{ data: BacktestEvent[] }> = ({ data }) => {
+const BacktestTable: React.FC<{ data?: BacktestEvent[] }> = ({ data = [] }) => {
   const [showFalsePositivesOnly, setShowFalsePositivesOnly] = useState(false);
 
   const orangeThreshold = 55;
@@ -36,7 +37,7 @@ const BacktestTable: React.FC<{ data: BacktestEvent[] }> = ({ data }) => {
   }, [data, showFalsePositivesOnly]);
 
   const stats = useMemo(() => {
-    if (!data.length) return null;
+    if (!data || !data.length) return null;
     const calc = (modelKey: 'model_a' | 'model_b' | 'model_c' | 'model_d', redThr: number) => {
       const correct = data.filter(row => isCorrect(row[modelKey], row, redThr)).length;
       return ((correct / data.length) * 100).toFixed(1) + '%';
