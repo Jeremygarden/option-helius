@@ -1,4 +1,4 @@
-from app.services.warning_calculator import compute_composite_score_v2, INDICATOR_WEIGHTS
+from ..services.warning_calculator import compute_composite_score_v2, INDICATOR_WEIGHTS
 
 BACKTEST_EVENTS = [
     {"date": "1929-09", "event": "大萧条前夕",      "old_score": 85, "return_1y": -38.6, "max_dd": -86.2, "correct": True},

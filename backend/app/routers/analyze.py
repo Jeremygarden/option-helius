@@ -1,27 +1,24 @@
 from fastapi import APIRouter
-from app.mock.options_chain import get_mock_options_chain
-from app.mock.ai_analysis import get_ai_analysis
-from app.services.scenarios import calculate_scenarios
-from app.core.cache import cached
+from ..mock.options_chain import get_mock_chain
+from ..mock.ai_analysis import get_ai_analysis
+from ..services.scenarios import get_all_scenarios
+from ..core.cache import cached
 
 router = APIRouter()
 
 @router.get("/{ticker}")
 @cached("bsm_calculation")
 async def analyze_options(ticker: str):
-    data = get_mock_options_chain(ticker)
+    data = get_mock_chain(ticker, "2025-06-21")
     return {
         "ticker": ticker,
         "analysis": "BSM fair value calculation complete",
-        "put_wall": data["put_wall"],
-        "gamma_wall": data["gamma_wall"],
-        "implied_move": data["implied_move"]
+        "chain_count": len(data.get("options", []))
     }
 
 @router.post("/scenarios/{ticker}")
 async def get_scenarios(ticker: str, positions: list):
-    data = get_mock_options_chain(ticker)
-    results = calculate_scenarios(data["spot_price"], positions)
+    results = get_all_scenarios(positions, position_max_risk=1000)
     return results
 
 @router.get("/ai/{ticker}")

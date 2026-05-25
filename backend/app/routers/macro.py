@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, List, Any
-from backend.app.services.indicator_refresh import IndicatorRefreshService
-from backend.app.core.cache import get_redis # Assuming this exists or will be implemented
+from ..services.indicator_refresh import IndicatorRefreshService
+from ..core.cache import get_redis
 
-router = APIRouter(prefix="/macro", tags=["macro"])
+router = APIRouter()
 
-async def get_refresh_service(redis = Depends(get_redis)):
+async def get_refresh_service(redis=Depends(get_redis)):
     return IndicatorRefreshService(redis_client=redis)
 
 @router.get("/refresh/status")
@@ -30,7 +30,6 @@ async def refresh_weekly_composite(service: IndicatorRefreshService = Depends(ge
 
 @router.get("/composite/latest")
 async def get_latest_composite(service: IndicatorRefreshService = Depends(get_refresh_service)):
-    # Try latest full first, then partial
     latest = await service._get_cached_data("composite:score:latest")
     if not latest:
         latest = await service._get_cached_data("composite:score:partial")
@@ -40,7 +39,6 @@ async def get_latest_composite(service: IndicatorRefreshService = Depends(get_re
 
 @router.get("/composite/history")
 async def get_composite_history(service: IndicatorRefreshService = Depends(get_refresh_service)):
-    # Mock history
     import random
     from datetime import datetime, timedelta
     return [
@@ -50,5 +48,5 @@ async def get_composite_history(service: IndicatorRefreshService = Depends(get_r
 
 @router.get("/backtest")
 async def get_macro_backtest():
-    from app.services.warning_calculator import run_backtest
+    from ..services.warning_calculator import run_backtest
     return run_backtest()
