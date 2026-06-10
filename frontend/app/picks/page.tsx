@@ -1,451 +1,651 @@
 "use client";
-import React, { useState, useCallback } from "react";
 
-// ── Types ──────────────────────────────────────────────────────
-interface ScanSummary {
-  ticker: string;
-  price: number;
-  vwap_pct: number;          // % vs VWAP
-  tech_bias: string;         // "bullish_breakout_only"
-  top_pick: OptionContract;
-  entry_trigger: string;
-  risk_control: string;
-  scan_time: string;
-}
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 
-interface OptionContract {
-  symbol: string;            // "SPY260508C00730000"
-  expiry: string;            // "2026-05-08"
-  strike: number;            // 730
-  type: "CALL" | "PUT";
-  bid: number;
-  ask: number;
-  spread_pct: number;
-  volume: number;
-  oi: number;
-  iv_pct: number;
-  rank: number;              // 1-8
-}
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-interface KLinePoint { date: string; close: number; }
-interface IntradayPoint { time: string; price: number; vwap: number; }
+const WATCHLIST = ["SPY", "QQQ", "NVDA", "TSLA", "AAPL", "META", "MSFT"] as const;
+const TAGS = ["全部", "核心", "激进", "保守"] as const;
+const STRATEGY_FILTERS = [
+  { label: "全部策略", value: "all" },
+  { label: "Sell Put", value: "sell_put" },
+  { label: "Call Spread", value: "call_spread" },
+  { label: "Iron Condor", value: "iron_condor" },
+] as const;
 
-// ── Mock Data ──────────────────────────────────────────────────
-const MOCK_SCAN: Record<string, ScanSummary> = {
-  SPY: {
-    ticker: "SPY",
-    price: 714.35,
-    vwap_pct: 0.20,
-    tech_bias: "bullish_breakout_only",
-    top_pick: {
-      symbol: "SPY260508C00730000", expiry: "2026-05-08", strike: 730, type: "CALL",
-      bid: 0.69, ask: 0.70, spread_pct: 1.43, volume: 2800, oi: 6318, iv_pct: 11.35, rank: 1,
-    },
-    entry_trigger: "按方向等符合正股突破/跌破关键位确认；不要提前在横盘里烧 theta",
-    risk_control: "期权亏 40%-50% 或正股跌回/站回触发发位方向反方向时退出；期权可能归零，优先限价单",
-    scan_time: "2026-05-08 09:45",
+type StrategyType = "sell_put" | "call_spread" | "iron_condor";
+type Direction = "up" | "down" | "flat";
+
+type Leg = {
+  action?: string;
+  quantity?: number;
+  strike?: number;
+  optionType?: string;
+  expiry?: string;
+};
+
+type ScoreDimensions = {
+  ivRank?: number;
+  otm?: number;
+  riskReward?: number;
+  liquidity?: number;
+};
+
+type Greeks = {
+  delta?: number;
+  gamma?: number;
+  theta?: number;
+  vega?: number;
+  iv?: number;
+};
+
+type StrategyPick = {
+  id?: string;
+  tag?: string;
+  ticker?: string;
+  strategyType?: StrategyType | string;
+  strategyName?: string;
+  score?: number;
+  direction?: Direction;
+  legs?: Leg[];
+  entry?: string;
+  scenarioTip?: string;
+  target?: string;
+  stop?: string;
+  maxRisk?: string;
+  expectedReturn?: string;
+  holdingPeriod?: string;
+  signalText?: string;
+  riskText?: string;
+  capitalText?: string;
+  scoreDimensions?: ScoreDimensions;
+  greeks?: Greeks;
+  capitalRequired?: number;
+  returnLow?: number;
+  returnHigh?: number;
+};
+
+type ScannerItem = {
+  ticker?: string;
+  price?: number;
+  bias?: string;
+  support?: number;
+  resistance?: number;
+  ivRank?: number;
+};
+
+type PicksResponse = {
+  week?: { start?: string; end?: string };
+  dataSource?: string;
+  summary?: {
+    totalStrategies?: number;
+    highScoreCount?: number;
+    expectedReturnRange?: { low?: number; high?: number };
+  };
+  scanner?: ScannerItem[];
+  picks?: StrategyPick[];
+};
+
+const TYPE_META: Record<StrategyType, { label: string; cn: string; border: string; text: string; glow: string; fill: string }> = {
+  sell_put: {
+    label: "SELL PUT",
+    cn: "卖Put",
+    border: "border-l-green-400",
+    text: "text-green-300",
+    glow: "shadow-[0_0_22px_rgba(63,185,80,0.10)]",
+    fill: "bg-green-400",
   },
-  NVDA: {
-    ticker: "NVDA",
-    price: 132.80,
-    vwap_pct: -0.35,
-    tech_bias: "range_bound_iv_sell",
-    top_pick: {
-      symbol: "NVDA260516C00140000", expiry: "2026-05-16", strike: 140, type: "CALL",
-      bid: 0.42, ask: 0.44, spread_pct: 4.55, volume: 1820, oi: 9240, iv_pct: 38.72, rank: 1,
-    },
-    entry_trigger: "IV Rank > 60，可直接卖出；等价差收窄至 < 3% 再成交",
-    risk_control: "Delta 超出 ±0.30 立即对冲；亏损超出收取权利金 2x 时平仓",
-    scan_time: "2026-05-08 09:45",
+  call_spread: {
+    label: "CALL SPREAD",
+    cn: "Call价差",
+    border: "border-l-blue-400",
+    text: "text-blue-300",
+    glow: "shadow-[0_0_22px_rgba(88,166,255,0.10)]",
+    fill: "bg-blue-400",
   },
-  QQQ: {
-    ticker: "QQQ",
-    price: 488.20,
-    vwap_pct: 0.08,
-    tech_bias: "neutral_wait_for_break",
-    top_pick: {
-      symbol: "QQQ260515P00480000", expiry: "2026-05-15", strike: 480, type: "PUT",
-      bid: 1.15, ask: 1.17, spread_pct: 1.72, volume: 3240, oi: 14200, iv_pct: 18.44, rank: 1,
-    },
-    entry_trigger: "等待QQQ跌破488支撑确认，或纳指期货开盘-0.3%以上",
-    risk_control: "亏 40% 平仓；期权到期前3天无盈利则强制平仓",
-    scan_time: "2026-05-08 09:45",
-  },
-  TSLA: {
-    ticker: "TSLA",
-    price: 248.90,
-    vwap_pct: 1.12,
-    tech_bias: "high_iv_premium_sell",
-    top_pick: {
-      symbol: "TSLA260516C00265000", expiry: "2026-05-16", strike: 265, type: "CALL",
-      bid: 2.85, ask: 2.90, spread_pct: 1.73, volume: 8920, oi: 22100, iv_pct: 62.30, rank: 1,
-    },
-    entry_trigger: "IV Rank = 85，高IV卖方策略；开盘后10分钟价稳后入场",
-    risk_control: "TSLA 单日±10% 跳空风险极高；仓位不超过账户 3%",
-    scan_time: "2026-05-08 09:45",
+  iron_condor: {
+    label: "IRON CONDOR",
+    cn: "铁鹰",
+    border: "border-l-orange-400",
+    text: "text-orange-300",
+    glow: "shadow-[0_0_22px_rgba(240,136,62,0.10)]",
+    fill: "bg-orange-400",
   },
 };
 
-function generateCandidates(ticker: string): OptionContract[] {
-  const base = MOCK_SCAN[ticker];
-  if (!base) return [];
-  const p = base.price;
-  const strikes = [
-    p * 1.022, p * 1.030, p * 1.025, p * 1.028,
-    p * 1.033, p * 1.038, p * 1.019, p * 1.031,
-  ].map(s => Math.round(s / 0.5) * 0.5);
-  const expiries = ["2026-05-08","2026-05-15","2026-05-15","2026-05-15","2026-05-08","2026-05-22","2026-05-08","2026-05-15"];
-  return strikes.map((strike, i) => {
-    const mid = Math.max(0.10, (strike - p) * 0.015 + Math.random() * 0.4 + 0.2);
-    const spread = mid * (0.01 + Math.random() * 0.04);
+const SCANNER_FALLBACK: ScannerItem[] = [
+  { ticker: "SPY", price: 542.1, bias: "range bullish", support: 536, resistance: 548, ivRank: 41 },
+  { ticker: "QQQ", price: 468.4, bias: "momentum bullish", support: 461, resistance: 476, ivRank: 38 },
+  { ticker: "NVDA", price: 124.7, bias: "high beta pullback", support: 118, resistance: 132, ivRank: 62 },
+  { ticker: "TSLA", price: 181.3, bias: "volatile range", support: 170, resistance: 196, ivRank: 74 },
+  { ticker: "AAPL", price: 211.8, bias: "defensive bullish", support: 205, resistance: 218, ivRank: 33 },
+  { ticker: "META", price: 498.6, bias: "trend bullish", support: 482, resistance: 515, ivRank: 45 },
+  { ticker: "MSFT", price: 426.9, bias: "quality range", support: 418, resistance: 438, ivRank: 36 },
+];
+
+function buildFallbackPicks(): StrategyPick[] {
+  const expiry = "2026-01-16";
+  return SCANNER_FALLBACK.slice(0, 5).map((item, index) => {
+    const ticker = item.ticker || WATCHLIST[index];
+    const price = item.price || 100;
+    const ivRank = item.ivRank || 40;
+    const support = item.support || price * 0.95;
+    const resistance = item.resistance || price * 1.05;
+    const aggressive = ivRank >= 65;
+    const type: StrategyType = aggressive ? "iron_condor" : index % 2 === 0 ? "sell_put" : "call_spread";
+    const score = Math.max(7, Math.min(9, Math.round(6.8 + ivRank / 30 + index * 0.15)));
+    const putStrike = Math.round(support);
+    const callStrike = Math.round(price * 1.02);
+    const upperStrike = Math.round(resistance * 1.02);
+
+    if (type === "iron_condor") {
+      return {
+        id: `${ticker}-fallback-ic`,
+        tag: "激进",
+        ticker,
+        strategyType: type,
+        strategyName: "Iron Condor",
+        score,
+        direction: "flat",
+        legs: [
+          { action: "Sell", quantity: 1, strike: putStrike, optionType: "P", expiry },
+          { action: "Buy", quantity: 1, strike: putStrike - 10, optionType: "P", expiry },
+          { action: "Sell", quantity: 1, strike: upperStrike, optionType: "C", expiry },
+          { action: "Buy", quantity: 1, strike: upperStrike + 10, optionType: "C", expiry },
+        ],
+        entry: `${ticker} 保持 ${support}-${resistance} 区间，IV Rank > ${ivRank - 5} 时收取权利金。`,
+        scenarioTip: "区间居中才开，靠近短腿不追单。",
+        target: "权利金衰减 55% 或剩余 21 DTE 平仓。",
+        stop: "任一短腿 Delta > 0.35 或组合亏损达到权利金 1.8x。",
+        maxRisk: "$650-$900 / condor",
+        expectedReturn: "35%-48% 风险回报",
+        holdingPeriod: "21-35 天",
+        signalText: `${ticker} IV Rank ${ivRank}，技术偏向 ${item.bias}，适合宽翼收时间价值。`,
+        riskText: "跳空突破区间会快速扩大亏损。",
+        capitalText: "每组约 $700 保证金，单标的风险 ≤ 3%。",
+        scoreDimensions: { ivRank: 10, otm: 7, riskReward: 8, liquidity: 8 },
+        greeks: { delta: -0.03, gamma: -0.006, theta: 0.16, vega: -0.28, iv: ivRank / 100 },
+        capitalRequired: 700,
+        returnLow: 35,
+        returnHigh: 48,
+      };
+    }
+
+    if (type === "call_spread") {
+      return {
+        id: `${ticker}-fallback-call-spread`,
+        tag: "核心",
+        ticker,
+        strategyType: type,
+        strategyName: "Bull Call Spread",
+        score,
+        direction: "up",
+        legs: [
+          { action: "Buy", quantity: 1, strike: callStrike, optionType: "C", expiry },
+          { action: "Sell", quantity: 1, strike: upperStrike, optionType: "C", expiry },
+        ],
+        entry: `${ticker} 放量站上 ${resistance}，净借方不超过价差宽度 42%。`,
+        scenarioTip: "突破确认后入场，避免横盘 Theta 消耗。",
+        target: "价差达到最大价值 65%-75% 止盈。",
+        stop: `${ticker} 跌回 ${support} 下方或组合亏损 45%。`,
+        maxRisk: "$400-$950 / spread",
+        expectedReturn: "60%-90% 目标回报",
+        holdingPeriod: "14-35 天",
+        signalText: `${ticker} 技术偏向 ${item.bias}，阻力位明确，价差控制追涨成本。`,
+        riskText: "假突破或 IV 回落会压缩组合价值。",
+        capitalText: "净借方即最大资金占用，分批进场。",
+        scoreDimensions: { ivRank: 7, otm: 8, riskReward: 9, liquidity: 9 },
+        greeks: { delta: 0.34, gamma: 0.01, theta: -0.06, vega: 0.14, iv: ivRank / 100 },
+        capitalRequired: 650,
+        returnLow: 60,
+        returnHigh: 90,
+      };
+    }
+
     return {
-      symbol: `${ticker}${expiries[i].replace(/-/g,'')}C00${Math.round(strike*1000).toString().padStart(8,'0')}`,
-      expiry: expiries[i],
-      strike: Math.round(strike * 100) / 100,
-      type: "CALL",
-      bid: Math.round((mid - spread/2) * 100) / 100,
-      ask: Math.round((mid + spread/2) * 100) / 100,
-      spread_pct: Math.round(spread / mid * 10000) / 100,
-      volume: Math.round(200 + Math.random() * 8000),
-      oi: Math.round(2000 + Math.random() * 20000),
-      iv_pct: Math.round((10 + Math.random() * 50) * 100) / 100,
-      rank: i + 1,
+      id: `${ticker}-fallback-sell-put`,
+      tag: score >= 9 ? "核心" : "保守",
+      ticker,
+      strategyType: type,
+      strategyName: "Cash-Secured Put",
+      score,
+      direction: "up",
+      legs: [{ action: "Sell", quantity: 1, strike: putStrike, optionType: "P", expiry }],
+      entry: `${ticker} 守住 ${support} 支撑，卖出 ${putStrike}P，限价 ≥ ${(price * 0.018).toFixed(2)}。`,
+      scenarioTip: "只卖愿意接货的标的，避开财报前窗口。",
+      target: "权利金衰减 55%-70% 止盈。",
+      stop: `${ticker} 有效跌破 ${support * 0.98} 或期权价格扩大至 2x。`,
+      maxRisk: `$${Math.round((putStrike - price * 0.018) * 100).toLocaleString()} / contract`,
+      expectedReturn: `${(price * 0.018 / putStrike * 100).toFixed(1)}%-${(price * 0.024 / putStrike * 100).toFixed(1)}% 权利金`,
+      holdingPeriod: "28-45 天",
+      signalText: `${ticker} 支撑 ${support} 清晰，IV Rank ${ivRank}，Put 侧权利金具备安全垫。`,
+      riskText: "趋势破位或事件跳空会提高被行权概率。",
+      capitalText: `现金担保约 $${(putStrike * 100).toLocaleString()}。`,
+      scoreDimensions: { ivRank: Math.max(6, Math.round(ivRank / 10)), otm: 8, riskReward: 8, liquidity: 9 },
+      greeks: { delta: -0.22, gamma: 0.014, theta: 0.07, vega: 0.18, iv: ivRank / 100 },
+      capitalRequired: putStrike * 100,
+      returnLow: 8,
+      returnHigh: 18,
     };
   });
 }
 
-function generateKLine(ticker: string): KLinePoint[] {
-  const base = MOCK_SCAN[ticker]?.price || 500;
-  const points: KLinePoint[] = [];
-  let price = base * 0.94;
-  const start = new Date("2026-02-04");
-  for (let i = 0; i < 60; i++) {
-    price *= (1 + (Math.random() - 0.48) * 0.025);
-    const d = new Date(start);
-    d.setDate(start.getDate() + i * 1.3);
-    points.push({ date: d.toISOString().slice(0, 10), close: Math.round(price * 100) / 100 });
-  }
-  points[points.length - 1].close = base;
-  return points;
+function normalizeType(value?: string): StrategyType {
+  if (value === "iron_condor") return "iron_condor";
+  if (value === "call_spread" || value === "bull_call_spread" || value === "bear_put_spread") return "call_spread";
+  return "sell_put";
 }
 
-function generateIntraday(ticker: string): IntradayPoint[] {
-  const base = MOCK_SCAN[ticker]?.price || 500;
-  const points: IntradayPoint[] = [];
-  let price = base * 0.998;
-  let vwapSum = 0;
-  for (let i = 0; i < 78; i++) { // 9:30-16:00 in 5min bars
-    const h = Math.floor(i * 5 / 60) + 9;
-    const m = (i * 5) % 60;
-    price *= (1 + (Math.random() - 0.49) * 0.003);
-    vwapSum += price;
-    points.push({
-      time: `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`,
-      price: Math.round(price * 100) / 100,
-      vwap: Math.round((vwapSum / (i + 1)) * 100) / 100,
-    });
-  }
-  return points;
+function clampScore(value?: number): number {
+  return Math.max(1, Math.min(10, Math.round(Number(value || 7))));
 }
 
-// ── Mini SVG Charts ────────────────────────────────────────────
-function KLineChart({ data, w = 400, h = 140 }: { data: KLinePoint[]; w?: number; h?: number }) {
-  if (!data.length) return null;
-  const prices = data.map(d => d.close);
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  const range = max - min || 1;
-  const pad = { l: 8, r: 8, t: 10, b: 24 };
-  const W = w - pad.l - pad.r;
-  const H = h - pad.t - pad.b;
-  const xStep = W / (data.length - 1);
-  const toY = (v: number) => pad.t + H - ((v - min) / range) * H;
-  const toX = (i: number) => pad.l + i * xStep;
-  const pts = data.map((d, i) => `${toX(i).toFixed(1)},${toY(d.close).toFixed(1)}`).join(" ");
-  const area = `M${toX(0)},${toY(data[0].close)} ` +
-    data.map((d, i) => `L${toX(i).toFixed(1)},${toY(d.close).toFixed(1)}`).join(" ") +
-    ` L${toX(data.length-1)},${h-pad.b} L${toX(0)},${h-pad.b} Z`;
+function fmtDate(value?: string) {
+  if (!value) return "--";
+  return value.replaceAll("-", "/");
+}
+
+function fmtNum(value?: number, digits = 2) {
+  if (typeof value !== "number" || Number.isNaN(value)) return "--";
+  return value.toFixed(digits);
+}
+
+function scoreClass(score: number) {
+  if (score >= 9) return "text-green-300";
+  if (score >= 8) return "text-yellow-300";
+  return "text-gray-300";
+}
+
+function ScoreStrip({ score, fill }: { score: number; fill: string }) {
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full">
-      <defs>
-        <linearGradient id="kgrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#22c55e" stopOpacity="0.3" />
-          <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={area} fill="url(#kgrad)" />
-      <polyline points={pts} fill="none" stroke="#22c55e" strokeWidth="1.5" strokeLinejoin="round" />
-      {/* x-axis labels */}
-      {[0, Math.floor(data.length/2), data.length-1].map(i => (
-        <text key={i} x={toX(i)} y={h-4} fill="#4b5563" fontSize="9" textAnchor="middle">{data[i].date}</text>
+    <div className="flex items-center gap-1" aria-label={`score ${score} of 10`}>
+      {Array.from({ length: 10 }).map((_, index) => (
+        <span
+          key={index}
+          className={`h-3 w-1.5 rounded-sm ${index < score ? fill : "bg-[#30363d]"}`}
+        />
       ))}
-    </svg>
-  );
-}
-
-function IntradayChart({ data, w = 400, h = 140 }: { data: IntradayPoint[]; w?: number; h?: number }) {
-  if (!data.length) return null;
-  const allPrices = [...data.map(d => d.price), ...data.map(d => d.vwap)];
-  const min = Math.min(...allPrices);
-  const max = Math.max(...allPrices);
-  const range = max - min || 1;
-  const pad = { l: 8, r: 8, t: 10, b: 24 };
-  const W = w - pad.l - pad.r;
-  const H = h - pad.t - pad.b;
-  const toY = (v: number) => pad.t + H - ((v - min) / range) * H;
-  const toX = (i: number) => pad.l + (i / (data.length - 1)) * W;
-  const pricePts = data.map((d, i) => `${toX(i).toFixed(1)},${toY(d.price).toFixed(1)}`).join(" ");
-  const vwapPts = data.map((d, i) => `${toX(i).toFixed(1)},${toY(d.vwap).toFixed(1)}`).join(" ");
-  const area = `M${toX(0)},${toY(data[0].price)} ` +
-    data.map((d,i) => `L${toX(i).toFixed(1)},${toY(d.price).toFixed(1)}`).join(" ") +
-    ` L${toX(data.length-1)},${H+pad.t} L${toX(0)},${H+pad.t} Z`;
-  return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full">
-      <defs>
-        <linearGradient id="igrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#22c55e" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={area} fill="url(#igrad)" />
-      <polyline points={pricePts} fill="none" stroke="#22c55e" strokeWidth="1.5" strokeLinejoin="round" />
-      <polyline points={vwapPts} fill="none" stroke="#f59e0b" strokeWidth="1" strokeDasharray="4,3" strokeLinejoin="round" />
-      {[0, Math.floor(data.length/2), data.length-1].map(i => (
-        <text key={i} x={toX(i)} y={h-4} fill="#4b5563" fontSize="9" textAnchor="middle">
-          {data[i].time}
-        </text>
-      ))}
-    </svg>
-  );
-}
-
-// ── Option Candidate Card ──────────────────────────────────────
-function OptionCard({ contract, isTop }: { contract: OptionContract; isTop: boolean }) {
-  const spreadColor = contract.spread_pct < 2 ? "text-green-400" : contract.spread_pct < 4 ? "text-yellow-400" : "text-red-400";
-  return (
-    <div className={`relative rounded-lg border p-3 font-mono text-xs transition-all cursor-pointer
-      ${isTop
-        ? "border-green-500 bg-green-950/20 shadow-[0_0_12px_rgba(34,197,94,0.15)]"
-        : "border-gray-800 bg-[#0a0d12] hover:border-gray-600"}`}>
-      {/* Rank + Type badge */}
-      <div className="flex justify-between items-center mb-1.5">
-        <span className={`text-[11px] font-bold ${isTop ? "text-green-400" : "text-gray-500"}`}>#{contract.rank}</span>
-        <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold
-          ${contract.type === "CALL" ? "bg-green-900/60 text-green-300 border border-green-800" : "bg-red-900/60 text-red-300 border border-red-800"}`}>
-          {contract.type}
-        </span>
-      </div>
-      {/* Symbol */}
-      <div className={`text-[11px] font-bold truncate mb-1 ${isTop ? "text-green-300" : "text-gray-300"}`}>
-        {contract.symbol}
-      </div>
-      {/* Expiry + Strike */}
-      <div className="flex justify-between text-[10px] text-gray-500 mb-2">
-        <span>{contract.expiry}</span>
-        <span className="text-gray-400">Strike {contract.strike}</span>
-      </div>
-      {/* Bid/Ask */}
-      <div className={`text-lg font-black mb-0.5 ${isTop ? "text-green-400" : "text-gray-200"}`}>
-        {contract.bid} / {contract.ask}
-      </div>
-      {/* Spread */}
-      <div className={`text-[10px] mb-2 ${spreadColor}`}>spread {contract.spread_pct}%</div>
-      {/* Vol / OI / IV */}
-      <div className="grid grid-cols-3 gap-1 text-[10px]">
-        <div><span className="text-gray-600">Vol </span><span className="text-gray-400">{(contract.volume/1000).toFixed(1)}K</span></div>
-        <div><span className="text-gray-600">OI </span><span className="text-gray-400">{(contract.oi/1000).toFixed(1)}K</span></div>
-        <div><span className="text-gray-600">IV </span><span className="text-gray-400">{contract.iv_pct}%</span></div>
-      </div>
     </div>
   );
 }
 
-// ── Main Page ──────────────────────────────────────────────────
-const STRATEGY_TYPES = ["全部策略", "买入Call", "买入Put", "卖出Call", "价差策略", "Iron Condor"];
-const RISK_LEVELS = ["全部风险", "低风险", "中等风险", "高风险"];
-const QUICK_TICKERS = ["SPY", "QQQ", "NVDA", "TSLA", "AAPL", "AMZN"];
-
-export default function PicksPage() {
-  const [ticker, setTicker] = useState("SPY");
-  const [searchInput, setSearchInput] = useState("SPY");
-  const [strategyFilter, setStrategyFilter] = useState("全部策略");
-  const [riskFilter, setRiskFilter] = useState("全部风险");
-  const [scanning, setScanning] = useState(false);
-
-  const scan = MOCK_SCAN[ticker.toUpperCase()] || MOCK_SCAN["SPY"];
-  const candidates = generateCandidates(ticker.toUpperCase());
-  const klineData = generateKLine(ticker.toUpperCase());
-  const intradayData = generateIntraday(ticker.toUpperCase());
-
-  const handleSearch = useCallback(() => {
-    const t = searchInput.trim().toUpperCase();
-    if (!t) return;
-    setScanning(true);
-    setTimeout(() => { setTicker(t); setScanning(false); }, 800);
-  }, [searchInput]);
-
-  const biasColor = scan.tech_bias.includes("bullish") ? "text-green-400"
-    : scan.tech_bias.includes("sell") || scan.tech_bias.includes("high_iv") ? "text-yellow-400"
-    : "text-gray-400";
+function DimensionBars({ dimensions, meta }: { dimensions?: ScoreDimensions; meta: (typeof TYPE_META)[StrategyType] }) {
+  const rows = [
+    ["IV Rank", dimensions?.ivRank ?? 6],
+    ["OTM 程度", dimensions?.otm ?? 7],
+    ["Risk/Reward", dimensions?.riskReward ?? 7],
+    ["流动性", dimensions?.liquidity ?? 8],
+  ] as const;
 
   return (
-    <div className="flex flex-col gap-4 pb-12 text-sm">
-      {/* ── Header + Search + Filters ── */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="grid gap-2 rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
+      {rows.map(([label, value]) => {
+        const score = clampScore(value);
+        return (
+          <div key={label} className="grid grid-cols-[88px_1fr_28px] items-center gap-2 text-[11px]">
+            <span className="text-gray-500">{label}</span>
+            <div className="h-1.5 overflow-hidden rounded-full bg-[#30363d]">
+              <div className={`h-full rounded-full ${meta.fill} transition-all duration-700`} style={{ width: `${score * 10}%` }} />
+            </div>
+            <span className="text-right font-mono text-gray-300">{score}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function LegsRow({ legs }: { legs?: Leg[] }) {
+  const safeLegs = legs?.length ? legs : [{ action: "Sell", quantity: 1, strike: 0, optionType: "P", expiry: "--" }];
+  return (
+    <div className="divide-y divide-[#30363d] border-y border-[#30363d]">
+      {safeLegs.map((leg, index) => (
+        <div key={`${leg.action}-${leg.strike}-${index}`} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 font-mono text-xs">
+          <span className={leg.action === "Buy" ? "text-blue-300" : "text-green-300"}>[{leg.action || "Sell"}]</span>
+          <span className="text-gray-200">{leg.quantity || 1}张</span>
+          <span className="text-white">{leg.strike || "--"}{leg.optionType || "P"}</span>
+          <span className="text-gray-500">{fmtDate(leg.expiry)}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function DetailLine({ icon, label, children }: { icon: string; label: string; children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[112px_1fr] gap-2 text-xs leading-relaxed sm:grid-cols-[128px_1fr]">
+      <div className="whitespace-nowrap text-gray-500"><span className="mr-1">{icon}</span>{label}</div>
+      <div className="text-gray-200">{children}</div>
+    </div>
+  );
+}
+
+function GreeksSnapshot({ greeks }: { greeks?: Greeks }) {
+  const rows = [
+    ["Delta", greeks?.delta, 2],
+    ["Gamma", greeks?.gamma, 3],
+    ["Theta", greeks?.theta, 2],
+    ["Vega", greeks?.vega, 2],
+    ["IV%", typeof greeks?.iv === "number" ? greeks.iv * 100 : undefined, 1],
+  ] as const;
+
+  return (
+    <div className="grid grid-cols-2 gap-2 pt-3 sm:grid-cols-5">
+      {rows.map(([label, value, digits]) => (
+        <div key={label} className="rounded-lg border border-[#30363d] bg-[#0d1117] p-2">
+          <div className="text-[10px] uppercase tracking-widest text-gray-600">{label}</div>
+          <div className="mt-1 font-mono text-sm text-white">{fmtNum(value, digits)}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StrategyCard({ pick }: { pick: StrategyPick }) {
+  const [open, setOpen] = useState(false);
+  const type = normalizeType(pick.strategyType);
+  const meta = TYPE_META[type];
+  const score = clampScore(pick.score);
+  const ticker = (pick.ticker || "SPY").toUpperCase();
+  const tag = pick.tag || "核心";
+
+  return (
+    <article
+      className={`group overflow-hidden rounded-xl border border-[#30363d] border-l-4 ${meta.border} bg-[#161b22] ${meta.glow} transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-500 hover:bg-[#18202b]`}
+    >
+      <button type="button" onClick={() => setOpen(v => !v)} className="w-full p-4 text-left">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="rounded border border-[#30363d] bg-[#0d1117] px-2 py-1 text-[10px] font-bold text-gray-300">{tag}</span>
+            <span className="font-mono text-lg font-black tracking-wide text-white">{ticker}</span>
+            <span className={`truncate text-sm font-semibold ${meta.text}`}>{pick.strategyName || meta.cn}</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <ScoreStrip score={score} fill={meta.fill} />
+            <span className={`font-mono text-lg font-black ${scoreClass(score)}`}>{score}/10</span>
+            <span className={pick.direction === "down" ? "text-red-400" : pick.direction === "flat" ? "text-orange-300" : "text-green-400"}>
+              {pick.direction === "down" ? "▼" : pick.direction === "flat" ? "◆" : "▲"}
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-3">
+          <LegsRow legs={pick.legs} />
+        </div>
+
+        <div className="mt-3 grid gap-2">
+          <DetailLine icon="🎯" label="入场条件">
+            {pick.entry || "等待价格与盘口确认后限价入场"}
+            <div className="mt-1 text-[11px] text-gray-500">└ 💡 {pick.scenarioTip || "先确认流动性，再确认方向，不抢开盘前几分钟。"}</div>
+          </DetailLine>
+          <DetailLine icon="📋" label="目标预期">{pick.target || "权利金衰减 50%-70% 后止盈"}</DetailLine>
+          <DetailLine icon="🔴" label="止损位">{pick.stop || "价格破位或亏损达到计划阈值"}</DetailLine>
+          <DetailLine icon="⚠️" label="最大风险">{pick.maxRisk || "按组合保证金和成交价格计算"}</DetailLine>
+          <DetailLine icon="💰" label="预期回报">{pick.expectedReturn || "以实时成交价估算"}</DetailLine>
+          <DetailLine icon="⏱" label="持有周期">{pick.holdingPeriod || "21-45 天"}</DetailLine>
+        </div>
+
+        <div className="my-3 border-t border-[#30363d]" />
+
+        <div className="grid gap-2 text-xs leading-relaxed">
+          <div><span className="text-gray-500">📊 异动依据: </span><span className="text-gray-200">{pick.signalText || "多因子评分通过，等待成交确认。"}</span></div>
+          <div><span className="text-gray-500">⚠️ 风险点: </span><span className="text-gray-200">{pick.riskText || "跳空、流动性与波动率变化。"}</span></div>
+          <div><span className="text-gray-500">💵 资金占用: </span><span className="text-gray-200">{pick.capitalText || "按券商保证金为准。"}</span></div>
+        </div>
+
+        <div className="mt-3 flex items-center justify-between text-[11px] text-gray-500">
+          <span>{meta.label} · 点击{open ? "收起" : "展开"} Greeks 快照</span>
+          <span className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}>⌄</span>
+        </div>
+      </button>
+
+      <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+        <div className="overflow-hidden">
+          <div className="border-t border-[#30363d] px-4 pb-4">
+            <GreeksSnapshot greeks={pick.greeks} />
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function ScannerPanel({ scanner, selected, onSelect }: { scanner: ScannerItem[]; selected: string; onSelect: (ticker: string) => void }) {
+  const current = scanner.find(item => (item.ticker || "").toUpperCase() === selected) || scanner[0] || SCANNER_FALLBACK[0];
+  const bias = current.bias || "neutral";
+
+  return (
+    <aside className="rounded-xl border border-[#30363d] bg-[#161b22] p-4 lg:sticky lg:top-4 lg:self-start">
+      <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-white">精选策略 / Options Scanner</h1>
-          <p className="text-gray-500 text-xs mt-0.5">Multi-signal: IV Rank · GEX · Skew · Trend · OI Flow</p>
+          <div className="text-[10px] uppercase tracking-[0.28em] text-gray-600">Scanner</div>
+          <h2 className="mt-1 text-base font-bold text-white">标的雷达</h2>
         </div>
+        <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2 py-1 text-[10px] text-green-300">LIVE BIAS</span>
+      </div>
 
-        {/* Right: filters + search */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Strategy type */}
-          <select
-            value={strategyFilter}
-            onChange={e => setStrategyFilter(e.target.value)}
-            className="bg-[#111827] border border-gray-700 text-gray-300 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-green-600"
-          >
-            {STRATEGY_TYPES.map(s => <option key={s}>{s}</option>)}
-          </select>
-          {/* Risk level */}
-          <select
-            value={riskFilter}
-            onChange={e => setRiskFilter(e.target.value)}
-            className="bg-[#111827] border border-gray-700 text-gray-300 text-xs rounded-lg px-3 py-1.5 outline-none focus:border-green-600"
-          >
-            {RISK_LEVELS.map(r => <option key={r}>{r}</option>)}
-          </select>
-          {/* Search box */}
-          <div className="flex items-center border border-gray-700 rounded-lg overflow-hidden focus-within:border-green-500 transition-colors">
-            <input
-              value={searchInput}
-              onChange={e => setSearchInput(e.target.value.toUpperCase())}
-              onKeyDown={e => e.key === "Enter" && handleSearch()}
-              placeholder="输入标的 SPY..."
-              className="bg-[#111827] text-white text-xs px-3 py-1.5 w-32 outline-none placeholder-gray-600"
-            />
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
+        {WATCHLIST.map(ticker => {
+          const item = scanner.find(row => (row.ticker || "").toUpperCase() === ticker) || SCANNER_FALLBACK.find(row => row.ticker === ticker);
+          const active = selected === ticker;
+          return (
             <button
-              onClick={handleSearch}
-              className="bg-green-700 hover:bg-green-600 text-white text-xs px-3 py-1.5 font-medium transition-colors"
+              key={ticker}
+              type="button"
+              onClick={() => onSelect(ticker)}
+              className={`rounded-lg border p-3 text-left transition-all ${active ? "border-green-500 bg-green-500/10" : "border-[#30363d] bg-[#0d1117] hover:border-gray-500"}`}
             >
-              扫描
+              <div className="flex items-center justify-between">
+                <span className="font-mono font-black text-white">{ticker}</span>
+                <span className="font-mono text-xs text-gray-400">{fmtNum(item?.price, 1)}</span>
+              </div>
+              <div className="mt-1 truncate text-[11px] text-gray-500">{item?.bias || "neutral"}</div>
             </button>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
-      {/* Quick ticker pills */}
-      <div className="flex gap-1.5 flex-wrap">
-        {QUICK_TICKERS.map(t => (
-          <button key={t} onClick={() => { setTicker(t); setSearchInput(t); }}
-            className={`px-3 py-1 rounded-full text-xs font-mono font-medium border transition-all
-              ${ticker === t
-                ? "bg-green-700 border-green-600 text-white"
-                : "bg-[#111827] border-gray-700 text-gray-400 hover:border-gray-500"}`}>
-            {t}
-          </button>
-        ))}
-      </div>
-
-      {/* ── 最终方案 Summary Card ── */}
-      <div className="rounded-xl border border-gray-700 bg-[#0a0d12] p-4">
-        <div className="flex justify-between items-start mb-3">
-          <div>
-            <span className="text-[10px] text-gray-600 uppercase tracking-widest">最终方案</span>
-            <h2 className="text-base font-bold text-green-400 mt-0.5">{ticker} 扫描结论</h2>
-          </div>
-          <button
-            onClick={handleSearch}
-            disabled={scanning}
-            className="text-xs border border-gray-600 text-gray-400 hover:border-green-500 hover:text-green-400 px-3 py-1 rounded-lg transition-all disabled:opacity-50"
-          >
-            {scanning ? "扫描中..." : "重新扫描"}
-          </button>
+      <div className="mt-4 rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
+        <div className="flex items-center justify-between">
+          <span className="font-mono text-lg font-black text-white">{selected}</span>
+          <span className="text-xs text-green-300">IV Rank {current.ivRank ?? "--"}</span>
         </div>
-
-        <div className="space-y-1.5 text-xs leading-relaxed">
-          <div className="flex gap-2">
-            <span className="text-green-500 flex-shrink-0">•</span>
-            <span className="text-gray-300">
-              现价参考：<span className="font-mono text-white">{scan.price.toFixed(2)}</span>；
-              日内相对VWAP：<span className="font-mono text-white">{scan.vwap_pct > 0 ? "+" : ""}{scan.vwap_pct}%</span>；
-              技术偏向：<span className={`font-mono ${biasColor}`}>{scan.tech_bias}</span>
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <span className="text-green-500 flex-shrink-0">•</span>
-            <span className="text-gray-300">
-              单腿候选：<span className="font-mono text-green-300">{scan.top_pick.symbol}</span>，
-              {scan.top_pick.expiry} 到期 Strike {scan.top_pick.strike} <span className={scan.top_pick.type === "CALL" ? "text-green-400" : "text-red-400"}>{scan.top_pick.type}</span>
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <span className="text-green-500 flex-shrink-0">•</span>
-            <span className="text-gray-300">
-              盘口：bid/ask <span className="font-mono text-white">{scan.top_pick.bid}/{scan.top_pick.ask}</span>；
-              volume <span className="font-mono text-white">{scan.top_pick.volume.toLocaleString()}</span>；
-              OI <span className="font-mono text-white">{scan.top_pick.oi.toLocaleString()}</span>；
-              IV <span className="font-mono text-yellow-400">{scan.top_pick.iv_pct}%</span>
-            </span>
-          </div>
-          <div className="flex gap-2">
-            <span className="text-green-500 flex-shrink-0">•</span>
-            <span className="text-gray-300"><span className="text-gray-500">触发：</span>{scan.entry_trigger}</span>
-          </div>
-          <div className="flex gap-2">
-            <span className="text-green-500 flex-shrink-0">•</span>
-            <span className="text-gray-300"><span className="text-gray-500">风控：</span>{scan.risk_control}</span>
-          </div>
+        <div className="mt-3 space-y-2 text-xs">
+          <div className="flex justify-between"><span className="text-gray-500">技术偏向</span><span className="text-gray-200">{bias}</span></div>
+          <div className="flex justify-between"><span className="text-gray-500">关键支撑</span><span className="font-mono text-blue-300">{fmtNum(current.support, 1)}</span></div>
+          <div className="flex justify-between"><span className="text-gray-500">关键阻力</span><span className="font-mono text-orange-300">{fmtNum(current.resistance, 1)}</span></div>
         </div>
       </div>
+    </aside>
+  );
+}
 
-      {/* ── Charts Row ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="rounded-xl border border-gray-800 bg-[#0a0d12] p-4">
-          <div className="text-xs text-gray-500 mb-2 font-medium">最近日K收盘路径</div>
-          <div className="h-36">
-            <KLineChart data={klineData} w={460} h={140} />
-          </div>
-        </div>
-        <div className="rounded-xl border border-gray-800 bg-[#0a0d12] p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-xs text-gray-500 font-medium">今日分时 / VWAP</span>
-            <div className="flex items-center gap-3 text-[10px]">
-              <span className="flex items-center gap-1"><span className="w-3 h-px bg-green-500 inline-block"></span><span className="text-gray-600">Price</span></span>
-              <span className="flex items-center gap-1"><span className="w-3 border-t border-dashed border-yellow-500 inline-block"></span><span className="text-gray-600">VWAP</span></span>
+export default function PicksPage() {
+  const [payload, setPayload] = useState<PicksResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedTicker, setSelectedTicker] = useState<string>("SPY");
+  const [tagFilter, setTagFilter] = useState<(typeof TAGS)[number]>("全部");
+  const [strategyFilter, setStrategyFilter] = useState<string>("all");
+  const [sortMode, setSortMode] = useState<"score" | "ticker">("score");
+
+  const fetchPicks = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE}/api/picks`, { cache: "no-store" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = (await response.json()) as PicksResponse;
+      setPayload({
+        ...data,
+        picks: data.picks?.length ? data.picks : buildFallbackPicks(),
+        scanner: data.scanner?.length ? data.scanner : SCANNER_FALLBACK,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "API unavailable");
+      setPayload({
+        dataSource: "frontend-fallback",
+        week: undefined,
+        scanner: SCANNER_FALLBACK,
+        picks: buildFallbackPicks(),
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPicks();
+  }, [fetchPicks]);
+
+  const picks = payload?.picks?.length ? payload.picks : buildFallbackPicks();
+  const scanner = payload?.scanner?.length ? payload.scanner : SCANNER_FALLBACK;
+
+  const filtered = useMemo(() => {
+    return picks
+      .filter(pick => (selectedTicker ? (pick.ticker || "").toUpperCase() === selectedTicker : true))
+      .filter(pick => (tagFilter === "全部" ? true : (pick.tag || "核心") === tagFilter))
+      .filter(pick => (strategyFilter === "all" ? true : normalizeType(pick.strategyType) === strategyFilter))
+      .sort((a, b) => sortMode === "score" ? clampScore(b.score) - clampScore(a.score) : (a.ticker || "").localeCompare(b.ticker || ""));
+  }, [picks, selectedTicker, tagFilter, strategyFilter, sortMode]);
+
+  const displayPicks = filtered.length ? filtered : picks.slice().sort((a, b) => clampScore(b.score) - clampScore(a.score));
+  const highScoreCount = picks.filter(pick => clampScore(pick.score) >= 8).length;
+  const returnLows = picks.map(p => Number(p.returnLow || 0)).filter(Boolean);
+  const returnHighs = picks.map(p => Number(p.returnHigh || 0)).filter(Boolean);
+  const weekStart = payload?.week?.start;
+  const weekEnd = payload?.week?.end;
+
+  return (
+    <div className="min-h-screen bg-[#0d1117] pb-10 text-[#e6edf3]">
+      <div className="mb-5 overflow-hidden rounded-xl border border-[#30363d] bg-[#161b22]">
+        <div className="relative p-5">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(63,185,80,0.16),transparent_34%),linear-gradient(90deg,rgba(88,166,255,0.08),transparent)]" />
+          <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.35em] text-green-300/80">Weekly Options Picks</div>
+              <h1 className="mt-2 text-2xl font-black tracking-tight text-white">本周精选策略</h1>
+              <p className="mt-1 text-xs text-gray-500">真实策略评分优先 · API 不可用时自动生成完整 fallback 卡片</p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div className="rounded-lg border border-[#30363d] bg-[#0d1117]/80 px-4 py-3">
+                <div className="text-[10px] text-gray-500">日期范围</div>
+                <div className="mt-1 font-mono text-xs text-white">{fmtDate(weekStart)} → {fmtDate(weekEnd)}</div>
+              </div>
+              <div className="rounded-lg border border-[#30363d] bg-[#0d1117]/80 px-4 py-3">
+                <div className="text-[10px] text-gray-500">策略 / 高分</div>
+                <div className="mt-1 font-mono text-lg font-black text-white">{picks.length}<span className="text-gray-600"> / </span><span className="text-green-300">{payload?.summary?.highScoreCount ?? highScoreCount}</span></div>
+              </div>
+              <div className="rounded-lg border border-[#30363d] bg-[#0d1117]/80 px-4 py-3">
+                <div className="text-[10px] text-gray-500">预期回报范围</div>
+                <div className="mt-1 font-mono text-lg font-black text-white">{payload?.summary?.expectedReturnRange?.low ?? Math.min(...returnLows, 0)}-{payload?.summary?.expectedReturnRange?.high ?? Math.max(...returnHighs, 0)}%</div>
+              </div>
             </div>
           </div>
-          <div className="h-36">
-            <IntradayChart data={intradayData} w={460} h={140} />
+        </div>
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
+        <ScannerPanel scanner={scanner} selected={selectedTicker} onSelect={setSelectedTicker} />
+
+        <main className="space-y-4">
+          <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-sm font-bold text-white">策略筛选与评分面板</h2>
+                <p className="mt-1 text-xs text-gray-500">
+                  {loading ? "正在刷新评分..." : error ? `API fallback active: ${error}` : `Data source: ${payload?.dataSource || "api"}`}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={fetchPicks}
+                disabled={loading}
+                className="rounded-lg border border-green-500/40 bg-green-500/10 px-3 py-2 text-xs font-bold text-green-300 transition hover:bg-green-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? "刷新中..." : "刷新数据"}
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-3 xl:grid-cols-[1fr_1fr_160px]">
+              <div className="flex flex-wrap gap-2">
+                {TAGS.map(tag => (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setTagFilter(tag)}
+                    className={`rounded-full border px-3 py-1.5 text-xs transition ${tagFilter === tag ? "border-green-500 bg-green-500/10 text-green-300" : "border-[#30363d] bg-[#0d1117] text-gray-400 hover:border-gray-500"}`}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {STRATEGY_FILTERS.map(item => (
+                  <button
+                    key={item.value}
+                    type="button"
+                    onClick={() => setStrategyFilter(item.value)}
+                    className={`rounded-full border px-3 py-1.5 text-xs transition ${strategyFilter === item.value ? "border-blue-500 bg-blue-500/10 text-blue-300" : "border-[#30363d] bg-[#0d1117] text-gray-400 hover:border-gray-500"}`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              <select
+                value={sortMode}
+                onChange={event => setSortMode(event.target.value as "score" | "ticker")}
+                className="rounded-lg border border-[#30363d] bg-[#0d1117] px-3 py-2 text-xs text-gray-300 outline-none focus:border-green-500"
+              >
+                <option value="score">按评分排序</option>
+                <option value="ticker">按Ticker排序</option>
+              </select>
+            </div>
+
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {(STRATEGY_FILTERS.slice(1) as readonly { label: string; value: StrategyType }[]).map(item => {
+                const meta = TYPE_META[item.value];
+                const count = picks.filter(pick => normalizeType(pick.strategyType) === item.value).length;
+                return (
+                  <div key={item.value} className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
+                    <div className={`text-[10px] font-bold uppercase tracking-widest ${meta.text}`}>{item.label}</div>
+                    <div className="mt-2 flex items-end justify-between">
+                      <span className="font-mono text-2xl font-black text-white">{count}</span>
+                      <span className="text-[11px] text-gray-500">cards</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+
+          {loading && (
+            <div className="grid gap-3">
+              {[0, 1].map(index => <div key={index} className="h-64 animate-pulse rounded-xl border border-[#30363d] bg-[#161b22]" />)}
+            </div>
+          )}
+
+          {!loading && (
+            <div className="grid gap-4">
+              {displayPicks.map((pick, index) => (
+                <div key={pick.id || `${pick.ticker}-${index}`} className="animate-[fadeIn_0.35s_ease-out_both]" style={{ animationDelay: `${index * 45}ms` }}>
+                  <StrategyCard pick={pick} />
+                  <div className="mt-2">
+                    <DimensionBars dimensions={pick.scoreDimensions} meta={TYPE_META[normalizeType(pick.strategyType)]} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </main>
       </div>
 
-      {/* ── 期权候选池 ── */}
-      <div>
-        <div className="flex items-center gap-3 mb-3">
-          <span className="text-sm font-bold text-gray-200">期权候选池</span>
-          <span className="text-[11px] text-gray-600">{candidates.length}个候选合约 · 按综合得分排序</span>
-          <div className="h-px flex-1 bg-gray-800"></div>
-          <span className="text-[10px] text-green-600 border border-green-900 rounded px-2 py-0.5">#1 最优推荐</span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {candidates.map(c => (
-            <OptionCard key={c.symbol} contract={c} isTop={c.rank === 1} />
-          ))}
-        </div>
-      </div>
-
-      {/* ── Engine notes ── */}
-      <div className="rounded-xl border border-gray-800 bg-[#0a0d12] p-4 text-xs text-gray-500 leading-relaxed">
-        <span className="text-gray-600 font-semibold uppercase tracking-widest text-[10px]">Engine Logic</span>
-        <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1.5">
-          <p><span className="text-gray-400">IV排名信号：</span>高IV → 卖方策略；低IV → 买方/方向性策略</p>
-          <p><span className="text-gray-400">GEX影响：</span>正GEX区间 = 做市商对冲压制波动；负GEX = 波动放大</p>
-          <p><span className="text-gray-400">Skew信号：</span>Put Skew高 → 市场对冲需求大；Call Skew高 → 追涨情绪强</p>
-          <p><span className="text-gray-400">安全策略：</span>卖方策略最小 1.5x 隐含波动缓冲；期权亏40%强制平仓</p>
-        </div>
-      </div>
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
