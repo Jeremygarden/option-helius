@@ -5,7 +5,9 @@ import { useParams } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 
 // Use env var for API URL; fallback to localhost for local dev
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// In Docker, NEXT_PUBLIC_API_URL=http://backend:8000 but browser can't resolve that,
+// so we use relative /api paths that Next.js rewrites to the backend.
+const API_BASE = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000');
 
 const ReportPage = () => {
   const { ticker } = useParams();
