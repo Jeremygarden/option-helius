@@ -4,23 +4,37 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 
+// Use env var for API URL; fallback to localhost for local dev
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
 const ReportPage = () => {
   const { ticker } = useParams();
   const [activeTab, setActiveTab] = useState('概览');
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    fetch(`http://localhost:8000/api/report/${ticker}`)
-      .then(res => res.json())
+    fetch(`${API_BASE}/api/report/${ticker}`)
+      .then(res => {
+        if (!res.ok) throw new Error(`API error: ${res.status}`);
+        return res.json();
+      })
       .then(d => {
         setData(d);
         setLoading(false);
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error(err);
+        setError(err.message);
+        setLoading(false);
+      });
   }, [ticker]);
 
   if (loading) return <div className="p-8 text-green-500 font-mono">LOADING_SYSTEM_DATA...</div>;
+  if (error) return <div className="p-8 text-red-500 font-mono">ERROR: {error}</div>;
+  if (!data) return <div className="p-8 text-yellow-500 font-mono">NO_DATA_RETURNED</div>;
 
   return (
     <div className="flex h-screen bg-black text-green-400 font-mono overflow-hidden">
@@ -151,17 +165,21 @@ const Greeks = ({ ticker }: { ticker: string }) => {
 };
 
 const Scenarios = ({ data }: { data: any }) => {
-  const [selected, setSelected] = useState(data.scenarios[0]);
+  const scenarios = data?.scenarios || [];
+  const [selected, setSelected] = useState(scenarios[0] || null);
   const [customParams, setCustomParams] = useState({ ds: -15, dv: 0.8, dt: 1, dr: 0 });
   const [isCustom, setIsCustom] = useState(false);
   const [customResult, setCustomResult] = useState<any>(null);
 
+  if (!scenarios.length) return <div className="p-4 text-yellow-500">No scenario data available.</div>;
+
   const handleCustomChange = (field: string, val: number) => {
     const next = { ...customParams, [field]: val };
     setCustomParams(next);
-    fetch(`http://localhost:8000/api/report/${data.ticker}/scenarios/custom?ds=${next.ds}&dv=${next.dv}&dt=${next.dt}&dr=${next.dr}`)
+    fetch(`${API_BASE}/api/report/${data.ticker}/scenarios/custom?ds=${next.ds}&dv=${next.dv}&dt=${next.dt}&dr=${next.dr}`)
       .then(res => res.json())
-      .then(setCustomResult);
+      .then(setCustomResult)
+      .catch(err => console.error('Custom scenario error:', err));
   };
 
   const current = isCustom ? (customResult || data.scenarios[0]) : selected;
@@ -171,7 +189,7 @@ const Scenarios = ({ data }: { data: any }) => {
       {/* Sidebar: Scenario Selection */}
       <div className="w-1/3 space-y-2 border-r border-green-900/30 pr-4">
         <div className="text-xs text-gray-500 mb-4 uppercase">Scenario Library</div>
-        {data.scenarios.map((sc: any, i: number) => (
+        {scenarios.map((sc: any, i: number) => (
           <div 
             key={i}
             onClick={() => { setSelected(sc); setIsCustom(false); }}
@@ -288,10 +306,14 @@ const AIAnalysis = ({ ticker }: { ticker: string }) => {
 
   const runAnalysis = () => {
     setLoading(true);
-    fetch(`http://localhost:8000/api/analyze/ai/${ticker}?strategy=Sell Put&strike=850&expiry=2025-08-20`)
+    fetch(`${API_BASE}/api/analyze/ai/${ticker}?strategy=Sell Put&strike=850&expiry=2025-08-20`)
       .then(res => res.json())
       .then(d => {
         setAnalysis(d);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('AI analysis error:', err);
         setLoading(false);
       });
   };
