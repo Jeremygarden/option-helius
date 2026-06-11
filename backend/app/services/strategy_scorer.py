@@ -786,4 +786,34 @@ def scan_ticker(ticker: str) -> dict:
                     for s in scored
                 ]
 
+    # Compute overall pick score (1-10) based on IV Rank + best candidate score
+    if result["candidates"]:
+        all_scores = []
+        for strat_list in result["candidates"].values():
+            if strat_list:
+                all_scores.append(strat_list[0].get("score", 0))
+        best_raw = max(all_scores) if all_scores else 0
+
+        # IV Rank bonus: reward high IV (>60) for sell strategies
+        iv_rank_val = iv_env.iv_rank
+        if iv_rank_val >= 60:
+            iv_bonus = min(10, (iv_rank_val - 60) / 40 * 10)
+        elif iv_rank_val < 25:
+            iv_bonus = -10
+        else:
+            iv_bonus = 0
+
+        # Direction conviction bonus
+        dir_abs = abs(direction.score)
+        dir_bonus = min(5, dir_abs / 100 * 5)
+
+        composite = best_raw + iv_bonus + dir_bonus
+        composite = float(np.clip(composite, 0, 100))
+        result["overall_score"] = round(composite / 10, 1)  # 0.0 - 10.0
+        result["overall_score_raw"] = round(composite, 1)
+    else:
+        result["overall_score"] = 0.0
+        result["overall_score_raw"] = 0.0
+
     return result
+
