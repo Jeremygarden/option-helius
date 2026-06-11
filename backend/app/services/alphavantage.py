@@ -261,3 +261,28 @@ def av_get_overview(ticker: str) -> dict:
     except Exception as e:
         logger.error(f"av_get_overview parse {ticker}: {e}")
         return {}
+
+
+class AlphaVantageClient:
+    """Thin class wrapper around AlphaVantage functions for easy injection/mocking."""
+
+    def __init__(self, api_key: Optional[str] = None):
+        global AV_API_KEY
+        if api_key:
+            AV_API_KEY = api_key
+        self.api_key = AV_API_KEY
+
+    def get_quote(self, ticker: str) -> dict:
+        return av_get_quote(ticker)
+
+    def get_options_chain(self, ticker: str, date_str: Optional[str] = None) -> dict:
+        return av_get_options_chain(ticker, date_str)
+
+    def get_summary(self, ticker: str) -> dict:
+        return av_get_summary(ticker)
+
+    def get_historical_daily(self, ticker: str, outputsize: str = "compact") -> list:
+        return av_get_historical_daily(ticker, outputsize)
+
+    def get_overview(self, ticker: str) -> dict:
+        return av_get_overview(ticker)
