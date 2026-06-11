@@ -1,59 +1,22 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { createChart, ColorType } from "lightweight-charts";
+import { useMemo } from "react";
+import { Area, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { IVSurfacePoint, SummaryResponse, formatMoney } from "@/lib/chainData";
 
-export default function TermStructure() {
-  const chartContainerRef = useRef<HTMLDivElement>(null);
+type TermStructureProps = { surface: IVSurfacePoint[]; summary?: SummaryResponse | null; loading?: boolean };
 
-  useEffect(() => {
-    if (!chartContainerRef.current) return;
-
-    const chart = createChart(chartContainerRef.current, {
-      layout: {
-        background: { type: ColorType.Solid, color: "transparent" },
-        textColor: "#7d8590",
-      },
-      grid: {
-        vertLines: { color: "#30363d" },
-        horzLines: { color: "#30363d" },
-      },
-      width: chartContainerRef.current.clientWidth,
-      height: 300,
+export default function TermStructure({ surface, summary, loading }: TermStructureProps) {
+  const data = useMemo(() => {
+    const grouped = new Map<number, IVSurfacePoint[]>();
+    surface.forEach((p) => grouped.set(p.dte, [...(grouped.get(p.dte) || []), p]));
+    const spotMove = summary?.expected_move_dollar || 0;
+    return Array.from(grouped.entries()).sort((a, b) => a[0] - b[0]).map(([dte, rows]) => {
+      const mid = rows.reduce((sum, p) => sum + p.iv, 0) / Math.max(1, rows.length);
+      const atm = rows.slice().sort((a, b) => Math.abs(a.iv - mid) - Math.abs(b.iv - mid))[0]?.iv || mid;
+      return { dte, label: `${dte}D`, atmIv: +(atm * 100).toFixed(2), expectedMove: +(spotMove * Math.sqrt(Math.max(1, dte) / Math.max(1, Number(summary?.expiry ? 30 : 30)))).toFixed(2) };
     });
+  }, [surface, summary]);
 
-    const lineSeries = chart.addLineSeries({
-      color: "#a371f7",
-      lineWidth: 2,
-    });
-
-    const data = [
-      { time: "2024-06-21", value: 0.18 },
-      { time: "2024-06-28", value: 0.19 },
-      { time: "2024-07-19", value: 0.22 },
-      { time: "2024-08-16", value: 0.24 },
-      { time: "2024-09-20", value: 0.25 },
-      { time: "2024-12-20", value: 0.28 },
-    ];
-
-    lineSeries.setData(data as any);
-    chart.timeScale().fitContent();
-
-    const handleResize = () => {
-      chart.applyOptions({ width: chartContainerRef.current!.clientWidth });
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      chart.remove();
-    };
-  }, []);
-
-  return (
-    <div className="card h-full p-4">
-      <h3 className="text-sm font-semibold mb-2">IV 期限结构 / Term Structure</h3>
-      <div ref={chartContainerRef} className="w-full" />
-    </div>
-  );
+  return <div className="card h-full min-h-[380px] p-4"><div className="mb-3"><h3 className="text-sm font-bold tracking-wide">Term Structure / IV期限结构</h3><p className="text-xs text-[#7d8590]">ATM IV (blue) + expected move (orange), dual-axis</p></div><div className="h-[310px]">{loading ? <div className="h-full animate-pulse rounded bg-[#0d1117]" /> : <ResponsiveContainer width="100%" height="100%"><ComposedChart data={data} margin={{ top: 10, right: 8, bottom: 0, left: 0 }}><defs><linearGradient id="ivFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="#58a6ff" stopOpacity={0.28} /><stop offset="100%" stopColor="#58a6ff" stopOpacity={0.02} /></linearGradient></defs><CartesianGrid stroke="#30363d" strokeDasharray="3 3" /><XAxis dataKey="label" tick={{ fill: "#7d8590", fontSize: 11 }} axisLine={{ stroke: "#30363d" }} tickLine={false} /><YAxis yAxisId="iv" tick={{ fill: "#7d8590", fontSize: 11 }} axisLine={false} tickLine={false} unit="%" /><YAxis yAxisId="move" orientation="right" tick={{ fill: "#7d8590", fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} /><Tooltip contentStyle={{ background: "#0d1117", border: "1px solid #30363d", borderRadius: 8, color: "#e6edf3" }} formatter={(value, name) => name === "Expected Move" ? [formatMoney(Number(value)), name] : [`${value}%`, name]} labelStyle={{ color: "#7d8590" }} /><Legend wrapperStyle={{ color: "#7d8590", fontSize: 12 }} /><Area yAxisId="iv" type="monotone" dataKey="atmIv" name="ATM IV" stroke="#58a6ff" fill="url(#ivFill)" strokeWidth={2.4} dot={{ r: 3, fill: "#58a6ff" }} /><Line yAxisId="move" type="monotone" dataKey="expectedMove" name="Expected Move" stroke="#f0883e" strokeWidth={2.4} dot={{ r: 3, fill: "#f0883e" }} /></ComposedChart></ResponsiveContainer>}</div></div>;
 }
