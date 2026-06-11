@@ -15,6 +15,9 @@ dependencies = [
     "pandas",
     "scipy",
     "yfinance",
+    "httpx",
+    "ibflex",
+    "python-dotenv",
 ]
 
 [build-system]
