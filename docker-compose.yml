@@ -6,6 +6,8 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379/0
       - DATABASE_URL=postgres://postgres:postgres@timescaledb:5432/postgres
+      - FLASHALPHA_API_KEY=${FLASHALPHA_API_KEY:-kA3RN78I4T1lE1EyOyHiH9yfJs2QdX9HQuCQeOM5}
+      - ALPHAVANTAGE_API_KEY=${ALPHAVANTAGE_API_KEY:-4ZVBTAERBE2N4AUG}
     depends_on:
       redis:
         condition: service_healthy

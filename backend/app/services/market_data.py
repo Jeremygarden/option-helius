@@ -391,6 +391,15 @@ def get_summary(ticker: str) -> dict:
         t = yf.Ticker(ticker)
         expirations = t.options
         if not expirations:
+            # Try FlashAlpha for single stocks
+            try:
+                from .flashalpha import fa_get_summary, fa_is_supported
+                if fa_is_supported(ticker.upper()):
+                    fa_summary = fa_get_summary(ticker.upper())
+                    if fa_summary:
+                        return fa_summary
+            except Exception:
+                pass
             try:
                 from .alphavantage import av_get_summary
                 return av_get_summary(ticker)
@@ -476,12 +485,43 @@ def get_gex(ticker: str, expiry: Optional[str] = None) -> list:
     Gamma Exposure (GEX) by strike.
     GEX = gamma * OI * spot^2 * 0.01 * contract_multiplier
     Returns list of {"strike": ..., "gex": ... (in $M)}
+
+    For single stocks: tries FlashAlpha first (pre-computed, more accurate).
+    For ETFs (SPY, QQQ, etc.) or on FA quota exceeded: falls back to yfinance.
     """
     cache_key = f"gex:{ticker.upper()}:{expiry}"
     cached = _cache_get(cache_key)
     if cached:
         return cached
 
+    # --- FlashAlpha path (single stocks only, Free plan) ---
+    try:
+        from .flashalpha import fa_get_gex, fa_is_supported
+        if fa_is_supported(ticker.upper()):
+            fa_result = fa_get_gex(ticker.upper(), expiration=expiry)
+            if fa_result:
+                # Convert FlashAlpha format to internal format
+                result = [
+                    {
+                        "strike": s["strike"],
+                        "gex": round(s["net_gex"] / 1_000_000, 4),  # normalize to $M
+                        "call_gex": round(s["call_gex"] / 1_000_000, 4),
+                        "put_gex": round(s["put_gex"] / 1_000_000, 4),
+                        "call_oi": s.get("call_oi", 0),
+                        "put_oi": s.get("put_oi", 0),
+                        "call_volume": s.get("call_volume", 0),
+                        "put_volume": s.get("put_volume", 0),
+                        "source": "flashalpha",
+                    }
+                    for s in fa_result
+                ]
+                _cache_set(cache_key, result, ttl=300)
+                logger.info(f"get_gex {ticker}: using FlashAlpha ({len(result)} strikes)")
+                return result
+    except Exception as e:
+        logger.warning(f"FlashAlpha GEX failed for {ticker}, falling back to yfinance: {e}")
+
+    # --- yfinance fallback ---
     try:
         t = yf.Ticker(ticker)
         expirations = t.options
