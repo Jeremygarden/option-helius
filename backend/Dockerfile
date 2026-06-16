@@ -2,10 +2,10 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN pip install uv
+RUN pip install uv -i https://pypi.tuna.tsinghua.edu.cn/simple
 
 COPY pyproject.toml .
-RUN uv pip install --system -r pyproject.toml
+RUN uv pip install --system -r pyproject.toml --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 COPY . .
 
