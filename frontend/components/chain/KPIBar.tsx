@@ -20,25 +20,25 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
   const callOi = summary?.call_oi ?? 0;
   const putOi = summary?.put_oi ?? 0;
 
-  const kpis: { label: string; value: string; sub: string; color: string }[] = [
+  const kpis: { label: string; value: string; sub: string; colorClass: string }[] = [
     {
       label: "预期波动",
       value: summary?.expected_move
         || (summary?.expected_move_dollar ? `±${formatMoney(summary.expected_move_dollar)}` : "—"),
       sub: summary?.spot ? `现价 ${formatMoney(summary.spot)}` : "front straddle",
-      color: "#58a6ff",
+      colorClass: "text-[#F5A623]",
     },
     {
       label: "Max Pain",
       value: formatMoney(summary?.max_pain, { digits: 2 }),
       sub: summary?.expiry ?? "selected expiry",
-      color: "#f0883e",
+      colorClass: "text-primary",
     },
     {
       label: "P/C 成交量",
       value: formatNumber(summary?.pcr_volume, 3),
       sub: `${callVol.toLocaleString()}C / ${putVol.toLocaleString()}P`,
-      color: (summary?.pcr_volume ?? 0) > 1 ? "#f85149" : "#3fb950",
+      colorClass: (summary?.pcr_volume ?? 0) > 1 ? "text-[#E91E63]" : "text-[#2EB6D2]",
     },
     {
       label: "P/C 持仓",
@@ -46,7 +46,7 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
       sub: callOi
         ? `${Math.round(callOi).toLocaleString()}C / ${Math.round(putOi).toLocaleString()}P`
         : "open interest ratio",
-      color: (summary?.pcr_oi ?? 0) > 1 ? "#f85149" : "#3fb950",
+      colorClass: (summary?.pcr_oi ?? 0) > 1 ? "text-[#E91E63]" : "text-[#2EB6D2]",
     },
     {
       label: "净 GEX",
@@ -57,68 +57,40 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
           ? summary.net_gex
           : "—",
       sub: (netGex ?? 0) < 0 ? "做市商短 Gamma" : "做市商多 Gamma",
-      color: (netGex ?? 0) < 0 ? "#f85149" : "#3fb950",
+      colorClass: (netGex ?? 0) < 0 ? "text-[#E91E63]" : "text-[#2EB6D2]",
     },
   ];
 
   return (
-    <section className="mb-4">
+    <section className="mb-6">
       {error && (
-        <div
-          className="mb-2 rounded px-3 py-1.5 text-[11px] font-mono border"
-          style={{
-            background: "rgba(210,153,34,0.08)",
-            borderColor: "rgba(210,153,34,0.25)",
-            color: "#d29922",
-          }}
-        >
+        <div className="mb-4 rounded-lg px-4 py-2 text-xs font-mono border bg-amber-50 border-amber-200 text-amber-700">
           API fallback active: {error}
         </div>
       )}
 
-      {/* Horizontal KPI bar — one row, border-r dividers */}
-      <div
-        className="flex rounded-lg border overflow-hidden"
-        style={{ borderColor: "var(--border-default)", background: "var(--bg-surface)" }}
-      >
+      <div className="grid grid-cols-5 gap-0 bg-white border border-[#EDF0F2] rounded-2xl shadow-sm overflow-hidden">
         {kpis.map((kpi, idx) => (
           <div
             key={kpi.label}
-            className="flex flex-col gap-1 px-6 py-3 flex-1"
-            style={{
-              borderRight: idx < kpis.length - 1 ? "1px solid var(--border-default)" : "none",
-              minWidth: 0,
-            }}
+            className={`flex flex-col gap-1.5 px-8 py-5 min-w-0 ${
+              idx < kpis.length - 1 ? "border-r border-[#EDF0F2]" : ""
+            }`}
           >
-            {/* Label — small gray uppercase */}
-            <span
-              className="text-xs uppercase tracking-wide whitespace-nowrap"
-              style={{ color: "var(--text-secondary)" }}
-            >
+            <span className="text-[11px] font-bold text-[#9A9FA5] uppercase tracking-wider">
               {kpi.label}
             </span>
 
-            {/* Value — large bold mono */}
             {loading ? (
-              <div
-                className="h-7 w-24 rounded animate-pulse"
-                style={{ background: "var(--border-default)" }}
-              />
+              <div className="h-8 w-24 rounded bg-gray-100 animate-pulse" />
             ) : (
-              <span
-                className="text-xl font-bold font-mono leading-none tabular-nums"
-                style={{ color: kpi.color }}
-              >
+              <span className={`text-2xl font-bold font-mono tabular-nums leading-tight ${kpi.colorClass}`}>
                 {kpi.value}
               </span>
             )}
 
-            {/* Sub-label */}
-            <span
-              className="text-[11px] font-mono truncate"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {loading ? "加载中..." : kpi.sub}
+            <span className="text-[11px] font-medium text-[#6F767E] truncate">
+              {loading ? "..." : kpi.sub}
             </span>
           </div>
         ))}

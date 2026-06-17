@@ -185,138 +185,91 @@ function fmtNum(v?: number, d = 2) { return typeof v === "number" && !isNaN(v) ?
 function fmtDate(v?: string) { return v ? v.replaceAll("-", "/") : "--"; }
 
 /* ─── Mini pick card (grid layout) ────────────────────────────── */
-function PickCard({ pick, rank }: { pick: StrategyPick; rank: number }) {
-  const [expanded, setExpanded] = useState(false);
+function PickCard({ pick, rank, isSelected, onSelect }: { 
+  pick: StrategyPick; 
+  rank: number;
+  isSelected: boolean;
+  onSelect: () => void;
+}) {
   const type = normalizeType(pick.strategyType);
   const meta = TYPE_META[type];
   const score = clampScore(pick.score);
   const ticker = (pick.ticker || "SPY").toUpperCase();
 
-  // Build legs summary
   const legsSummary = (pick.legs || []).map(l =>
-    `${l.action} ${l.strike}${l.optionType}`
-  ).join(" / ");
+    `${l.strike}${l.optionType}`
+  ).join("/");
 
-  const dirColor = pick.direction === "down" ? "#f85149" : pick.direction === "flat" ? "#f0883e" : "#3fb950";
+  const dirColor = pick.direction === "down" ? "var(--color-put)" : pick.direction === "flat" ? "var(--accent-orange)" : "var(--color-call)";
   const DirIcon = pick.direction === "down" ? TrendingDown : pick.direction === "flat" ? Minus : TrendingUp;
 
   return (
     <article
-      className="rounded-lg border transition-all duration-150 hover:-translate-y-px overflow-hidden flex flex-col"
+      onClick={onSelect}
+      className={`relative cursor-pointer rounded-xl border transition-all duration-200 overflow-hidden flex flex-col h-full ${
+        isSelected ? 'ring-2 ring-inset ring-[#58a6ff]' : 'hover:border-[#484f58] hover:translate-y-[-2px]'
+      }`}
       style={{
         background: "var(--bg-surface)",
-        borderColor: "var(--border-default)",
-        borderLeft: `3px solid ${meta.color}`,
+        borderColor: isSelected ? "transparent" : "var(--border-default)",
+        boxShadow: isSelected ? "0 0 20px rgba(88,166,255,0.15)" : "none",
       }}
     >
-      {/* Card header */}
-      <div className="px-3 pt-3 pb-2">
-        <div className="flex items-start justify-between gap-1 mb-2">
-          {/* Rank + ticker */}
-          <div className="flex items-center gap-2 min-w-0">
-            <span
-              className="text-[10px] font-mono font-bold w-5 h-5 flex items-center justify-center rounded"
-              style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}
-            >
+      {/* Selected Left Border Indicator */}
+      {isSelected && (
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#58a6ff] z-10" />
+      )}
+
+      {/* Card Header */}
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <span className="flex items-center justify-center w-5 h-5 rounded bg-[#1c2128] text-[10px] font-mono font-bold text-[#6e7681]">
               {rank}
             </span>
-            <span className="font-mono text-base font-black" style={{ color: "var(--text-primary)" }}>
+            <span className="text-lg font-bold font-mono tracking-tight text-[#e6edf3]">
               {ticker}
             </span>
           </div>
-          {/* Type badge */}
-          <span
-            className="shrink-0 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded"
-            style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}
+          <div 
+            className="px-2 py-0.5 rounded text-[10px] font-bold font-mono"
+            style={{ backgroundColor: meta.bg, color: meta.color }}
           >
             {meta.label}
-          </span>
+          </div>
         </div>
 
-        {/* Strategy name + direction */}
-        <div className="flex items-center justify-between gap-1">
-          <span className="text-xs font-semibold" style={{ color: meta.color }}>
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-semibold" style={{ color: meta.color }}>
             {pick.strategyName || meta.cn}
           </span>
-          <DirIcon size={12} style={{ color: dirColor, flexShrink: 0 }} />
+          <DirIcon size={14} style={{ color: dirColor }} />
         </div>
       </div>
 
-      {/* Contract code */}
-      <div
-        className="px-3 py-1.5 border-y text-[11px] font-mono font-bold truncate"
-        style={{
-          borderColor: "var(--border-muted)",
-          background: "var(--bg-elevated)",
-          color: "var(--text-primary)",
-        }}
-      >
+      {/* Contract Code Bar */}
+      <div className="px-4 py-2 bg-[#1c2128] border-y border-[#30363d] font-mono font-bold text-xs tracking-wider text-[#e6edf3]">
         {legsSummary || pick.strategyName}
       </div>
 
-      {/* Stats 2-col grid */}
-      <div className="px-3 py-2 grid grid-cols-2 gap-x-3 gap-y-1.5 flex-1">
+      {/* Stats Grid 2x2 */}
+      <div className="p-4 grid grid-cols-2 gap-4 flex-1">
         {[
-          { label: "评分", value: `${score}/10`, color: score >= 9 ? "#3fb950" : score >= 8 ? "#d29922" : "var(--text-secondary)" },
-          { label: "回报", value: pick.expectedReturn || "--", color: "#58a6ff" },
-          { label: "最大风险", value: pick.maxRisk || "--", color: "#f85149" },
-          { label: "周期", value: pick.holdingPeriod || "--", color: "var(--text-secondary)" },
+          { label: "SCORE", value: `${score}/10`, color: score >= 9 ? "var(--color-call)" : "var(--accent-yellow)" },
+          { label: "RETURN", value: pick.expectedReturn || "--", color: "var(--accent-blue)" },
+          { label: "MAX RISK", value: pick.maxRisk || "--", color: "var(--color-put)" },
+          { label: "PERIOD", value: pick.holdingPeriod || "--", color: "var(--text-secondary)" },
         ].map(s => (
           <div key={s.label}>
-            <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+            <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-1">
               {s.label}
             </div>
-            <div className="text-[11px] font-mono font-semibold tabular-nums leading-tight mt-0.5 truncate" style={{ color: s.color }}>
+            <div className="text-sm font-bold font-mono tabular-nums leading-none" style={{ color: s.color }}>
               {s.value}
             </div>
           </div>
         ))}
       </div>
-
-      {/* Signal text */}
-      {pick.signalText && (
-        <div className="px-3 pb-2 text-[10px] leading-relaxed line-clamp-2" style={{ color: "var(--text-muted)" }}>
-          {pick.signalText}
-        </div>
-      )}
-
-      {/* Expand toggle */}
-      <button
-        type="button"
-        onClick={() => setExpanded(v => !v)}
-        className="w-full px-3 py-1.5 text-[10px] font-mono text-left border-t flex items-center justify-between transition-colors hover:opacity-80"
-        style={{
-          borderColor: "var(--border-muted)",
-          color: "var(--text-muted)",
-          background: "var(--bg-elevated)",
-        }}
-      >
-        <span>{expanded ? "收起 Greeks" : "展开 Greeks"}</span>
-        <span style={{ transform: expanded ? "rotate(180deg)" : "none", display: "inline-block", transition: "transform 0.2s" }}>▾</span>
-      </button>
-
-      {/* Expanded Greeks */}
-      {expanded && (
-        <div
-          className="px-3 py-2 grid grid-cols-5 gap-1 border-t"
-          style={{ borderColor: "var(--border-muted)", background: "var(--bg-elevated)" }}
-        >
-          {[
-            ["Δ", pick.greeks?.delta, 2],
-            ["Γ", pick.greeks?.gamma, 3],
-            ["Θ", pick.greeks?.theta, 2],
-            ["V", pick.greeks?.vega, 2],
-            ["IV", typeof pick.greeks?.iv === "number" ? pick.greeks.iv * 100 : undefined, 1],
-          ].map(([label, value, d]) => (
-            <div key={label as string} className="text-center">
-              <div className="text-[9px] uppercase" style={{ color: "var(--text-muted)" }}>{label}</div>
-              <div className="text-[10px] font-mono font-semibold" style={{ color: "var(--text-primary)" }}>
-                {fmtNum(value as number | undefined, d as number)}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
     </article>
   );
 }
@@ -530,6 +483,7 @@ export default function PicksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTicker, setSelectedTicker] = useState<string>("");
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(0);
   const [tagFilter, setTagFilter] = useState<string>("全部");
   const [strategyFilter, setStrategyFilter] = useState<string>("all");
   const [sortMode, setSortMode] = useState<"score" | "ticker">("score");
@@ -756,7 +710,12 @@ export default function PicksPage() {
               style={{ animationDelay: `${idx * 30}ms` }}
               className="animate-[fadeIn_0.3s_ease-out_both]"
             >
-              <PickCard pick={pick} rank={idx + 1} />
+              <PickCard 
+                pick={pick} 
+                rank={idx + 1} 
+                isSelected={selectedIndex === idx}
+                onSelect={() => setSelectedIndex(idx)}
+              />
             </div>
           ))}
           {displayPicks.length === 0 && (
