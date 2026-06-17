@@ -1,0 +1,41 @@
+# IBKR sidecar override
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.ibkr.yml up -d
+#
+# This file keeps the default docker-compose.yml usable without IBKR while
+# adding the Interactive Brokers Gateway sidecar only when explicitly requested.
+
+services:
+  backend:
+    environment:
+      - IBKR_ENABLED=${IBKR_ENABLED:-true}
+      - IBKR_HOST=${IBKR_HOST:-ibgateway}
+      - IBKR_PORT=${IBKR_PORT:-4002}
+      - IBKR_CLIENT_ID=${IBKR_CLIENT_ID:-1}
+      - IBKR_ACCOUNT_TYPE=${IBKR_ACCOUNT_TYPE:-paper}
+    depends_on:
+      ibgateway:
+        condition: service_started
+
+  ibgateway:
+    image: ghcr.io/extrange/ibkr:stable
+    container_name: ibgateway
+    restart: unless-stopped
+    environment:
+      - IBKR_USERNAME=${IBKR_USERNAME:-}
+      - IBKR_PASSWORD=${IBKR_PASSWORD:-}
+      - TRADING_MODE=${TRADING_MODE:-PAPER}
+      - TWS_VERSION=${TWS_VERSION:-1019}
+      - IBC_VERSION=${IBC_VERSION:-3.18.0}
+      - TZ=${TZ:-America/New_York}
+      - VNC_PASSWORD=${VNC_PASSWORD:-changeme123}
+    ports:
+      - "${PAPER_PORT:-4002}:4002"
+      - "${VNC_PORT:-6080}:6080"
+    volumes:
+      - ibgateway-settings:/home/ibgateway/.java
+      - ibgateway-ibc:/home/ibgateway/ibc
+
+volumes:
+  ibgateway-settings:
+  ibgateway-ibc:

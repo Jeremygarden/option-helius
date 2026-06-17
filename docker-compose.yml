@@ -20,28 +20,6 @@ services:
       retries: 5
       start_period: 30s
 
-  ibgateway:
-    image: ghcr.io/extrange/ibkr:stable
-    container_name: ibgateway
-    restart: unless-stopped
-    environment:
-      - IBKR_USERNAME=${IBKR_USERNAME:-}
-      - IBKR_PASSWORD=${IBKR_PASSWORD:-}
-      - TRADING_MODE=${TRADING_MODE:-PAPER}
-      - TWS_VERSION=${TWS_VERSION:-1019}
-      - IBC_VERSION=${IBC_VERSION:-3.18.0}
-      - TZ=${TZ:-America/New_York}
-      - VNC_PASSWORD=${VNC_PASSWORD:-changeme123}
-    ports:
-      - "${PAPER_PORT:-4002}:4002"
-      - "${VNC_PORT:-6080}:6080"
-    volumes:
-      - ibgateway-settings:/home/ibgateway/.java
-      - ibgateway-ibc:/home/ibgateway/ibc
-    depends_on:
-      backend:
-        condition: service_healthy
-
   frontend:
     build: ./frontend
     ports:
@@ -73,7 +51,3 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-
-volumes:
-  ibgateway-settings:
-  ibgateway-ibc:
