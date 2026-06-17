@@ -1,6 +1,5 @@
 "use client";
 
-import { Activity, AlertTriangle, CircleDollarSign, Gauge, RadioTower } from "lucide-react";
 import { formatMoney, formatNumber, SummaryResponse } from "@/lib/chainData";
 
 type KPIBarProps = { summary?: SummaryResponse | null; loading?: boolean; error?: string | null };
@@ -21,82 +20,108 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
   const callOi = summary?.call_oi ?? 0;
   const putOi = summary?.put_oi ?? 0;
 
-  const kpis = [
+  const kpis: { label: string; value: string; sub: string; color: string }[] = [
     {
-      label: "Expected Move",
-      value: summary?.expected_move || (summary?.expected_move_dollar ? `\u00B1${formatMoney(summary.expected_move_dollar)}` : "\u2014"),
-      color: "text-[var(--color-neutral)]",
-      icon: Activity,
-      sub: summary?.spot ? `Spot ${formatMoney(summary.spot)}` : "front straddle",
+      label: "预期波动",
+      value: summary?.expected_move
+        || (summary?.expected_move_dollar ? `±${formatMoney(summary.expected_move_dollar)}` : "—"),
+      sub: summary?.spot ? `现价 ${formatMoney(summary.spot)}` : "front straddle",
+      color: "#58a6ff",
     },
     {
       label: "Max Pain",
       value: formatMoney(summary?.max_pain, { digits: 2 }),
-      color: "text-[var(--accent-orange)]",
-      icon: CircleDollarSign,
-      sub: summary?.expiry || "selected expiry",
+      sub: summary?.expiry ?? "selected expiry",
+      color: "#f0883e",
     },
     {
-      label: "P/C Volume",
+      label: "P/C 成交量",
       value: formatNumber(summary?.pcr_volume, 3),
-      color: (summary?.pcr_volume ?? 0) > 1 ? "text-[var(--color-bearish)]" : "text-[var(--color-bullish)]",
-      icon: Gauge,
       sub: `${callVol.toLocaleString()}C / ${putVol.toLocaleString()}P`,
+      color: (summary?.pcr_volume ?? 0) > 1 ? "#f85149" : "#3fb950",
     },
     {
-      label: "P/C OI",
+      label: "P/C 持仓",
       value: formatNumber(summary?.pcr_oi, 3),
-      color: (summary?.pcr_oi ?? 0) > 1 ? "text-[var(--color-bearish)]" : "text-[var(--color-bullish)]",
-      icon: RadioTower,
-      sub: callOi ? `${Math.round(callOi).toLocaleString()}C / ${Math.round(putOi).toLocaleString()}P` : "open interest ratio",
+      sub: callOi
+        ? `${Math.round(callOi).toLocaleString()}C / ${Math.round(putOi).toLocaleString()}P`
+        : "open interest ratio",
+      color: (summary?.pcr_oi ?? 0) > 1 ? "#f85149" : "#3fb950",
     },
     {
-      label: "Net GEX",
-      value: netGex !== undefined ? formatMoney(netGex, { signed: true, compact: true }) : typeof summary?.net_gex === "string" ? summary.net_gex : "\u2014",
-      color: (netGex ?? 0) < 0 ? "text-[var(--color-bearish)]" : "text-[var(--color-bullish)]",
-      icon: AlertTriangle,
-      sub: (netGex ?? 0) < 0 ? "dealer short gamma" : "dealer long gamma",
+      label: "净 GEX",
+      value:
+        netGex !== undefined
+          ? formatMoney(netGex, { signed: true, compact: true })
+          : typeof summary?.net_gex === "string"
+          ? summary.net_gex
+          : "—",
+      sub: (netGex ?? 0) < 0 ? "做市商短 Gamma" : "做市商多 Gamma",
+      color: (netGex ?? 0) < 0 ? "#f85149" : "#3fb950",
     },
   ];
 
   return (
-    <section className="mb-5">
+    <section className="mb-4">
       {error && (
-        <div className="mb-3 rounded-md border border-[var(--color-warning)]/30 bg-[var(--color-warning-muted)] px-3 py-2 text-data-xs font-mono text-[var(--color-warning)]">
+        <div
+          className="mb-2 rounded px-3 py-1.5 text-[11px] font-mono border"
+          style={{
+            background: "rgba(210,153,34,0.08)",
+            borderColor: "rgba(210,153,34,0.25)",
+            color: "#d29922",
+          }}
+        >
           API fallback active: {error}
         </div>
       )}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
-        {kpis.map((kpi) => {
-          const Icon = kpi.icon;
-          return (
-            <div
-              key={kpi.label}
-              className="bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-lg p-3.5 group hover:border-[var(--border-default)]/80 transition-colors"
+
+      {/* Horizontal KPI bar — one row, border-r dividers */}
+      <div
+        className="flex rounded-lg border overflow-hidden"
+        style={{ borderColor: "var(--border-default)", background: "var(--bg-surface)" }}
+      >
+        {kpis.map((kpi, idx) => (
+          <div
+            key={kpi.label}
+            className="flex flex-col gap-1 px-6 py-3 flex-1"
+            style={{
+              borderRight: idx < kpis.length - 1 ? "1px solid var(--border-default)" : "none",
+              minWidth: 0,
+            }}
+          >
+            {/* Label — small gray uppercase */}
+            <span
+              className="text-xs uppercase tracking-wide whitespace-nowrap"
+              style={{ color: "var(--text-secondary)" }}
             >
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0 flex-1">
-                  <span className="text-data-xs font-mono text-[var(--text-muted)] uppercase tracking-wider block">
-                    {kpi.label}
-                  </span>
-                  {loading ? (
-                    <span className="mt-1.5 block h-6 w-20 animate-pulse rounded bg-[var(--border-default)]" />
-                  ) : (
-                    <span className={`mt-1 block font-mono text-data-lg font-semibold tabular-nums ${kpi.color}`}>
-                      {kpi.value}
-                    </span>
-                  )}
-                  <span className="mt-0.5 block text-data-xs font-mono text-[var(--text-muted)] truncate">
-                    {loading ? "syncing..." : kpi.sub}
-                  </span>
-                </div>
-                <div className="p-1.5 rounded-md bg-[var(--bg-primary)] border border-[var(--border-muted)] text-[var(--text-muted)] group-hover:text-[var(--text-secondary)] transition-colors">
-                  <Icon size={14} strokeWidth={1.5} />
-                </div>
-              </div>
-            </div>
-          );
-        })}
+              {kpi.label}
+            </span>
+
+            {/* Value — large bold mono */}
+            {loading ? (
+              <div
+                className="h-7 w-24 rounded animate-pulse"
+                style={{ background: "var(--border-default)" }}
+              />
+            ) : (
+              <span
+                className="text-xl font-bold font-mono leading-none tabular-nums"
+                style={{ color: kpi.color }}
+              >
+                {kpi.value}
+              </span>
+            )}
+
+            {/* Sub-label */}
+            <span
+              className="text-[11px] font-mono truncate"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {loading ? "加载中..." : kpi.sub}
+            </span>
+          </div>
+        ))}
       </div>
     </section>
   );
