@@ -1,60 +1,139 @@
 "use client";
 
-import { LayoutDashboard, BarChart3, TrendingUp, Globe, Star, History, Shuffle, User } from "lucide-react";
+import {
+  LayoutDashboard,
+  BarChart3,
+  TrendingUp,
+  Star,
+  History,
+  Shuffle,
+  User,
+  ChevronRight,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 
-const navItems = [
-  { icon: LayoutDashboard, label: "概览", href: "/macro" },
-  { icon: BarChart3, label: "期权链", href: "/chain" },
-  { icon: TrendingUp, label: "情绪", href: "/sentiment" },
-  { icon: Star, label: "精选", href: "/picks" },
-  { icon: User, label: "个人", href: "/profile" },
-  { icon: History, label: "回测", href: "#" },
-  { icon: Shuffle, label: "交易", href: "#" },
+const mainNavItems = [
+  { icon: LayoutDashboard, label: "概览", sub: "Overview", href: "/macro" },
+  { icon: BarChart3,       label: "期权链", sub: "Chain",    href: "/chain" },
+  { icon: TrendingUp,      label: "情绪",   sub: "Sentiment", href: "/sentiment" },
+  { icon: Star,            label: "精选",   sub: "Picks",    href: "/picks" },
+];
+
+const toolsNavItems = [
+  { icon: History, label: "回测", sub: "Backtest", href: "#" },
+  { icon: Shuffle, label: "交易", sub: "Trade",    href: "#" },
+  { icon: User,    label: "个人", sub: "Profile",  href: "/profile" },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
 
+  const NavItem = ({
+    icon: Icon,
+    label,
+    sub,
+    href,
+  }: {
+    icon: React.ElementType;
+    label: string;
+    sub: string;
+    href: string;
+  }) => {
+    const isActive = pathname === href;
+    return (
+      <Link
+        href={href}
+        className={clsx(
+          "flex items-center gap-3 px-4 py-2.5 rounded-lg mx-2 transition-all duration-150 group",
+          isActive
+            ? "bg-[#1158c7] text-white"
+            : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#1c2128]"
+        )}
+      >
+        <Icon
+          size={20}
+          strokeWidth={isActive ? 2 : 1.5}
+          className="shrink-0"
+        />
+        <div className="flex flex-col min-w-0 leading-none">
+          <span className="text-[13px] font-semibold leading-tight">{label}</span>
+          <span
+            className={clsx(
+              "text-[11px] leading-tight mt-0.5",
+              isActive ? "text-blue-200" : "text-[#6e7681] group-hover:text-[#8b949e]"
+            )}
+          >
+            {sub}
+          </span>
+        </div>
+        {isActive && (
+          <ChevronRight size={14} className="ml-auto shrink-0 opacity-60" />
+        )}
+      </Link>
+    );
+  };
+
   return (
-    <aside className="w-[64px] flex flex-col items-center py-4 bg-[var(--bg-primary)] border-r border-[var(--border-default)] h-screen sticky top-0">
-      {/* Logo */}
-      <div className="mb-6 w-9 h-9 rounded-lg bg-[var(--accent-blue)] flex items-center justify-center">
-        <span className="font-mono font-bold text-sm text-[var(--bg-primary)]">H</span>
+    <aside
+      className="w-[220px] flex flex-col shrink-0 h-screen sticky top-0 border-r border-[#30363d]"
+      style={{ background: "var(--bg-base)" }}
+    >
+      {/* ─── Logo ─── */}
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-[#21262d]">
+        <div
+          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-mono font-bold text-[15px]"
+          style={{
+            background: "linear-gradient(135deg, #1158c7 0%, #58a6ff 100%)",
+            boxShadow: "0 0 16px rgba(88,166,255,0.35)",
+            color: "#fff",
+          }}
+        >
+          H
+        </div>
+        <div className="flex flex-col leading-none">
+          <span className="text-[14px] font-bold text-[#e6edf3] tracking-tight">Helius</span>
+          <span className="text-[11px] text-[#6e7681] mt-0.5">Options Terminal</span>
+        </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex flex-col gap-1 w-full px-2">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              title={item.label}
-              className={clsx(
-                "group relative flex flex-col items-center justify-center rounded-md py-2.5 transition-all duration-150",
-                isActive
-                  ? "bg-[var(--bg-secondary)] text-[var(--accent-blue)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
-              )}
-            >
-              {isActive && (
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-sm bg-[var(--accent-blue)]" />
-              )}
-              <item.icon
-                size={18}
-                strokeWidth={isActive ? 2 : 1.5}
-              />
-              <span className="text-[9px] mt-1 font-medium leading-none tracking-wide">
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+      {/* ─── Main nav ─── */}
+      <nav className="flex flex-col gap-0.5 pt-3 pb-2">
+        <span className="px-5 pb-1.5 text-[10px] uppercase tracking-widest text-[#484f58] font-semibold">
+          主菜单
+        </span>
+        {mainNavItems.map((item) => (
+          <NavItem key={item.href} {...item} />
+        ))}
       </nav>
+
+      {/* ─── Divider ─── */}
+      <div className="mx-4 border-t border-[#21262d]" />
+
+      {/* ─── Tools nav ─── */}
+      <nav className="flex flex-col gap-0.5 pt-3 pb-2">
+        <span className="px-5 pb-1.5 text-[10px] uppercase tracking-widest text-[#484f58] font-semibold">
+          工具
+        </span>
+        {toolsNavItems.map((item) => (
+          <NavItem key={item.href} {...item} />
+        ))}
+      </nav>
+
+      {/* ─── Spacer ─── */}
+      <div className="flex-1" />
+
+      {/* ─── Status footer ─── */}
+      <div className="px-5 py-4 border-t border-[#21262d]">
+        <div className="flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#3fb950] animate-pulse" />
+          <span className="text-[11px] text-[#6e7681]">Market Open</span>
+        </div>
+        <div className="mt-1 text-[10px] font-mono text-[#484f58]">
+          {new Date().toLocaleDateString("zh-CN", { weekday: "short", month: "short", day: "numeric" })}
+        </div>
+      </div>
     </aside>
   );
 }
