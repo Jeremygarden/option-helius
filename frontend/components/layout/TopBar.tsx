@@ -1,37 +1,58 @@
 "use client";
 
-import { Search, Bell, User } from "lucide-react";
+import { Search, Bell, Settings } from "lucide-react";
 
 export default function TopBar() {
   return (
-    <header className="h-[60px] border-b border-[#30363d] flex items-center justify-between px-6 bg-[#0d1117] sticky top-0 z-10">
-      <div className="flex items-center gap-4 flex-1 max-w-xl">
+    <header className="h-12 border-b border-[var(--border-default)] flex items-center justify-between px-5 bg-[var(--bg-primary)] sticky top-0 z-10">
+      {/* Search */}
+      <div className="flex items-center gap-3 flex-1 max-w-md">
         <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7d8590]" size={16} />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={14} />
           <input
             type="text"
-            placeholder="Search Ticker (e.g. NVDA, SPY)..."
-            className="w-full bg-[#161b22] border border-[#30363d] rounded-md py-1.5 pl-10 pr-4 text-sm focus:outline-none focus:border-[#58a6ff]"
+            placeholder="Search ticker..."
+            className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md py-1.5 pl-8 pr-3 text-data-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-placeholder)] focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
             defaultValue="NVDA"
           />
+          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded px-1 py-0.5 font-mono">
+            /
+          </kbd>
         </div>
       </div>
-      
-      <div className="flex items-center gap-6">
-        <div className="flex gap-4 text-xs font-mono">
-          <div className="flex flex-col items-end">
-            <span className="text-[#7d8590]">NVDA</span>
-            <span className="text-[#3fb950]">$128.50 (+2.4%)</span>
+
+      {/* Market Data Strip */}
+      <div className="flex items-center gap-5">
+        <div className="flex gap-5 font-mono text-data-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-[var(--text-muted)] text-data-xs">NVDA</span>
+            <span className="text-[var(--color-bullish)] font-medium">128.50</span>
+            <span className="text-[var(--color-bullish)] text-data-xs">+2.4%</span>
           </div>
-          <div className="flex flex-col items-end border-l border-[#30363d] pl-4">
-            <span className="text-[#7d8590]">VIX</span>
-            <span className="text-[#f85149]">14.50 (+1.2%)</span>
+          <div className="w-px h-4 bg-[var(--border-default)]" />
+          <div className="flex items-center gap-2">
+            <span className="text-[var(--text-muted)] text-data-xs">VIX</span>
+            <span className="text-[var(--color-bearish)] font-medium">14.50</span>
+            <span className="text-[var(--color-bearish)] text-data-xs">+1.2%</span>
+          </div>
+          <div className="w-px h-4 bg-[var(--border-default)]" />
+          <div className="flex items-center gap-2">
+            <span className="text-[var(--text-muted)] text-data-xs">SPY</span>
+            <span className="text-[var(--color-bullish)] font-medium">545.20</span>
+            <span className="text-[var(--color-bullish)] text-data-xs">+0.8%</span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Bell size={18} className="text-[#7d8590] hover:text-[#e6edf3] cursor-pointer" />
-          <div className="w-8 h-8 rounded-full bg-[#30363d] flex items-center justify-center">
-            <User size={16} />
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 ml-3">
+          <button className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors">
+            <Bell size={15} />
+          </button>
+          <button className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors">
+            <Settings size={15} />
+          </button>
+          <div className="w-7 h-7 rounded-md bg-[var(--bg-elevated)] border border-[var(--border-default)] flex items-center justify-center ml-1">
+            <span className="text-data-xs font-mono font-medium text-[var(--text-secondary)]">JJ</span>
           </div>
         </div>
       </div>

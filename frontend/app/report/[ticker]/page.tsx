@@ -266,7 +266,7 @@ const Scenarios = ({ data }: { data: any }) => {
                { label: 'Theta贡献', val: current.breakdown.theta_pnl, color: 'bg-yellow-500' },
                { label: 'Rho贡献', val: current.breakdown.rho_pnl, color: 'bg-gray-500' },
              ].map((item, idx) => {
-                const totalAbs = Object.values(current.breakdown).reduce((a: any, b: any) => Math.abs(a) + Math.abs(b), 0);
+                const totalAbs = Object.values(current.breakdown).reduce((a: any, b: any) => Math.abs(a) + Math.abs(b), 0) as number;
                 const width = totalAbs > 0 ? (Math.abs(item.val) / totalAbs * 100) : 0;
                 return (
                   <div key={idx} className="space-y-1">

@@ -6,35 +6,51 @@ import { usePathname } from "next/navigation";
 import { clsx } from "clsx";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "概览", sub: "Overview", href: "/macro" },
-  { icon: BarChart3, label: "期权链", sub: "Chain", href: "/chain" },
-  { icon: TrendingUp, label: "情绪", sub: "Sentiment", href: "/sentiment" },
-  { icon: Star, label: "精选", sub: "Picks", href: "/picks" },
-  { icon: User, label: "个人", sub: "Profile", href: "/profile" },
-  { icon: History, label: "回测", sub: "Backtest", href: "#" },
-  { icon: Shuffle, label: "交易", sub: "Trade", href: "#" },
+  { icon: LayoutDashboard, label: "概览", href: "/macro" },
+  { icon: BarChart3, label: "期权链", href: "/chain" },
+  { icon: TrendingUp, label: "情绪", href: "/sentiment" },
+  { icon: Star, label: "精选", href: "/picks" },
+  { icon: User, label: "个人", href: "/profile" },
+  { icon: History, label: "回测", href: "#" },
+  { icon: Shuffle, label: "交易", href: "#" },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-[70px] flex flex-col items-center py-6 bg-[#0d1117] border-r border-[#30363d] h-screen sticky top-0">
-      <div className="mb-8 font-bold text-accent-blue text-xl">H</div>
-      <nav className="flex flex-col gap-6 w-full">
+    <aside className="w-[64px] flex flex-col items-center py-4 bg-[var(--bg-primary)] border-r border-[var(--border-default)] h-screen sticky top-0">
+      {/* Logo */}
+      <div className="mb-6 w-9 h-9 rounded-lg bg-[var(--accent-blue)] flex items-center justify-center">
+        <span className="font-mono font-bold text-sm text-[var(--bg-primary)]">H</span>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex flex-col gap-1 w-full px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <Link
               key={item.label}
               href={item.href}
+              title={item.label}
               className={clsx(
-                "group relative flex flex-col items-center justify-center w-full py-2 transition-colors",
-                isActive ? "border-l-2 border-[#58a6ff] bg-[#161b22]" : "hover:bg-[#161b22]"
+                "group relative flex flex-col items-center justify-center rounded-md py-2.5 transition-all duration-150",
+                isActive
+                  ? "bg-[var(--bg-secondary)] text-[var(--accent-blue)]"
+                  : "text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
               )}
             >
-              <item.icon size={20} className={isActive ? "text-[#58a6ff]" : "text-[#7d8590] group-hover:text-[#e6edf3]"} />
-              <span className="text-[10px] mt-1 text-[#7d8590] group-hover:text-[#e6edf3] font-medium">{item.label}</span>
+              {isActive && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 rounded-r-sm bg-[var(--accent-blue)]" />
+              )}
+              <item.icon
+                size={18}
+                strokeWidth={isActive ? 2 : 1.5}
+              />
+              <span className="text-[9px] mt-1 font-medium leading-none tracking-wide">
+                {item.label}
+              </span>
             </Link>
           );
         })}

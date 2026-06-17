@@ -36,88 +36,109 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
   const isTop3 = strategy.highlight;
 
   return (
-    <div className={`relative p-6 rounded-xl border transition-all ${
-      isTop3 
-        ? 'bg-gradient-to-br from-gray-900 to-blue-900/20 border-blue-500/50 shadow-lg shadow-blue-500/10' 
-        : 'bg-gray-900/50 border-gray-800'
+    <div className={`relative p-5 rounded-lg border transition-all ${
+      isTop3
+        ? 'bg-[var(--bg-secondary)] border-[var(--accent-blue)]/30 shadow-[0_0_20px_rgba(88,166,255,0.05)]'
+        : 'bg-[var(--bg-secondary)] border-[var(--border-default)] hover:border-[var(--border-default)]/80'
     }`}>
+      {/* Top Choice Badge */}
       {isTop3 && (
-        <div className="absolute -top-3 -right-3 bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">
-          TOP CHOICE
+        <div className="absolute top-3 right-3 bg-[var(--accent-blue)]/10 text-[var(--accent-blue)] px-2 py-0.5 rounded text-data-xs font-mono font-semibold border border-[var(--accent-blue)]/20">
+          TOP
         </div>
       )}
 
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-xl font-bold text-white flex items-center gap-2">
-            {strategy.strategy_cn}
-            <span className="text-sm font-normal text-gray-400">({strategy.strategy})</span>
-          </h3>
-          <div className="mt-1 flex items-center gap-2">
-            <span className={`px-2 py-0.5 rounded text-xs font-bold ${
-              strategy.score > 80 ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'
-            }`}>
-              评分: {strategy.score}
-            </span>
-            <span className="text-sm">{strategy.signal_badge}</span>
-          </div>
+      {/* Header */}
+      <div className="mb-3">
+        <h3 className="text-ui-lg text-[var(--text-primary)]">
+          {strategy.strategy_cn}
+          <span className="ml-2 text-data-sm font-mono text-[var(--text-muted)]">
+            {strategy.strategy}
+          </span>
+        </h3>
+        <div className="mt-1.5 flex items-center gap-2">
+          <span className={`px-1.5 py-0.5 rounded text-data-xs font-mono font-semibold ${
+            strategy.score > 80
+              ? 'bg-[var(--color-bullish-muted)] text-[var(--color-bullish)]'
+              : 'bg-[var(--color-neutral-muted)] text-[var(--color-neutral)]'
+          }`}>
+            {strategy.score}
+          </span>
+          <span className="text-data-sm">{strategy.signal_badge}</span>
         </div>
       </div>
 
-      <p className="text-gray-300 text-sm mb-6 leading-relaxed">
+      {/* Description */}
+      <p className="text-data-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
         {strategy.why_now}
       </p>
 
-      <div className="bg-black/40 rounded-lg p-4 mb-6">
-        <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">建议结构 (Suggested Structure)</h4>
-        <div className="grid grid-cols-1 gap-2">
+      {/* Structure Table */}
+      <div className="bg-[var(--bg-primary)] rounded-md p-3 mb-4 border border-[var(--border-muted)]">
+        <h4 className="text-data-xs font-mono text-[var(--text-muted)] uppercase tracking-wider mb-2">
+          Structure
+        </h4>
+        <div className="space-y-1">
           {Object.entries(strategy.suggested_structure).map(([legName, leg]) => (
-            <div key={legName} className="flex justify-between text-sm py-1 border-b border-gray-800 last:border-0">
-              <span className="capitalize text-gray-400">{legName.replace('_', ' ')}</span>
-              <span className="text-white font-mono">
-                {leg.strike} | {leg.expiry} | Δ {leg.delta}
+            <div key={legName} className="flex justify-between items-center py-1 text-data-sm font-mono border-b border-[var(--border-muted)] last:border-0">
+              <span className="text-[var(--text-secondary)] capitalize">
+                {legName.replace('_', ' ')}
+              </span>
+              <span className="text-[var(--text-primary)] font-medium tabular-nums">
+                {leg.strike} | {leg.expiry} | {'\u0394'}{leg.delta}
               </span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-gray-800/30 p-3 rounded-lg text-center">
-          <div className="text-xs text-gray-500 mb-1">最大利润</div>
-          <div className="text-green-400 font-bold">${strategy.max_profit}</div>
+      {/* Metrics Grid */}
+      <div className="grid grid-cols-4 gap-2 mb-4">
+        <div className="text-center p-2 rounded-md bg-[var(--bg-primary)] border border-[var(--border-muted)]">
+          <div className="text-data-xs font-mono text-[var(--text-muted)] mb-1">Max P</div>
+          <div className="text-data-md font-mono font-semibold text-[var(--color-bullish)] tabular-nums">
+            ${strategy.max_profit}
+          </div>
         </div>
-        <div className="bg-gray-800/30 p-3 rounded-lg text-center">
-          <div className="text-xs text-gray-500 mb-1">最大风险</div>
-          <div className="text-red-400 font-bold">${strategy.max_loss}</div>
+        <div className="text-center p-2 rounded-md bg-[var(--bg-primary)] border border-[var(--border-muted)]">
+          <div className="text-data-xs font-mono text-[var(--text-muted)] mb-1">Max L</div>
+          <div className="text-data-md font-mono font-semibold text-[var(--color-bearish)] tabular-nums">
+            ${strategy.max_loss}
+          </div>
         </div>
-        <div className="bg-gray-800/30 p-3 rounded-lg text-center">
-          <div className="text-xs text-gray-500 mb-1">胜率</div>
-          <div className="text-blue-400 font-bold">{(strategy.prob_profit * 100).toFixed(1)}%</div>
+        <div className="text-center p-2 rounded-md bg-[var(--bg-primary)] border border-[var(--border-muted)]">
+          <div className="text-data-xs font-mono text-[var(--text-muted)] mb-1">Win%</div>
+          <div className="text-data-md font-mono font-semibold text-[var(--color-neutral)] tabular-nums">
+            {(strategy.prob_profit * 100).toFixed(1)}%
+          </div>
         </div>
-        <div className="bg-gray-800/30 p-3 rounded-lg text-center">
-          <div className="text-xs text-gray-500 mb-1">年化收益</div>
-          <div className="text-yellow-500 font-bold">{strategy.annualized_return}%</div>
+        <div className="text-center p-2 rounded-md bg-[var(--bg-primary)] border border-[var(--border-muted)]">
+          <div className="text-data-xs font-mono text-[var(--text-muted)] mb-1">Ann.</div>
+          <div className="text-data-md font-mono font-semibold text-[var(--color-warning)] tabular-nums">
+            {strategy.annualized_return}%
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      {/* Risk Tags */}
+      <div className="flex flex-wrap gap-1.5 mb-3">
         {strategy.risks.map((risk, idx) => (
-          <span key={idx} className="bg-red-900/20 text-red-400 text-[10px] px-2 py-0.5 rounded border border-red-500/20">
+          <span key={idx} className="bg-[var(--color-bearish-muted)] text-[var(--color-bearish)] text-data-xs font-mono px-1.5 py-0.5 rounded border border-[var(--color-bearish)]/20">
             {risk}
           </span>
         ))}
       </div>
 
-      <div className="space-y-1">
-        <div className="text-[10px] text-gray-500 flex items-center gap-2">
-          <span className="w-1 h-1 rounded-full bg-blue-500"></span>
+      {/* Notes */}
+      <div className="space-y-1 pt-2 border-t border-[var(--border-muted)]">
+        <p className="text-data-xs font-mono text-[var(--text-muted)] flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-blue)] flex-shrink-0" />
           {strategy.gex_note}
-        </div>
-        <div className="text-[10px] text-gray-500 flex items-center gap-2">
-          <span className="w-1 h-1 rounded-full bg-purple-500"></span>
+        </p>
+        <p className="text-data-xs font-mono text-[var(--text-muted)] flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-purple)] flex-shrink-0" />
           {strategy.skew_note}
-        </div>
+        </p>
       </div>
     </div>
   );
