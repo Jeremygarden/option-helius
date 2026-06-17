@@ -1,5 +1,6 @@
 """IBKR provider package."""
 
+from .fetcher import ChainRequest, IBKRFallbackError, OptionChainFetcher
 from .client import (
     ClientConfig,
     HealthStatus,
@@ -24,4 +25,7 @@ __all__ = [
     "create_live_client",
     "create_paper_client",
     "test_connectivity",
+    "ChainRequest",
+    "IBKRFallbackError",
+    "OptionChainFetcher",
 ]
