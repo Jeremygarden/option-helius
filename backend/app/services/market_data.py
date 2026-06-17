@@ -216,6 +216,93 @@ def _bsm_gamma(S: float, K: float, T: float, sigma: float, r: float = 0.05) -> f
         return 0.0
 
 
+def _calculate_gex_from_option_rows(option_rows: list, spot: float) -> Optional[list]:
+    """Calculate GEX from option rows that already contain real Greeks.
+
+    IBKR OptionChainFetcher maps modelGreeks into the existing option-helius
+    option row shape. When those rows include non-zero gamma, use them directly
+    instead of estimating gamma with BSM. The response remains compatible with
+    the current /gex shape while adding call/put breakdown and real delta/gamma
+    diagnostics for clients that want them.
+    """
+    if spot <= 0 or not option_rows:
+        return None
+
+    by_strike: dict[float, dict] = {}
+    used_real_greeks = False
+
+    for row in option_rows:
+        strike = _safe_float(row.get("strike"))
+        gamma = _safe_float(row.get("gamma"))
+        delta = _safe_float(row.get("delta"))
+        oi = _safe_float(row.get("oi", row.get("openInterest", 0)))
+        volume = _safe_int(row.get("volume"))
+        option_type = str(row.get("type", "")).lower()
+        if strike <= 0 or option_type not in {"call", "put"}:
+            continue
+
+        signed_gex = gamma * oi * spot * spot * 0.01 * 100
+        if option_type == "put":
+            signed_gex = -signed_gex
+
+        # Treat a row as real-Greeks backed when IBKR supplied at least one
+        # model Greek. Zero-gamma rows are still included if another option at
+        # the strike has real gamma, but all-zero chains fall back to yfinance.
+        if gamma != 0.0 or delta != 0.0:
+            used_real_greeks = True
+
+        bucket = by_strike.setdefault(
+            strike,
+            {
+                "strike": strike,
+                "gex": 0.0,
+                "call_gex": 0.0,
+                "put_gex": 0.0,
+                "call_oi": 0,
+                "put_oi": 0,
+                "call_volume": 0,
+                "put_volume": 0,
+                "call_delta_exposure": 0.0,
+                "put_delta_exposure": 0.0,
+                "call_gamma": 0.0,
+                "put_gamma": 0.0,
+                "source": "ibkr",
+                "greeks_source": "ibkr_model",
+            },
+        )
+        bucket["gex"] += signed_gex
+        delta_exposure = delta * oi * 100
+        if option_type == "call":
+            bucket["call_gex"] += signed_gex
+            bucket["call_oi"] += int(oi)
+            bucket["call_volume"] += volume
+            bucket["call_delta_exposure"] += delta_exposure
+            bucket["call_gamma"] = gamma
+        else:
+            bucket["put_gex"] += signed_gex
+            bucket["put_oi"] += int(oi)
+            bucket["put_volume"] += volume
+            bucket["put_delta_exposure"] += delta_exposure
+            bucket["put_gamma"] = gamma
+
+    if not used_real_greeks or not by_strike:
+        return None
+
+    return [
+        {
+            **bucket,
+            "gex": round(bucket["gex"] / 1e6, 4),
+            "call_gex": round(bucket["call_gex"] / 1e6, 4),
+            "put_gex": round(bucket["put_gex"] / 1e6, 4),
+            "call_delta_exposure": round(bucket["call_delta_exposure"], 2),
+            "put_delta_exposure": round(bucket["put_delta_exposure"], 2),
+            "call_gamma": round(bucket["call_gamma"], 8),
+            "put_gamma": round(bucket["put_gamma"], 8),
+        }
+        for _strike, bucket in sorted(by_strike.items())
+    ]
+
+
 def _calculate_gex(calls_df, puts_df, spot: float, expiry: Optional[str] = None) -> list:
     """
     GEX per strike (in $M).
@@ -701,7 +788,24 @@ async def async_get_summary(ticker: str) -> dict:
     return result
 
 
-async def async_get_gex(ticker: str, expiry: Optional[str] = None) -> list:
+async def async_get_gex(ticker: str, expiry: Optional[str] = None, *, prefer_ibkr: bool = True) -> list:
+    settings = get_settings()
+
+    if prefer_ibkr and settings.ibkr_enabled:
+        ibkr_cache_key = f"gex:ibkr:{ticker.upper()}:{expiry}:{settings.atm_strike_radius}"
+        cached_ibkr = await _redis_get(ibkr_cache_key)
+        if cached_ibkr:
+            return cached_ibkr
+
+        ibkr_chain = await _fetch_ibkr_options_chain(ticker, expiry, settings)
+        ibkr_gex = _calculate_gex_from_option_rows(
+            ibkr_chain.get("options", []) if ibkr_chain else [],
+            _safe_float(ibkr_chain.get("spot", 0.0)) if ibkr_chain else 0.0,
+        )
+        if ibkr_gex:
+            await _redis_set(ibkr_cache_key, ibkr_gex, IBKR_CHAIN_TTL_SECONDS)
+            return ibkr_gex
+
     cache_key = f"gex:{ticker.upper()}:{expiry}"
     cached = await _redis_get(cache_key)
     if cached:
