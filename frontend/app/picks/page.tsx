@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { RefreshCw, SlidersHorizontal, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -86,386 +87,442 @@ type PicksResponse = {
   picks?: StrategyPick[];
 };
 
-const TYPE_META: Record<StrategyType, { label: string; cn: string; border: string; text: string; glow: string; fill: string }> = {
-  sell_put: {
-    label: "SELL PUT",
-    cn: "卖Put",
-    border: "border-l-green-400",
-    text: "text-green-300",
-    glow: "shadow-[0_0_22px_rgba(63,185,80,0.10)]",
-    fill: "bg-green-400",
-  },
-  call_spread: {
-    label: "CALL SPREAD",
-    cn: "Call价差",
-    border: "border-l-blue-400",
-    text: "text-blue-300",
-    glow: "shadow-[0_0_22px_rgba(88,166,255,0.10)]",
-    fill: "bg-blue-400",
-  },
-  iron_condor: {
-    label: "IRON CONDOR",
-    cn: "铁鹰",
-    border: "border-l-orange-400",
-    text: "text-orange-300",
-    glow: "shadow-[0_0_22px_rgba(240,136,62,0.10)]",
-    fill: "bg-orange-400",
-  },
+/* ─── Type metadata ──────────────────────────────────────────── */
+const TYPE_META: Record<StrategyType, {
+  label: string; cn: string; color: string; bg: string; border: string;
+}> = {
+  sell_put:    { label: "SELL PUT",    cn: "卖Put",  color: "#3fb950", bg: "rgba(63,185,80,0.12)",  border: "rgba(63,185,80,0.3)"  },
+  call_spread: { label: "CALL SPREAD", cn: "Call价差", color: "#58a6ff", bg: "rgba(88,166,255,0.12)", border: "rgba(88,166,255,0.3)" },
+  iron_condor: { label: "IRON CONDOR", cn: "铁鹰",   color: "#f0883e", bg: "rgba(240,136,62,0.12)", border: "rgba(240,136,62,0.3)" },
 };
 
+/* ─── Fallback data ──────────────────────────────────────────── */
 const SCANNER_FALLBACK: ScannerItem[] = [
-  { ticker: "SPY", price: 542.1, bias: "range bullish", support: 536, resistance: 548, ivRank: 41 },
-  { ticker: "QQQ", price: 468.4, bias: "momentum bullish", support: 461, resistance: 476, ivRank: 38 },
-  { ticker: "NVDA", price: 124.7, bias: "high beta pullback", support: 118, resistance: 132, ivRank: 62 },
-  { ticker: "TSLA", price: 181.3, bias: "volatile range", support: 170, resistance: 196, ivRank: 74 },
-  { ticker: "AAPL", price: 211.8, bias: "defensive bullish", support: 205, resistance: 218, ivRank: 33 },
-  { ticker: "META", price: 498.6, bias: "trend bullish", support: 482, resistance: 515, ivRank: 45 },
-  { ticker: "MSFT", price: 426.9, bias: "quality range", support: 418, resistance: 438, ivRank: 36 },
+  { ticker: "SPY",  price: 542.1, bias: "range bullish",       support: 536, resistance: 548, ivRank: 41 },
+  { ticker: "QQQ",  price: 468.4, bias: "momentum bullish",    support: 461, resistance: 476, ivRank: 38 },
+  { ticker: "NVDA", price: 124.7, bias: "high beta pullback",  support: 118, resistance: 132, ivRank: 62 },
+  { ticker: "TSLA", price: 181.3, bias: "volatile range",      support: 170, resistance: 196, ivRank: 74 },
+  { ticker: "AAPL", price: 211.8, bias: "defensive bullish",   support: 205, resistance: 218, ivRank: 33 },
+  { ticker: "META", price: 498.6, bias: "trend bullish",       support: 482, resistance: 515, ivRank: 45 },
+  { ticker: "MSFT", price: 426.9, bias: "quality range",       support: 418, resistance: 438, ivRank: 36 },
 ];
 
 function buildFallbackPicks(): StrategyPick[] {
   const expiry = "2026-01-16";
-  return SCANNER_FALLBACK.slice(0, 5).map((item, index) => {
-    const ticker = item.ticker || WATCHLIST[index];
+  return SCANNER_FALLBACK.slice(0, 7).map((item, index) => {
+    const ticker = item.ticker || "SPY";
     const price = item.price || 100;
     const ivRank = item.ivRank || 40;
     const support = item.support || price * 0.95;
     const resistance = item.resistance || price * 1.05;
     const aggressive = ivRank >= 65;
     const type: StrategyType = aggressive ? "iron_condor" : index % 2 === 0 ? "sell_put" : "call_spread";
-    const score = Math.max(7, Math.min(9, Math.round(6.8 + ivRank / 30 + index * 0.15)));
+    const score = Math.max(7, Math.min(9, Math.round(6.8 + ivRank / 30 + index * 0.1)));
     const putStrike = Math.round(support);
     const callStrike = Math.round(price * 1.02);
     const upperStrike = Math.round(resistance * 1.02);
 
-    if (type === "iron_condor") {
-      return {
-        id: `${ticker}-fallback-ic`,
-        tag: "激进",
-        ticker,
-        strategyType: type,
-        strategyName: "Iron Condor",
-        score,
-        direction: "flat",
-        legs: [
-          { action: "Sell", quantity: 1, strike: putStrike, optionType: "P", expiry },
-          { action: "Buy", quantity: 1, strike: putStrike - 10, optionType: "P", expiry },
-          { action: "Sell", quantity: 1, strike: upperStrike, optionType: "C", expiry },
-          { action: "Buy", quantity: 1, strike: upperStrike + 10, optionType: "C", expiry },
-        ],
-        entry: `${ticker} 保持 ${support}-${resistance} 区间，IV Rank > ${ivRank - 5} 时收取权利金。`,
-        scenarioTip: "区间居中才开，靠近短腿不追单。",
-        target: "权利金衰减 55% 或剩余 21 DTE 平仓。",
-        stop: "任一短腿 Delta > 0.35 或组合亏损达到权利金 1.8x。",
-        maxRisk: "$650-$900 / condor",
-        expectedReturn: "35%-48% 风险回报",
-        holdingPeriod: "21-35 天",
-        signalText: `${ticker} IV Rank ${ivRank}，技术偏向 ${item.bias}，适合宽翼收时间价值。`,
-        riskText: "跳空突破区间会快速扩大亏损。",
-        capitalText: "每组约 $700 保证金，单标的风险 ≤ 3%。",
-        scoreDimensions: { ivRank: 10, otm: 7, riskReward: 8, liquidity: 8 },
-        greeks: { delta: -0.03, gamma: -0.006, theta: 0.16, vega: -0.28, iv: ivRank / 100 },
-        capitalRequired: 700,
-        returnLow: 35,
-        returnHigh: 48,
-      };
-    }
-
-    if (type === "call_spread") {
-      return {
-        id: `${ticker}-fallback-call-spread`,
-        tag: "核心",
-        ticker,
-        strategyType: type,
-        strategyName: "Bull Call Spread",
-        score,
-        direction: "up",
-        legs: [
-          { action: "Buy", quantity: 1, strike: callStrike, optionType: "C", expiry },
-          { action: "Sell", quantity: 1, strike: upperStrike, optionType: "C", expiry },
-        ],
-        entry: `${ticker} 放量站上 ${resistance}，净借方不超过价差宽度 42%。`,
-        scenarioTip: "突破确认后入场，避免横盘 Theta 消耗。",
-        target: "价差达到最大价值 65%-75% 止盈。",
-        stop: `${ticker} 跌回 ${support} 下方或组合亏损 45%。`,
-        maxRisk: "$400-$950 / spread",
-        expectedReturn: "60%-90% 目标回报",
-        holdingPeriod: "14-35 天",
-        signalText: `${ticker} 技术偏向 ${item.bias}，阻力位明确，价差控制追涨成本。`,
-        riskText: "假突破或 IV 回落会压缩组合价值。",
-        capitalText: "净借方即最大资金占用，分批进场。",
-        scoreDimensions: { ivRank: 7, otm: 8, riskReward: 9, liquidity: 9 },
-        greeks: { delta: 0.34, gamma: 0.01, theta: -0.06, vega: 0.14, iv: ivRank / 100 },
-        capitalRequired: 650,
-        returnLow: 60,
-        returnHigh: 90,
-      };
-    }
-
-    return {
-      id: `${ticker}-fallback-sell-put`,
-      tag: score >= 9 ? "核心" : "保守",
+    const base = {
+      id: `${ticker}-fallback-${type}`,
+      tag: aggressive ? "激进" : index % 3 === 0 ? "核心" : "保守",
       ticker,
       strategyType: type,
-      strategyName: "Cash-Secured Put",
       score,
-      direction: "up",
+      direction: type === "iron_condor" ? ("flat" as Direction) : ("up" as Direction),
+      scoreDimensions: { ivRank: Math.round(ivRank / 10), otm: 8, riskReward: 8, liquidity: 9 },
+      greeks: { delta: type === "sell_put" ? -0.22 : 0.34, gamma: 0.012, theta: 0.07, vega: 0.18, iv: ivRank / 100 },
+      returnLow: type === "sell_put" ? 8 : type === "call_spread" ? 60 : 35,
+      returnHigh: type === "sell_put" ? 18 : type === "call_spread" ? 90 : 48,
+    };
+
+    if (type === "iron_condor") return {
+      ...base, strategyName: "Iron Condor",
+      legs: [
+        { action: "Sell", quantity: 1, strike: putStrike,      optionType: "P", expiry },
+        { action: "Buy",  quantity: 1, strike: putStrike - 10, optionType: "P", expiry },
+        { action: "Sell", quantity: 1, strike: upperStrike,      optionType: "C", expiry },
+        { action: "Buy",  quantity: 1, strike: upperStrike + 10, optionType: "C", expiry },
+      ],
+      maxRisk: "$650-$900 / condor", expectedReturn: "35%-48%", holdingPeriod: "21-35 天",
+      signalText: `${ticker} IV Rank ${ivRank}，偏向 ${item.bias}，适合收时间价值。`,
+    };
+    if (type === "call_spread") return {
+      ...base, strategyName: "Bull Call Spread",
+      legs: [
+        { action: "Buy",  quantity: 1, strike: callStrike,  optionType: "C", expiry },
+        { action: "Sell", quantity: 1, strike: upperStrike, optionType: "C", expiry },
+      ],
+      maxRisk: "$400-$950 / spread", expectedReturn: "60%-90%", holdingPeriod: "14-35 天",
+      signalText: `${ticker} 偏向 ${item.bias}，阻力位明确，价差控制追涨成本。`,
+    };
+    return {
+      ...base, strategyName: "Cash-Secured Put",
       legs: [{ action: "Sell", quantity: 1, strike: putStrike, optionType: "P", expiry }],
-      entry: `${ticker} 守住 ${support} 支撑，卖出 ${putStrike}P，限价 ≥ ${(price * 0.018).toFixed(2)}。`,
-      scenarioTip: "只卖愿意接货的标的，避开财报前窗口。",
-      target: "权利金衰减 55%-70% 止盈。",
-      stop: `${ticker} 有效跌破 ${support * 0.98} 或期权价格扩大至 2x。`,
-      maxRisk: `$${Math.round((putStrike - price * 0.018) * 100).toLocaleString()} / contract`,
-      expectedReturn: `${(price * 0.018 / putStrike * 100).toFixed(1)}%-${(price * 0.024 / putStrike * 100).toFixed(1)}% 权利金`,
+      maxRisk: `$${Math.round(putStrike * 95).toLocaleString()} / contract`,
+      expectedReturn: `${(price * 0.018 / putStrike * 100).toFixed(1)}%-${(price * 0.024 / putStrike * 100).toFixed(1)}%`,
       holdingPeriod: "28-45 天",
-      signalText: `${ticker} 支撑 ${support} 清晰，IV Rank ${ivRank}，Put 侧权利金具备安全垫。`,
-      riskText: "趋势破位或事件跳空会提高被行权概率。",
-      capitalText: `现金担保约 $${(putStrike * 100).toLocaleString()}。`,
-      scoreDimensions: { ivRank: Math.max(6, Math.round(ivRank / 10)), otm: 8, riskReward: 8, liquidity: 9 },
-      greeks: { delta: -0.22, gamma: 0.014, theta: 0.07, vega: 0.18, iv: ivRank / 100 },
-      capitalRequired: putStrike * 100,
-      returnLow: 8,
-      returnHigh: 18,
+      signalText: `${ticker} 支撑 ${support} 清晰，IV Rank ${ivRank}，权利金具备安全垫。`,
     };
   });
 }
 
+/* ─── Helpers ─────────────────────────────────────────────────── */
 function normalizeType(value?: string): StrategyType {
   if (value === "iron_condor") return "iron_condor";
-  if (value === "call_spread" || value === "bull_call_spread" || value === "bear_put_spread") return "call_spread";
+  if (value === "call_spread" || value === "bull_call_spread") return "call_spread";
   return "sell_put";
 }
+function clampScore(v?: number) { return Math.max(1, Math.min(10, Math.round(Number(v || 7)))); }
+function fmtNum(v?: number, d = 2) { return typeof v === "number" && !isNaN(v) ? v.toFixed(d) : "--"; }
+function fmtDate(v?: string) { return v ? v.replaceAll("-", "/") : "--"; }
 
-function clampScore(value?: number): number {
-  return Math.max(1, Math.min(10, Math.round(Number(value || 7))));
-}
-
-function fmtDate(value?: string) {
-  if (!value) return "--";
-  return value.replaceAll("-", "/");
-}
-
-function fmtNum(value?: number, digits = 2) {
-  if (typeof value !== "number" || Number.isNaN(value)) return "--";
-  return value.toFixed(digits);
-}
-
-function scoreClass(score: number) {
-  if (score >= 9) return "text-green-300";
-  if (score >= 8) return "text-yellow-300";
-  return "text-gray-300";
-}
-
-function ScoreStrip({ score, fill }: { score: number; fill: string }) {
-  return (
-    <div className="flex items-center gap-1" aria-label={`score ${score} of 10`}>
-      {Array.from({ length: 10 }).map((_, index) => (
-        <span
-          key={index}
-          className={`h-3 w-1.5 rounded-sm ${index < score ? fill : "bg-[#30363d]"}`}
-        />
-      ))}
-    </div>
-  );
-}
-
-function DimensionBars({ dimensions, meta }: { dimensions?: ScoreDimensions; meta: (typeof TYPE_META)[StrategyType] }) {
-  const rows = [
-    ["IV Rank", dimensions?.ivRank ?? 6],
-    ["OTM 程度", dimensions?.otm ?? 7],
-    ["Risk/Reward", dimensions?.riskReward ?? 7],
-    ["流动性", dimensions?.liquidity ?? 8],
-  ] as const;
-
-  return (
-    <div className="grid gap-2 rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
-      {rows.map(([label, value]) => {
-        const score = clampScore(value);
-        return (
-          <div key={label} className="grid grid-cols-[88px_1fr_28px] items-center gap-2 text-[11px]">
-            <span className="text-gray-500">{label}</span>
-            <div className="h-1.5 overflow-hidden rounded-full bg-[#30363d]">
-              <div className={`h-full rounded-full ${meta.fill} transition-all duration-700`} style={{ width: `${score * 10}%` }} />
-            </div>
-            <span className="text-right font-mono text-gray-300">{score}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function LegsRow({ legs }: { legs?: Leg[] }) {
-  const safeLegs = legs?.length ? legs : [{ action: "Sell", quantity: 1, strike: 0, optionType: "P", expiry: "--" }];
-  return (
-    <div className="divide-y divide-[#30363d] border-y border-[#30363d]">
-      {safeLegs.map((leg, index) => (
-        <div key={`${leg.action}-${leg.strike}-${index}`} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 font-mono text-xs">
-          <span className={leg.action === "Buy" ? "text-blue-300" : "text-green-300"}>[{leg.action || "Sell"}]</span>
-          <span className="text-gray-200">{leg.quantity || 1}张</span>
-          <span className="text-white">{leg.strike || "--"}{leg.optionType || "P"}</span>
-          <span className="text-gray-500">{fmtDate(leg.expiry)}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function DetailLine({ icon, label, children }: { icon: string; label: string; children: React.ReactNode }) {
-  return (
-    <div className="grid grid-cols-[112px_1fr] gap-2 text-xs leading-relaxed sm:grid-cols-[128px_1fr]">
-      <div className="whitespace-nowrap text-gray-500"><span className="mr-1">{icon}</span>{label}</div>
-      <div className="text-gray-200">{children}</div>
-    </div>
-  );
-}
-
-function GreeksSnapshot({ greeks }: { greeks?: Greeks }) {
-  const rows = [
-    ["Delta", greeks?.delta, 2],
-    ["Gamma", greeks?.gamma, 3],
-    ["Theta", greeks?.theta, 2],
-    ["Vega", greeks?.vega, 2],
-    ["IV%", typeof greeks?.iv === "number" ? greeks.iv * 100 : undefined, 1],
-  ] as const;
-
-  return (
-    <div className="grid grid-cols-2 gap-2 pt-3 sm:grid-cols-5">
-      {rows.map(([label, value, digits]) => (
-        <div key={label} className="rounded-lg border border-[#30363d] bg-[#0d1117] p-2">
-          <div className="text-[10px] uppercase tracking-widest text-gray-600">{label}</div>
-          <div className="mt-1 font-mono text-sm text-white">{fmtNum(value, digits)}</div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function StrategyCard({ pick }: { pick: StrategyPick }) {
-  const [open, setOpen] = useState(false);
+/* ─── Mini pick card (grid layout) ────────────────────────────── */
+function PickCard({ pick, rank }: { pick: StrategyPick; rank: number }) {
+  const [expanded, setExpanded] = useState(false);
   const type = normalizeType(pick.strategyType);
   const meta = TYPE_META[type];
   const score = clampScore(pick.score);
   const ticker = (pick.ticker || "SPY").toUpperCase();
-  const tag = pick.tag || "核心";
+
+  // Build legs summary
+  const legsSummary = (pick.legs || []).map(l =>
+    `${l.action} ${l.strike}${l.optionType}`
+  ).join(" / ");
+
+  const dirColor = pick.direction === "down" ? "#f85149" : pick.direction === "flat" ? "#f0883e" : "#3fb950";
+  const DirIcon = pick.direction === "down" ? TrendingDown : pick.direction === "flat" ? Minus : TrendingUp;
 
   return (
     <article
-      className={`group overflow-hidden rounded-xl border border-[#30363d] border-l-4 ${meta.border} bg-[#161b22] ${meta.glow} transition-all duration-300 hover:-translate-y-0.5 hover:border-gray-500 hover:bg-[#18202b]`}
+      className="rounded-lg border transition-all duration-150 hover:-translate-y-px overflow-hidden flex flex-col"
+      style={{
+        background: "var(--bg-surface)",
+        borderColor: "var(--border-default)",
+        borderLeft: `3px solid ${meta.color}`,
+      }}
     >
-      <button type="button" onClick={() => setOpen(v => !v)} className="w-full p-4 text-left">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <span className="rounded border border-[#30363d] bg-[#0d1117] px-2 py-1 text-[10px] font-bold text-gray-300">{tag}</span>
-            <span className="font-mono text-lg font-black tracking-wide text-white">{ticker}</span>
-            <span className={`truncate text-sm font-semibold ${meta.text}`}>{pick.strategyName || meta.cn}</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <ScoreStrip score={score} fill={meta.fill} />
-            <span className={`font-mono text-lg font-black ${scoreClass(score)}`}>{score}/10</span>
-            <span className={pick.direction === "down" ? "text-red-400" : pick.direction === "flat" ? "text-orange-300" : "text-green-400"}>
-              {pick.direction === "down" ? "▼" : pick.direction === "flat" ? "◆" : "▲"}
+      {/* Card header */}
+      <div className="px-3 pt-3 pb-2">
+        <div className="flex items-start justify-between gap-1 mb-2">
+          {/* Rank + ticker */}
+          <div className="flex items-center gap-2 min-w-0">
+            <span
+              className="text-[10px] font-mono font-bold w-5 h-5 flex items-center justify-center rounded"
+              style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}
+            >
+              {rank}
+            </span>
+            <span className="font-mono text-base font-black" style={{ color: "var(--text-primary)" }}>
+              {ticker}
             </span>
           </div>
+          {/* Type badge */}
+          <span
+            className="shrink-0 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded"
+            style={{ background: meta.bg, color: meta.color, border: `1px solid ${meta.border}` }}
+          >
+            {meta.label}
+          </span>
         </div>
 
-        <div className="mt-3">
-          <LegsRow legs={pick.legs} />
-        </div>
-
-        <div className="mt-3 grid gap-2">
-          <DetailLine icon="🎯" label="入场条件">
-            {pick.entry || "等待价格与盘口确认后限价入场"}
-            <div className="mt-1 text-[11px] text-gray-500">└ 💡 {pick.scenarioTip || "先确认流动性，再确认方向，不抢开盘前几分钟。"}</div>
-          </DetailLine>
-          <DetailLine icon="📋" label="目标预期">{pick.target || "权利金衰减 50%-70% 后止盈"}</DetailLine>
-          <DetailLine icon="🔴" label="止损位">{pick.stop || "价格破位或亏损达到计划阈值"}</DetailLine>
-          <DetailLine icon="⚠️" label="最大风险">{pick.maxRisk || "按组合保证金和成交价格计算"}</DetailLine>
-          <DetailLine icon="💰" label="预期回报">{pick.expectedReturn || "以实时成交价估算"}</DetailLine>
-          <DetailLine icon="⏱" label="持有周期">{pick.holdingPeriod || "21-45 天"}</DetailLine>
-        </div>
-
-        <div className="my-3 border-t border-[#30363d]" />
-
-        <div className="grid gap-2 text-xs leading-relaxed">
-          <div><span className="text-gray-500">📊 异动依据: </span><span className="text-gray-200">{pick.signalText || "多因子评分通过，等待成交确认。"}</span></div>
-          <div><span className="text-gray-500">⚠️ 风险点: </span><span className="text-gray-200">{pick.riskText || "跳空、流动性与波动率变化。"}</span></div>
-          <div><span className="text-gray-500">💵 资金占用: </span><span className="text-gray-200">{pick.capitalText || "按券商保证金为准。"}</span></div>
-        </div>
-
-        <div className="mt-3 flex items-center justify-between text-[11px] text-gray-500">
-          <span>{meta.label} · 点击{open ? "收起" : "展开"} Greeks 快照</span>
-          <span className={`transition-transform duration-300 ${open ? "rotate-180" : ""}`}>⌄</span>
-        </div>
-      </button>
-
-      <div className={`grid transition-[grid-template-rows] duration-300 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
-        <div className="overflow-hidden">
-          <div className="border-t border-[#30363d] px-4 pb-4">
-            <GreeksSnapshot greeks={pick.greeks} />
-          </div>
+        {/* Strategy name + direction */}
+        <div className="flex items-center justify-between gap-1">
+          <span className="text-xs font-semibold" style={{ color: meta.color }}>
+            {pick.strategyName || meta.cn}
+          </span>
+          <DirIcon size={12} style={{ color: dirColor, flexShrink: 0 }} />
         </div>
       </div>
+
+      {/* Contract code */}
+      <div
+        className="px-3 py-1.5 border-y text-[11px] font-mono font-bold truncate"
+        style={{
+          borderColor: "var(--border-muted)",
+          background: "var(--bg-elevated)",
+          color: "var(--text-primary)",
+        }}
+      >
+        {legsSummary || pick.strategyName}
+      </div>
+
+      {/* Stats 2-col grid */}
+      <div className="px-3 py-2 grid grid-cols-2 gap-x-3 gap-y-1.5 flex-1">
+        {[
+          { label: "评分", value: `${score}/10`, color: score >= 9 ? "#3fb950" : score >= 8 ? "#d29922" : "var(--text-secondary)" },
+          { label: "回报", value: pick.expectedReturn || "--", color: "#58a6ff" },
+          { label: "最大风险", value: pick.maxRisk || "--", color: "#f85149" },
+          { label: "周期", value: pick.holdingPeriod || "--", color: "var(--text-secondary)" },
+        ].map(s => (
+          <div key={s.label}>
+            <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+              {s.label}
+            </div>
+            <div className="text-[11px] font-mono font-semibold tabular-nums leading-tight mt-0.5 truncate" style={{ color: s.color }}>
+              {s.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Signal text */}
+      {pick.signalText && (
+        <div className="px-3 pb-2 text-[10px] leading-relaxed line-clamp-2" style={{ color: "var(--text-muted)" }}>
+          {pick.signalText}
+        </div>
+      )}
+
+      {/* Expand toggle */}
+      <button
+        type="button"
+        onClick={() => setExpanded(v => !v)}
+        className="w-full px-3 py-1.5 text-[10px] font-mono text-left border-t flex items-center justify-between transition-colors hover:opacity-80"
+        style={{
+          borderColor: "var(--border-muted)",
+          color: "var(--text-muted)",
+          background: "var(--bg-elevated)",
+        }}
+      >
+        <span>{expanded ? "收起 Greeks" : "展开 Greeks"}</span>
+        <span style={{ transform: expanded ? "rotate(180deg)" : "none", display: "inline-block", transition: "transform 0.2s" }}>▾</span>
+      </button>
+
+      {/* Expanded Greeks */}
+      {expanded && (
+        <div
+          className="px-3 py-2 grid grid-cols-5 gap-1 border-t"
+          style={{ borderColor: "var(--border-muted)", background: "var(--bg-elevated)" }}
+        >
+          {[
+            ["Δ", pick.greeks?.delta, 2],
+            ["Γ", pick.greeks?.gamma, 3],
+            ["Θ", pick.greeks?.theta, 2],
+            ["V", pick.greeks?.vega, 2],
+            ["IV", typeof pick.greeks?.iv === "number" ? pick.greeks.iv * 100 : undefined, 1],
+          ].map(([label, value, d]) => (
+            <div key={label as string} className="text-center">
+              <div className="text-[9px] uppercase" style={{ color: "var(--text-muted)" }}>{label}</div>
+              <div className="text-[10px] font-mono font-semibold" style={{ color: "var(--text-primary)" }}>
+                {fmtNum(value as number | undefined, d as number)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </article>
   );
 }
 
-function ScannerPanel({ scanner, selected, onSelect }: { scanner: ScannerItem[]; selected: string; onSelect: (ticker: string) => void }) {
-  const current = scanner.find(item => (item.ticker || "").toUpperCase() === selected) || scanner[0] || SCANNER_FALLBACK[0];
-  const bias = current.bias || "neutral";
-
+/* ─── Score dimension bars ────────────────────────────────────── */
+function ScoreBars({ dimensions, color }: { dimensions?: ScoreDimensions; color: string }) {
+  const rows: [string, number][] = [
+    ["IV Rank",     clampScore(dimensions?.ivRank)],
+    ["OTM",         clampScore(dimensions?.otm)],
+    ["R/R",         clampScore(dimensions?.riskReward)],
+    ["流动性",       clampScore(dimensions?.liquidity)],
+  ];
   return (
-    <aside className="rounded-xl border border-[#30363d] bg-[#161b22] p-4 lg:sticky lg:top-4 lg:self-start">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <div className="text-[10px] uppercase tracking-[0.28em] text-gray-600">Scanner</div>
-          <h2 className="mt-1 text-base font-bold text-white">标的雷达</h2>
+    <div className="flex gap-3 items-end">
+      {rows.map(([label, score]) => (
+        <div key={label} className="flex flex-col items-center gap-0.5">
+          <div className="w-1 rounded-t" style={{ height: `${score * 4}px`, background: color, opacity: 0.8 }} />
+          <span className="text-[8px] leading-none" style={{ color: "var(--text-muted)" }}>{label}</span>
         </div>
-        <span className="rounded-full border border-green-500/30 bg-green-500/10 px-2 py-1 text-[10px] text-green-300">LIVE BIAS</span>
+      ))}
+    </div>
+  );
+}
+
+/* ─── Scanner summary card ────────────────────────────────────── */
+function ScannerSummaryCard({
+  scanner, selected, onSelect, loading, error, onRescan, dataSource, weekStart, weekEnd,
+}: {
+  scanner: ScannerItem[];
+  selected: string;
+  onSelect: (t: string) => void;
+  loading: boolean;
+  error: string | null;
+  onRescan: () => void;
+  dataSource?: string;
+  weekStart?: string;
+  weekEnd?: string;
+}) {
+  return (
+    <div
+      className="rounded-lg border p-4"
+      style={{ background: "var(--bg-surface)", borderColor: "var(--border-default)" }}
+    >
+      <div className="flex items-start justify-between gap-3 mb-3">
+        {/* Left: title + meta */}
+        <div>
+          <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
+            本周扫描结果
+            <span
+              className="ml-2 text-[10px] font-mono px-1.5 py-0.5 rounded"
+              style={{ background: "rgba(63,185,80,0.12)", color: "#3fb950" }}
+            >
+              {error ? "FALLBACK" : dataSource?.toUpperCase() || "LIVE"}
+            </span>
+          </h2>
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+            {weekStart && weekEnd ? `${fmtDate(weekStart)} → ${fmtDate(weekEnd)}` : "Weekly Options Scanner"}
+            {error && <span style={{ color: "var(--accent-yellow)" }}> · {error}</span>}
+          </p>
+        </div>
+
+        {/* Right: rescan button */}
+        <button
+          type="button"
+          onClick={onRescan}
+          disabled={loading}
+          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors disabled:opacity-50"
+          style={{ background: "#1158c7", borderColor: "#1158c7", color: "#fff" }}
+        >
+          <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
+          {loading ? "扫描中..." : "重新扫描"}
+        </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-2 lg:grid-cols-1">
-        {WATCHLIST.map(ticker => {
-          const item = scanner.find(row => (row.ticker || "").toUpperCase() === ticker) || SCANNER_FALLBACK.find(row => row.ticker === ticker);
-          const active = selected === ticker;
+      {/* Bullet-point scan results */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+        {scanner.map(item => {
+          const t = (item.ticker || "").toUpperCase();
+          const isSelected = t === selected;
+          const ivHigh = (item.ivRank || 0) >= 60;
           return (
             <button
-              key={ticker}
+              key={t}
               type="button"
-              onClick={() => onSelect(ticker)}
-              className={`rounded-lg border p-3 text-left transition-all ${active ? "border-green-500 bg-green-500/10" : "border-[#30363d] bg-[#0d1117] hover:border-gray-500"}`}
+              onClick={() => onSelect(t)}
+              className="flex items-start gap-2 p-2.5 rounded-md border text-left transition-all hover:brightness-110"
+              style={{
+                background: isSelected ? "rgba(17,88,199,0.15)" : "var(--bg-elevated)",
+                borderColor: isSelected ? "#1158c7" : "var(--border-default)",
+              }}
             >
-              <div className="flex items-center justify-between">
-                <span className="font-mono font-black text-white">{ticker}</span>
-                <span className="font-mono text-xs text-gray-400">{fmtNum(item?.price, 1)}</span>
+              {/* Bullet dot */}
+              <span
+                className="mt-1 w-1.5 h-1.5 rounded-full shrink-0"
+                style={{ background: isSelected ? "#58a6ff" : "var(--text-muted)" }}
+              />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="font-mono font-bold text-xs" style={{ color: "var(--text-primary)" }}>{t}</span>
+                  <span className="font-mono text-[10px]" style={{ color: "var(--text-secondary)" }}>
+                    {fmtNum(item.price, 1)}
+                  </span>
+                </div>
+                <div className="text-[10px] truncate mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  {item.bias}
+                </div>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <span
+                    className="text-[9px] font-mono px-1 py-0.5 rounded"
+                    style={{
+                      background: ivHigh ? "rgba(240,136,62,0.15)" : "var(--bg-surface)",
+                      color: ivHigh ? "#f0883e" : "var(--text-muted)",
+                    }}
+                  >
+                    IV {item.ivRank}
+                  </span>
+                  <span className="text-[9px] font-mono" style={{ color: "var(--text-muted)" }}>
+                    S:{fmtNum(item.support, 0)} / R:{fmtNum(item.resistance, 0)}
+                  </span>
+                </div>
               </div>
-              <div className="mt-1 truncate text-[11px] text-gray-500">{item?.bias || "neutral"}</div>
             </button>
           );
         })}
       </div>
-
-      <div className="mt-4 rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
-        <div className="flex items-center justify-between">
-          <span className="font-mono text-lg font-black text-white">{selected}</span>
-          <span className="text-xs text-green-300">IV Rank {current.ivRank ?? "--"}</span>
-        </div>
-        <div className="mt-3 space-y-2 text-xs">
-          <div className="flex justify-between"><span className="text-gray-500">技术偏向</span><span className="text-gray-200">{bias}</span></div>
-          <div className="flex justify-between"><span className="text-gray-500">关键支撑</span><span className="font-mono text-blue-300">{fmtNum(current.support, 1)}</span></div>
-          <div className="flex justify-between"><span className="text-gray-500">关键阻力</span><span className="font-mono text-orange-300">{fmtNum(current.resistance, 1)}</span></div>
-        </div>
-      </div>
-    </aside>
+    </div>
   );
 }
 
+/* ─── Filter bar ──────────────────────────────────────────────── */
+function FilterBar({
+  tagFilter, setTagFilter, strategyFilter, setStrategyFilter, sortMode, setSortMode, counts,
+}: {
+  tagFilter: string; setTagFilter: (v: string) => void;
+  strategyFilter: string; setStrategyFilter: (v: string) => void;
+  sortMode: string; setSortMode: (v: "score" | "ticker") => void;
+  counts: Record<string, number>;
+}) {
+  return (
+    <div
+      className="rounded-lg border p-3 flex flex-wrap items-center gap-3"
+      style={{ background: "var(--bg-surface)", borderColor: "var(--border-default)" }}
+    >
+      <SlidersHorizontal size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
+
+      {/* Tag filters */}
+      <div className="flex flex-wrap gap-1.5">
+        {TAGS.map(tag => (
+          <button
+            key={tag}
+            type="button"
+            onClick={() => setTagFilter(tag)}
+            className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
+            style={{
+              background: tagFilter === tag ? "rgba(63,185,80,0.15)" : "var(--bg-elevated)",
+              borderColor: tagFilter === tag ? "#3fb950" : "var(--border-default)",
+              color: tagFilter === tag ? "#3fb950" : "var(--text-muted)",
+            }}
+          >
+            {tag}
+          </button>
+        ))}
+      </div>
+
+      <div className="w-px h-4" style={{ background: "var(--border-default)" }} />
+
+      {/* Strategy filters */}
+      <div className="flex flex-wrap gap-1.5">
+        {STRATEGY_FILTERS.map(f => (
+          <button
+            key={f.value}
+            type="button"
+            onClick={() => setStrategyFilter(f.value)}
+            className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
+            style={{
+              background: strategyFilter === f.value ? "rgba(88,166,255,0.15)" : "var(--bg-elevated)",
+              borderColor: strategyFilter === f.value ? "#58a6ff" : "var(--border-default)",
+              color: strategyFilter === f.value ? "#58a6ff" : "var(--text-muted)",
+            }}
+          >
+            {f.label}
+            {f.value !== "all" && (
+              <span className="ml-1 font-mono text-[9px]">({counts[f.value] ?? 0})</span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div className="ml-auto">
+        <select
+          value={sortMode}
+          onChange={e => setSortMode(e.target.value as "score" | "ticker")}
+          className="rounded-md border px-2 py-1 text-[11px] outline-none transition-colors"
+          style={{
+            background: "var(--bg-elevated)",
+            borderColor: "var(--border-default)",
+            color: "var(--text-secondary)",
+          }}
+        >
+          <option value="score">按评分</option>
+          <option value="ticker">按Ticker</option>
+        </select>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Main page ──────────────────────────────────────────────── */
 export default function PicksPage() {
   const [payload, setPayload] = useState<PicksResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTicker, setSelectedTicker] = useState<string>("SPY");
-  const [tagFilter, setTagFilter] = useState<(typeof TAGS)[number]>("全部");
+  const [selectedTicker, setSelectedTicker] = useState<string>("");
+  const [tagFilter, setTagFilter] = useState<string>("全部");
   const [strategyFilter, setStrategyFilter] = useState<string>("all");
   const [sortMode, setSortMode] = useState<"score" | "ticker">("score");
 
@@ -473,9 +530,9 @@ export default function PicksPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`${API_BASE}/api/picks`, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const data = (await response.json()) as PicksResponse;
+      const res = await fetch(`${API_BASE}/api/picks`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = (await res.json()) as PicksResponse;
       setPayload({
         ...data,
         picks: data.picks?.length ? data.picks : buildFallbackPicks(),
@@ -483,167 +540,151 @@ export default function PicksPage() {
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "API unavailable");
-      setPayload({
-        dataSource: "frontend-fallback",
-        week: undefined,
-        scanner: SCANNER_FALLBACK,
-        picks: buildFallbackPicks(),
-      });
+      setPayload({ dataSource: "frontend-fallback", scanner: SCANNER_FALLBACK, picks: buildFallbackPicks() });
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchPicks();
-  }, [fetchPicks]);
+  useEffect(() => { fetchPicks(); }, [fetchPicks]);
 
   const picks = payload?.picks?.length ? payload.picks : buildFallbackPicks();
   const scanner = payload?.scanner?.length ? payload.scanner : SCANNER_FALLBACK;
 
+  // Strategy counts for badges
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { sell_put: 0, call_spread: 0, iron_condor: 0 };
+    picks.forEach(p => { c[normalizeType(p.strategyType)]++; });
+    return c;
+  }, [picks]);
+
   const filtered = useMemo(() => {
     return picks
-      .filter(pick => (selectedTicker ? (pick.ticker || "").toUpperCase() === selectedTicker : true))
-      .filter(pick => (tagFilter === "全部" ? true : (pick.tag || "核心") === tagFilter))
-      .filter(pick => (strategyFilter === "all" ? true : normalizeType(pick.strategyType) === strategyFilter))
-      .sort((a, b) => sortMode === "score" ? clampScore(b.score) - clampScore(a.score) : (a.ticker || "").localeCompare(b.ticker || ""));
+      .filter(p => !selectedTicker || (p.ticker || "").toUpperCase() === selectedTicker)
+      .filter(p => tagFilter === "全部" || (p.tag || "核心") === tagFilter)
+      .filter(p => strategyFilter === "all" || normalizeType(p.strategyType) === strategyFilter)
+      .sort((a, b) => sortMode === "score"
+        ? clampScore(b.score) - clampScore(a.score)
+        : (a.ticker || "").localeCompare(b.ticker || ""));
   }, [picks, selectedTicker, tagFilter, strategyFilter, sortMode]);
 
-  const displayPicks = filtered.length ? filtered : picks.slice().sort((a, b) => clampScore(b.score) - clampScore(a.score));
-  const highScoreCount = picks.filter(pick => clampScore(pick.score) >= 8).length;
-  const returnLows = picks.map(p => Number(p.returnLow || 0)).filter(Boolean);
-  const returnHighs = picks.map(p => Number(p.returnHigh || 0)).filter(Boolean);
-  const weekStart = payload?.week?.start;
-  const weekEnd = payload?.week?.end;
+  const displayPicks = filtered.length ? filtered : picks.sort((a, b) => clampScore(b.score) - clampScore(a.score));
+
+  // Summary stats
+  const highCount = picks.filter(p => clampScore(p.score) >= 8).length;
+  const returnMin = Math.min(...picks.map(p => Number(p.returnLow || 0)).filter(Boolean), 0);
+  const returnMax = Math.max(...picks.map(p => Number(p.returnHigh || 0)).filter(Boolean), 0);
 
   return (
-    <div className="min-h-screen bg-[#0d1117] pb-10 text-[#e6edf3]">
-      <div className="mb-5 overflow-hidden rounded-xl border border-[#30363d] bg-[#161b22]">
-        <div className="relative p-5">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(63,185,80,0.16),transparent_34%),linear-gradient(90deg,rgba(88,166,255,0.08),transparent)]" />
-          <div className="relative flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <div className="text-[10px] uppercase tracking-[0.35em] text-green-300/80">Weekly Options Picks</div>
-              <h1 className="mt-2 text-2xl font-black tracking-tight text-white">本周精选策略</h1>
-              <p className="mt-1 text-xs text-gray-500">真实策略评分优先 · API 不可用时自动生成完整 fallback 卡片</p>
+    <div className="flex flex-col gap-4 pb-8">
+
+      {/* ── Scanner summary card ── */}
+      <ScannerSummaryCard
+        scanner={scanner}
+        selected={selectedTicker}
+        onSelect={t => setSelectedTicker(prev => prev === t ? "" : t)}
+        loading={loading}
+        error={error}
+        onRescan={fetchPicks}
+        dataSource={payload?.dataSource}
+        weekStart={payload?.week?.start}
+        weekEnd={payload?.week?.end}
+      />
+
+      {/* ── Summary stat pills ── */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div
+          className="flex items-center gap-4 rounded-lg border px-4 py-2"
+          style={{ background: "var(--bg-surface)", borderColor: "var(--border-default)" }}
+        >
+          <div>
+            <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+              策略总数
             </div>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-lg border border-[#30363d] bg-[#0d1117]/80 px-4 py-3">
-                <div className="text-[10px] text-gray-500">日期范围</div>
-                <div className="mt-1 font-mono text-xs text-white">{fmtDate(weekStart)} → {fmtDate(weekEnd)}</div>
-              </div>
-              <div className="rounded-lg border border-[#30363d] bg-[#0d1117]/80 px-4 py-3">
-                <div className="text-[10px] text-gray-500">策略 / 高分</div>
-                <div className="mt-1 font-mono text-lg font-black text-white">{picks.length}<span className="text-gray-600"> / </span><span className="text-green-300">{payload?.summary?.highScoreCount ?? highScoreCount}</span></div>
-              </div>
-              <div className="rounded-lg border border-[#30363d] bg-[#0d1117]/80 px-4 py-3">
-                <div className="text-[10px] text-gray-500">预期回报范围</div>
-                <div className="mt-1 font-mono text-lg font-black text-white">{payload?.summary?.expectedReturnRange?.low ?? Math.min(...returnLows, 0)}-{payload?.summary?.expectedReturnRange?.high ?? Math.max(...returnHighs, 0)}%</div>
-              </div>
+            <div className="font-mono text-lg font-bold" style={{ color: "var(--text-primary)" }}>
+              {picks.length}
+              <span className="text-sm font-normal ml-1.5" style={{ color: "#3fb950" }}>
+                {highCount} 高分
+              </span>
             </div>
           </div>
+          <div className="w-px h-8" style={{ background: "var(--border-default)" }} />
+          <div>
+            <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+              预期回报区间
+            </div>
+            <div className="font-mono text-lg font-bold" style={{ color: "#58a6ff" }}>
+              {returnMin}%-{returnMax}%
+            </div>
+          </div>
+          {Object.entries(TYPE_META).map(([key, meta]) => (
+            <React.Fragment key={key}>
+              <div className="w-px h-8" style={{ background: "var(--border-default)" }} />
+              <div>
+                <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+                  {meta.cn}
+                </div>
+                <div className="font-mono text-lg font-bold" style={{ color: meta.color }}>
+                  {counts[key] ?? 0}
+                </div>
+              </div>
+            </React.Fragment>
+          ))}
         </div>
       </div>
 
-      <div className="grid gap-5 lg:grid-cols-[280px_1fr]">
-        <ScannerPanel scanner={scanner} selected={selectedTicker} onSelect={setSelectedTicker} />
+      {/* ── Filter bar ── */}
+      <FilterBar
+        tagFilter={tagFilter} setTagFilter={setTagFilter}
+        strategyFilter={strategyFilter} setStrategyFilter={setStrategyFilter}
+        sortMode={sortMode} setSortMode={setSortMode}
+        counts={counts}
+      />
 
-        <main className="space-y-4">
-          <div className="rounded-xl border border-[#30363d] bg-[#161b22] p-4">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-sm font-bold text-white">策略筛选与评分面板</h2>
-                <p className="mt-1 text-xs text-gray-500">
-                  {loading ? "正在刷新评分..." : error ? `API fallback active: ${error}` : `Data source: ${payload?.dataSource || "api"}`}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={fetchPicks}
-                disabled={loading}
-                className="rounded-lg border border-green-500/40 bg-green-500/10 px-3 py-2 text-xs font-bold text-green-300 transition hover:bg-green-500/20 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {loading ? "刷新中..." : "刷新数据"}
-              </button>
+      {/* ── Loading skeletons ── */}
+      {loading && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-56 rounded-lg animate-pulse"
+              style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)" }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ── Picks grid ── */}
+      {!loading && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {displayPicks.map((pick, idx) => (
+            <div
+              key={pick.id || `${pick.ticker}-${idx}`}
+              style={{ animationDelay: `${idx * 30}ms` }}
+              className="animate-[fadeIn_0.3s_ease-out_both]"
+            >
+              <PickCard pick={pick} rank={idx + 1} />
             </div>
-
-            <div className="mt-4 grid gap-3 xl:grid-cols-[1fr_1fr_160px]">
-              <div className="flex flex-wrap gap-2">
-                {TAGS.map(tag => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => setTagFilter(tag)}
-                    className={`rounded-full border px-3 py-1.5 text-xs transition ${tagFilter === tag ? "border-green-500 bg-green-500/10 text-green-300" : "border-[#30363d] bg-[#0d1117] text-gray-400 hover:border-gray-500"}`}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {STRATEGY_FILTERS.map(item => (
-                  <button
-                    key={item.value}
-                    type="button"
-                    onClick={() => setStrategyFilter(item.value)}
-                    className={`rounded-full border px-3 py-1.5 text-xs transition ${strategyFilter === item.value ? "border-blue-500 bg-blue-500/10 text-blue-300" : "border-[#30363d] bg-[#0d1117] text-gray-400 hover:border-gray-500"}`}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-              <select
-                value={sortMode}
-                onChange={event => setSortMode(event.target.value as "score" | "ticker")}
-                className="rounded-lg border border-[#30363d] bg-[#0d1117] px-3 py-2 text-xs text-gray-300 outline-none focus:border-green-500"
-              >
-                <option value="score">按评分排序</option>
-                <option value="ticker">按Ticker排序</option>
-              </select>
-            </div>
-
-            <div className="mt-4 grid gap-3 md:grid-cols-3">
-              {(STRATEGY_FILTERS.slice(1) as readonly { label: string; value: StrategyType }[]).map(item => {
-                const meta = TYPE_META[item.value];
-                const count = picks.filter(pick => normalizeType(pick.strategyType) === item.value).length;
-                return (
-                  <div key={item.value} className="rounded-lg border border-[#30363d] bg-[#0d1117] p-3">
-                    <div className={`text-[10px] font-bold uppercase tracking-widest ${meta.text}`}>{item.label}</div>
-                    <div className="mt-2 flex items-end justify-between">
-                      <span className="font-mono text-2xl font-black text-white">{count}</span>
-                      <span className="text-[11px] text-gray-500">cards</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {loading && (
-            <div className="grid gap-3">
-              {[0, 1].map(index => <div key={index} className="h-64 animate-pulse rounded-xl border border-[#30363d] bg-[#161b22]" />)}
+          ))}
+          {displayPicks.length === 0 && (
+            <div
+              className="col-span-4 py-16 text-center text-sm rounded-lg border"
+              style={{
+                color: "var(--text-muted)",
+                background: "var(--bg-surface)",
+                borderColor: "var(--border-default)",
+              }}
+            >
+              当前筛选条件下没有策略，请调整过滤器
             </div>
           )}
-
-          {!loading && (
-            <div className="grid gap-4">
-              {displayPicks.map((pick, index) => (
-                <div key={pick.id || `${pick.ticker}-${index}`} className="animate-[fadeIn_0.35s_ease-out_both]" style={{ animationDelay: `${index * 45}ms` }}>
-                  <StrategyCard pick={pick} />
-                  <div className="mt-2">
-                    <DimensionBars dimensions={pick.scoreDimensions} meta={TYPE_META[normalizeType(pick.strategyType)]} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </main>
-      </div>
+        </div>
+      )}
 
       <style>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>
