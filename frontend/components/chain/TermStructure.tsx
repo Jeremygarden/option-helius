@@ -6,6 +6,32 @@ import { IVSurfacePoint, SummaryResponse, formatMoney } from "@/lib/chainData";
 
 type TermStructureProps = { surface: IVSurfacePoint[]; summary?: SummaryResponse | null; loading?: boolean };
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/95 backdrop-blur-md border border-[#EDF0F2] rounded-xl p-4 shadow-xl">
+        <p className="text-xs font-bold text-[#1A1D1F] mb-3 border-b border-[#EDF0F2] pb-2 font-mono">
+          Term: {label}
+        </p>
+        <div className="space-y-2">
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between gap-6 text-[11px]">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: entry.stroke }} />
+                <span className="text-[#6F767E] font-medium">{entry.name}</span>
+              </div>
+              <span className="font-bold font-mono text-[#1A1D1F]">
+                {entry.name === "Expected Move" ? formatMoney(entry.value) : `${entry.value}%`}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function TermStructure({ surface, summary, loading }: TermStructureProps) {
   const data = useMemo(() => {
     const grouped = new Map<number, IVSurfacePoint[]>();
@@ -29,77 +55,71 @@ export default function TermStructure({ surface, summary, loading }: TermStructu
   }, [surface, summary]);
 
   return (
-    <div className="h-[280px]">
+    <div className="h-[340px] w-full">
       {loading ? (
-        <div
-          className="h-full rounded-md animate-pulse"
-          style={{ background: "var(--bg-elevated)" }}
-        />
+        <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[#EDF0F2]" />
       ) : (
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 10, right: 8, bottom: 0, left: 0 }}>
+          <ComposedChart data={data} margin={{ top: 10, right: 0, bottom: 0, left: 0 }}>
             <defs>
               <linearGradient id="ivFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#58a6ff" stopOpacity={0.28} />
-                <stop offset="100%" stopColor="#58a6ff" stopOpacity={0.02} />
+                <stop offset="0%" stopColor="#2F6BFF" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="#2F6BFF" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" />
+            <CartesianGrid stroke="#F0F2F5" vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fill: "var(--text-muted)", fontSize: 11 }}
-              axisLine={{ stroke: "var(--border-default)" }}
+              tick={{ fill: "#9A9FA5", fontSize: 10, fontWeight: 500 }}
+              axisLine={false}
               tickLine={false}
+              dy={10}
             />
             <YAxis
               yAxisId="iv"
-              tick={{ fill: "var(--text-muted)", fontSize: 11 }}
+              tick={{ fill: "#9A9FA5", fontSize: 10, fontWeight: 500 }}
               axisLine={false}
               tickLine={false}
               unit="%"
+              dx={-10}
             />
             <YAxis
               yAxisId="move"
               orientation="right"
-              tick={{ fill: "var(--text-muted)", fontSize: 11 }}
+              tick={{ fill: "#9A9FA5", fontSize: 10, fontWeight: 500 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `$${v}`}
+              dx={10}
             />
-            <Tooltip
-              contentStyle={{
-                background: "var(--bg-base)",
-                border: "1px solid var(--border-default)",
-                borderRadius: 8,
-                color: "var(--text-primary)",
-                fontSize: 12,
-              }}
-              formatter={(value, name) =>
-                name === "Expected Move"
-                  ? [formatMoney(Number(value)), name]
-                  : [`${value}%`, name]
-              }
-              labelStyle={{ color: "var(--text-muted)" }}
+            <Tooltip content={<CustomTooltip />} />
+            <Legend 
+              verticalAlign="top" 
+              align="left" 
+              iconType="circle" 
+              iconSize={8}
+              wrapperStyle={{ paddingBottom: 20, fontSize: 11, fontWeight: 600, color: "#6F767E" }}
             />
-            <Legend wrapperStyle={{ color: "var(--text-muted)", fontSize: 12 }} />
             <Area
               yAxisId="iv"
               type="monotone"
               dataKey="atmIv"
               name="ATM IV"
-              stroke="#58a6ff"
+              stroke="#2F6BFF"
               fill="url(#ivFill)"
-              strokeWidth={2.4}
-              dot={{ r: 3, fill: "#58a6ff" }}
+              strokeWidth={3}
+              dot={{ r: 4, fill: "#FFFFFF", stroke: "#2F6BFF", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: "#2F6BFF" }}
             />
             <Line
               yAxisId="move"
               type="monotone"
               dataKey="expectedMove"
               name="Expected Move"
-              stroke="#f0883e"
-              strokeWidth={2.4}
-              dot={{ r: 3, fill: "#f0883e" }}
+              stroke="#F5A623"
+              strokeWidth={3}
+              dot={{ r: 4, fill: "#FFFFFF", stroke: "#F5A623", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: "#F5A623" }}
             />
           </ComposedChart>
         </ResponsiveContainer>
