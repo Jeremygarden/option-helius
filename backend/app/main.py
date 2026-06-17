@@ -6,20 +6,85 @@ import logging
 from .routers import options, sentiment, macro, picks, report, analyze, strategies, notifications, scanner, health
 from .mock.options_chain import get_mock_chain
 from .core.config import get_settings, validate_ibkr_startup
+from .services.ibkr import IBKRDependencyError, OptionChainFetcher, create_client_from_settings
 
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Options Helius API")
 
 
-@app.on_event("startup")
-async def validate_optional_ibkr_config() -> None:
-    """Warn when IBKR is enabled but Gateway is not reachable."""
+async def startup_ibkr_lifecycle(application: FastAPI) -> None:
+    """Connect the optional IBKR provider during app startup.
+
+    IBKR remains additive: startup failures are logged and saved in app.state,
+    while yfinance fallback routes continue serving requests normally.
+    """
 
     settings = get_settings()
-    app.state.settings = settings
-    app.state.ibkr_reachable = await validate_ibkr_startup(settings)
+    application.state.settings = settings
+    application.state.ibkr_client = None
+    application.state.ibkr_fetcher = None
+    application.state.ibkr_reachable = await validate_ibkr_startup(settings)
     logger.info("Application settings loaded (ibkr_enabled=%s)", settings.ibkr_enabled)
+
+    if not settings.ibkr_enabled:
+        return
+    if not application.state.ibkr_reachable:
+        logger.warning("Skipping IBKR startup connection because Gateway is not reachable")
+        return
+
+    try:
+        client = create_client_from_settings(settings)
+        await client.connect()
+        application.state.ibkr_client = client
+        application.state.ibkr_fetcher = OptionChainFetcher(client, settings=settings)
+        health = await client.health_check()
+        logger.info(
+            "IBKR connected on startup (host=%s port=%s clientId=%s account=%s serverVersion=%s subscriptions=%s)",
+            settings.ibkr_host,
+            settings.ibkr_port,
+            settings.ibkr_client_id,
+            getattr(health, "account", None),
+            getattr(health, "server_version", None),
+            getattr(health, "subscription_count", 0),
+        )
+    except IBKRDependencyError as exc:
+        logger.warning("IBKR provider dependency missing; yfinance fallback remains active (%s)", exc)
+        application.state.ibkr_startup_error = str(exc)
+    except Exception as exc:
+        logger.warning("IBKR startup connection failed; yfinance fallback remains active (%s)", exc)
+        application.state.ibkr_startup_error = str(exc)
+
+
+async def shutdown_ibkr_lifecycle(application: FastAPI) -> None:
+    """Gracefully disconnect the optional IBKR provider during shutdown."""
+
+    client = getattr(application.state, "ibkr_client", None)
+    if client is None:
+        return
+
+    try:
+        await client.disconnect()
+        logger.info("IBKR disconnected on shutdown")
+    except Exception:
+        logger.exception("IBKR shutdown disconnect failed")
+    finally:
+        application.state.ibkr_client = None
+        application.state.ibkr_fetcher = None
+
+
+@app.on_event("startup")
+async def validate_optional_ibkr_config() -> None:
+    """Start optional IBKR provider lifecycle without breaking fallbacks."""
+
+    await startup_ibkr_lifecycle(app)
+
+
+@app.on_event("shutdown")
+async def shutdown_optional_ibkr_client() -> None:
+    """Disconnect optional IBKR provider lifecycle."""
+
+    await shutdown_ibkr_lifecycle(app)
 
 
 app.add_middleware(
