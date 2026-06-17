@@ -1,5 +1,6 @@
 import asyncio
 from types import SimpleNamespace
+import sys
 
 import pytest
 
@@ -51,9 +52,13 @@ class FakeIB:
         return [SimpleNamespace(tag="NetLiquidation", value="100000")]
 
 
-def test_client_import_does_not_require_ib_async_until_default_instantiation():
-    with pytest.raises(IBKRDependencyError):
+def test_client_import_does_not_require_ib_async_until_default_instantiation(monkeypatch):
+    # Mask ib_async to simulate it not being installed
+    monkeypatch.setitem(sys.modules, "ib_async", None)
+    
+    with pytest.raises(IBKRDependencyError) as exc:
         IBKRClient(ClientConfig())
+    assert "ib-async is required" in str(exc.value)
 
 
 def test_create_client_from_settings_uses_safe_config_with_injected_ib():
