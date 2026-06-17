@@ -675,12 +675,15 @@ export default function PicksPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div className="lg:col-span-4 space-y-4">
           <ScannerSummaryStats picks={picks} bullish={bullishCount} bearish={bearishCount} />
-          <div className="p-4 rounded-xl bg-[#0d1117] border border-[#30363d] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-[#3fb950] animate-pulse" />
-              <span className="text-xs font-bold text-[#e6edf3] uppercase tracking-wider">Scanner Active</span>
+          <div className="p-4 rounded-xl bg-[#0d1117] border border-[#30363d] flex items-center justify-between shadow-inner">
+            <div className="flex items-center gap-2.5">
+              <div className="relative flex">
+                <div className="w-2 h-2 rounded-full bg-[#3fb950] animate-ping absolute" />
+                <div className="w-2 h-2 rounded-full bg-[#3fb950] relative" />
+              </div>
+              <span className="text-[11px] font-black text-[#e6edf3] uppercase tracking-[0.15em]">System Status: Optimal</span>
             </div>
-            <span className="text-[10px] font-mono text-[#6e7681]">v2.4.1-stable</span>
+            <span className="text-[9px] font-mono font-bold text-[#484f58] bg-[#161b22] px-2 py-0.5 rounded border border-[#30363d]">v2.4.1</span>
           </div>
         </div>
         
@@ -801,21 +804,24 @@ export default function PicksPage() {
 
 /* ─── Helper Components ─── */
 function ScannerSummaryStats({ picks, bullish, bearish }: { picks: any[], bullish: number, bearish: number }) {
-  const highCount = picks.filter(p => clampScore(p.score) >= 8).length;
-  
   return (
-    <div className="p-6 rounded-2xl bg-[#161b22] border border-[#30363d] grid grid-cols-3 gap-4">
-      <div className="text-center">
-        <div className="text-2xl font-black font-mono text-[#e6edf3]">{picks.length}</div>
-        <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-wider mt-1">Total</div>
-      </div>
-      <div className="text-center border-x border-[#30363d]">
-        <div className="text-2xl font-black font-mono text-[#3fb950]">{bullish}</div>
-        <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-wider mt-1">Bull</div>
-      </div>
-      <div className="text-center">
-        <div className="text-2xl font-black font-mono text-[#f85149]">{bearish}</div>
-        <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-wider mt-1">Bear</div>
+    <div className="p-6 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-xl relative overflow-hidden group">
+      {/* Background decoration */}
+      <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors" />
+      
+      <div className="grid grid-cols-3 gap-4 relative z-10">
+        <div className="text-center">
+          <div className="text-3xl font-black font-mono text-[#e6edf3] tracking-tighter">{picks.length}</div>
+          <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-[0.2em] mt-1">Total</div>
+        </div>
+        <div className="text-center border-x border-[#30363d]">
+          <div className="text-3xl font-black font-mono text-[#3fb950] tracking-tighter">{bullish}</div>
+          <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-[0.2em] mt-1">Bullish</div>
+        </div>
+        <div className="text-center">
+          <div className="text-3xl font-black font-mono text-[#f85149] tracking-tighter">{bearish}</div>
+          <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-[0.2em] mt-1">Bearish</div>
+        </div>
       </div>
     </div>
   );
