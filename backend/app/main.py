@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import json
 import logging
-from .routers import options, sentiment, macro, picks, report, analyze, strategies, notifications, scanner
+from .routers import options, sentiment, macro, picks, report, analyze, strategies, notifications, scanner, health
 from .mock.options_chain import get_mock_chain
 from .core.config import get_settings, validate_ibkr_startup
 
@@ -39,6 +39,7 @@ app.include_router(analyze.router, prefix="/api/analyze", tags=["analyze"])
 app.include_router(strategies.router, prefix="/api/strategies", tags=["strategies"])
 app.include_router(notifications.router, prefix="/api/notifications", tags=["notifications"])
 app.include_router(scanner.router)
+app.include_router(health.router, tags=["health"])
 
 @app.get("/")
 async def root():
