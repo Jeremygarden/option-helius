@@ -18,7 +18,9 @@ services:
         condition: service_started
 
   ibgateway:
-    image: ghcr.io/extrange/ibkr:stable
+    build:
+      context: ./infra/ibkr
+    image: option-helius-ibgateway:latest
     container_name: ibgateway
     restart: unless-stopped
     environment:
