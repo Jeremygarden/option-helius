@@ -638,191 +638,185 @@ export default function PicksPage() {
   const returnMax = Math.max(...picks.map(p => Number(p.returnHigh || 0)).filter(Boolean), 0);
 
   return (
-    <div className="flex flex-col gap-4 pb-8">
+    <div className="flex flex-col gap-6 pb-12 px-6 max-w-[1600px] mx-auto">
 
-      {/* ── Page header ── */}
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
-          期权精选
-          <span className="text-[#8b949e] text-base font-normal ml-2">Picks</span>
-        </h1>
+      {/* ── Page Header ── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 py-6 border-b border-[#30363d]">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-2xl font-black tracking-tight text-[#e6edf3]">
+              TOP PICKS
+            </h1>
+            <div className="flex gap-1">
+              {WATCHLIST.map(t => (
+                <span key={t} className="px-1.5 py-0.5 rounded bg-[#1c2128] border border-[#30363d] text-[10px] font-bold font-mono text-[#8b949e]">
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+          <p className="text-sm text-[#6e7681] font-medium">
+            AI-driven option strategies based on real-time volatility surface analysis.
+          </p>
+        </div>
+        
         <button
           type="button"
           onClick={fetchPicks}
           disabled={loading}
-          className="bg-[#1158c7] hover:bg-[#1f6feb] text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+          className="bg-[#1158c7] hover:bg-[#1f6feb] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
         >
-          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-          {loading ? "扫描中..." : "重新扫描"}
+          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+          {loading ? "SCANNING MARKET..." : "REFRESH PICKS"}
         </button>
       </div>
 
-      {/* ── Scanner summary stats card ── */}
-      <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 mb-4">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="text-center">
-            <div className="font-mono text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
-              {picks.length}
+      {/* ── Scanner Summary Section ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-4 space-y-4">
+          <ScannerSummaryStats picks={picks} bullish={bullishCount} bearish={bearishCount} />
+          <div className="p-4 rounded-xl bg-[#0d1117] border border-[#30363d] flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-[#3fb950] animate-pulse" />
+              <span className="text-xs font-bold text-[#e6edf3] uppercase tracking-wider">Scanner Active</span>
             </div>
-            <div className="text-[11px] uppercase tracking-wide mt-1" style={{ color: "var(--text-muted)" }}>
-              策略数
-            </div>
+            <span className="text-[10px] font-mono text-[#6e7681]">v2.4.1-stable</span>
           </div>
-          <div className="text-center border-x border-[#30363d]">
-            <div className="font-mono text-2xl font-bold" style={{ color: "#3fb950" }}>
-              {bullishCount}
-            </div>
-            <div className="text-[11px] uppercase tracking-wide mt-1" style={{ color: "var(--text-muted)" }}>
-              看涨
-            </div>
-          </div>
-          <div className="text-center">
-            <div className="font-mono text-2xl font-bold" style={{ color: "#f85149" }}>
-              {bearishCount}
-            </div>
-            <div className="text-[11px] uppercase tracking-wide mt-1" style={{ color: "var(--text-muted)" }}>
-              看跌
-            </div>
-          </div>
+        </div>
+        
+        <div className="lg:col-span-8">
+          <ScannerSummaryCard
+            scanner={scanner}
+            selected={selectedTicker}
+            onSelect={t => setSelectedTicker(prev => prev === t ? "" : t)}
+            loading={loading}
+            error={error}
+            onRescan={fetchPicks}
+            dataSource={payload?.dataSource}
+            weekStart={payload?.week?.start}
+            weekEnd={payload?.week?.end}
+          />
         </div>
       </div>
 
-      {/* ── Scanner detail card ── */}
-      <ScannerSummaryCard
-        scanner={scanner}
-        selected={selectedTicker}
-        onSelect={t => setSelectedTicker(prev => prev === t ? "" : t)}
-        loading={loading}
-        error={error}
-        onRescan={fetchPicks}
-        dataSource={payload?.dataSource}
-        weekStart={payload?.week?.start}
-        weekEnd={payload?.week?.end}
-      />
-
-      {/* ── Direction filter tabs ── */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {DIRECTION_TABS.map(tab => (
-          <button
-            key={tab.value}
-            type="button"
-            onClick={() => setDirectionTab(tab.value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-              directionTab === tab.value
-                ? "bg-[#1158c7] text-white border-[#1158c7]"
-                : "bg-[#1c2128] border border-[#30363d] text-[#8b949e] hover:text-white hover:border-[#8b949e]"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* ── Summary stat pills ── */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div
-          className="flex items-center gap-4 rounded-lg border px-4 py-2"
-          style={{ background: "var(--bg-surface)", borderColor: "var(--border-default)" }}
-        >
-          <div>
-            <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-              策略总数
-            </div>
-            <div className="font-mono text-lg font-bold" style={{ color: "var(--text-primary)" }}>
-              {picks.length}
-              <span className="text-sm font-normal ml-1.5" style={{ color: "#3fb950" }}>
-                {highCount} 高分
-              </span>
-            </div>
-          </div>
-          <div className="w-px h-8" style={{ background: "var(--border-default)" }} />
-          <div>
-            <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-              预期回报区间
-            </div>
-            <div className="font-mono text-lg font-bold" style={{ color: "#58a6ff" }}>
-              {returnMin}%-{returnMax}%
-            </div>
-          </div>
-          {Object.entries(TYPE_META).map(([key, meta]) => (
-            <React.Fragment key={key}>
-              <div className="w-px h-8" style={{ background: "var(--border-default)" }} />
-              <div>
-                <div className="text-[10px] uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-                  {meta.cn}
-                </div>
-                <div className="font-mono text-lg font-bold" style={{ color: meta.color }}>
-                  {counts[key] ?? 0}
-                </div>
-              </div>
-            </React.Fragment>
+      {/* ── Navigation & Filters ── */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
+        <div className="flex items-center gap-2 p-1 rounded-xl bg-[#161b22] border border-[#30363d]">
+          {DIRECTION_TABS.map(tab => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setDirectionTab(tab.value)}
+              className={`px-5 py-2 rounded-lg text-xs font-bold transition-all ${
+                directionTab === tab.value
+                  ? "bg-[#1158c7] text-white shadow-md"
+                  : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#1c2128]"
+              }`}
+            >
+              {tab.label.toUpperCase()}
+            </button>
           ))}
         </div>
+
+        <FilterBar
+          tagFilter={tagFilter} setTagFilter={setTagFilter}
+          strategyFilter={strategyFilter} setStrategyFilter={setStrategyFilter}
+          sortMode={sortMode} setSortMode={setSortMode}
+          counts={counts}
+        />
       </div>
 
       {/* ── Detail Panel ── */}
       {selectedPick && <DetailPanel pick={selectedPick} />}
 
-      {/* ── Filter bar ── */}
-      <FilterBar
-        tagFilter={tagFilter} setTagFilter={setTagFilter}
-        strategyFilter={strategyFilter} setStrategyFilter={setStrategyFilter}
-        sortMode={sortMode} setSortMode={setSortMode}
-        counts={counts}
-      />
-
-      {/* ── Loading skeletons ── */}
-      {loading && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-56 rounded-lg animate-pulse"
-              style={{ background: "var(--bg-surface)", border: "1px solid var(--border-default)" }}
-            />
-          ))}
+      {/* ── Grid Section ── */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-xs font-bold text-[#6e7681] uppercase tracking-[0.2em]">
+            Recommended Strategies ({displayPicks.length})
+          </h3>
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1.5 text-[10px] font-bold text-[#6e7681]">
+              <span className="w-2 h-2 rounded bg-var(--color-call)" /> BULLISH
+            </span>
+            <span className="flex items-center gap-1.5 text-[10px] font-bold text-[#6e7681]">
+              <span className="w-2 h-2 rounded bg-var(--color-put)" /> BEARISH
+            </span>
+          </div>
         </div>
-      )}
 
-      {/* ── Picks grid ── */}
-      {!loading && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {displayPicks.map((pick, idx) => (
-            <div
-              key={pick.id || `${pick.ticker}-${idx}`}
-              style={{ animationDelay: `${idx * 30}ms` }}
-              className="animate-[fadeIn_0.3s_ease-out_both]"
-            >
-              <PickCard 
-                pick={pick} 
-                rank={idx + 1} 
-                isSelected={selectedIndex === idx}
-                onSelect={() => setSelectedIndex(idx)}
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-64 rounded-xl animate-pulse bg-[#161b22] border border-[#30363d]"
               />
-            </div>
-          ))}
-          {displayPicks.length === 0 && (
-            <div
-              className="col-span-4 py-16 text-center text-sm rounded-lg border"
-              style={{
-                color: "var(--text-muted)",
-                background: "var(--bg-surface)",
-                borderColor: "var(--border-default)",
-              }}
-            >
-              当前筛选条件下没有策略，请调整过滤器
-            </div>
-          )}
-        </div>
-      )}
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {displayPicks.map((pick, idx) => (
+              <div
+                key={pick.id || `${pick.ticker}-${idx}`}
+                style={{ animationDelay: `${idx * 40}ms` }}
+                className="animate-[fadeIn_0.4s_ease-out_both]"
+              >
+                <PickCard 
+                  pick={pick} 
+                  rank={idx + 1} 
+                  isSelected={selectedIndex === idx}
+                  onSelect={() => setSelectedIndex(idx)}
+                />
+              </div>
+            ))}
+            {displayPicks.length === 0 && (
+              <div className="col-span-full py-24 flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#30363d] bg-[#0d1117]">
+                <div className="w-12 h-12 rounded-full bg-[#161b22] flex items-center justify-center mb-4 text-[#484f58]">
+                  <SlidersHorizontal size={24} />
+                </div>
+                <p className="text-sm font-bold text-[#8b949e]">No strategies match your filters.</p>
+                <button 
+                  onClick={() => {setTagFilter("全部"); setStrategyFilter("all"); setDirectionTab("all"); setSelectedTicker("");}}
+                  className="mt-4 text-xs font-bold text-[#58a6ff] hover:underline"
+                >
+                  Clear all filters
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <style>{`
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(6px); }
+          from { opacity: 0; transform: translateY(10px); }
           to   { opacity: 1; transform: translateY(0); }
         }
         ${DETAIL_STYLES}
       `}</style>
+    </div>
+  );
+}
+
+/* ─── Helper Components ─── */
+function ScannerSummaryStats({ picks, bullish, bearish }: { picks: any[], bullish: number, bearish: number }) {
+  const highCount = picks.filter(p => clampScore(p.score) >= 8).length;
+  
+  return (
+    <div className="p-6 rounded-2xl bg-[#161b22] border border-[#30363d] grid grid-cols-3 gap-4">
+      <div className="text-center">
+        <div className="text-2xl font-black font-mono text-[#e6edf3]">{picks.length}</div>
+        <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-wider mt-1">Total</div>
+      </div>
+      <div className="text-center border-x border-[#30363d]">
+        <div className="text-2xl font-black font-mono text-[#3fb950]">{bullish}</div>
+        <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-wider mt-1">Bull</div>
+      </div>
+      <div className="text-center">
+        <div className="text-2xl font-black font-mono text-[#f85149]">{bearish}</div>
+        <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-wider mt-1">Bear</div>
+      </div>
     </div>
   );
 }
