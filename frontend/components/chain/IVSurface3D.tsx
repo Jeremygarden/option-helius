@@ -54,24 +54,32 @@ export default function IVSurface3D({ data, spot, loading }: IVSurface3DProps) {
           y: matrix.dtes,
           z: matrix.z,
           colorscale: [
-            [0, "#0d1117"],
-            [0.22, "#1f6feb"],
-            [0.55, "#58a6ff"],
-            [0.78, "#f0883e"],
-            [1, "#f85149"],
+            [0, "#E3F2FD"],
+            [0.2, "#90CAF9"],
+            [0.4, "#42A5F5"],
+            [0.6, "#2F6BFF"],
+            [0.8, "#1A56FF"],
+            [1, "#0D47A1"],
           ],
           hovertemplate: "Strike $%{x}<br>DTE %{y}<br>IV %{z:.2%}<extra></extra>",
           contours: {
-            z: { show: true, usecolormap: true, highlightcolor: "#e6edf3", project: { z: true } },
+            z: { show: true, usecolormap: true, highlightcolor: "#2F6BFF", project: { z: true } },
           },
           showscale: false,
+          lighting: {
+            ambient: 0.6,
+            diffuse: 0.9,
+            fresnel: 0.2,
+            specular: 0.5,
+            roughness: 0.3
+          }
         }
       : {
           type: "heatmap",
           x: matrix.strikes,
           y: matrix.dtes,
           z: matrix.z,
-          colorscale: "YlGnBu",
+          colorscale: "Blues",
           hovertemplate: "Strike $%{x}<br>DTE %{y}<br>IV %{z:.2%}<extra></extra>",
           showscale: false,
         },
@@ -82,58 +90,58 @@ export default function IVSurface3D({ data, spot, loading }: IVSurface3DProps) {
     margin: { l: 0, r: 0, b: 0, t: 8 },
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
-    font: { color: "var(--text-muted)", size: 10 },
+    font: { color: "#6F767E", size: 10, family: "var(--font-sans)" },
     scene: {
       xaxis: {
-        title: { text: "Strike" },
-        gridcolor: "var(--border-default)",
-        color: "var(--text-muted)",
-        zerolinecolor: "var(--border-default)",
+        title: { text: "Strike", font: { size: 10, weight: 600 } },
+        gridcolor: "#EDF0F2",
+        color: "#9A9FA5",
+        zerolinecolor: "#EDF0F2",
+        showbackground: false,
       },
       yaxis: {
-        title: { text: "DTE" },
-        gridcolor: "var(--border-default)",
-        color: "var(--text-muted)",
-        zerolinecolor: "var(--border-default)",
+        title: { text: "DTE", font: { size: 10, weight: 600 } },
+        gridcolor: "#EDF0F2",
+        color: "#9A9FA5",
+        zerolinecolor: "#EDF0F2",
+        showbackground: false,
       },
       zaxis: {
-        title: { text: "IV" },
+        title: { text: "IV", font: { size: 10, weight: 600 } },
         tickformat: ".0%",
-        gridcolor: "var(--border-default)",
-        color: "var(--text-muted)",
+        gridcolor: "#EDF0F2",
+        color: "#9A9FA5",
+        showbackground: false,
       },
       camera: { eye: { x: 1.55, y: 1.35, z: 0.92 } },
       bgcolor: "rgba(0,0,0,0)",
     },
     xaxis: {
-      color: "var(--text-muted)",
-      gridcolor: "var(--border-default)",
-      title: { text: "Strike" },
+      color: "#9A9FA5",
+      gridcolor: "#EDF0F2",
+      title: { text: "Strike", font: { size: 10, weight: 600 } },
     },
     yaxis: {
-      color: "var(--text-muted)",
-      gridcolor: "var(--border-default)",
-      title: { text: "DTE" },
+      color: "#9A9FA5",
+      gridcolor: "#EDF0F2",
+      title: { text: "DTE", font: { size: 10, weight: 600 } },
     },
   };
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {/* Mode toggle */}
       <div className="flex justify-end">
-        <div
-          className="flex rounded-md border p-0.5 text-[11px]"
-          style={{ background: "var(--bg-elevated)", borderColor: "var(--border-default)" }}
-        >
+        <div className="flex rounded-xl bg-gray-50 border border-[#EDF0F2] p-1 shadow-inner">
           {(["3d", "money", "table"] as Mode[]).map((item) => (
             <button
               key={item}
               onClick={() => setMode(item)}
-              className="rounded px-2.5 py-1 uppercase transition-colors"
-              style={{
-                background: mode === item ? "var(--accent-blue)" : "transparent",
-                color: mode === item ? "#fff" : "var(--text-muted)",
-              }}
+              className={`rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase transition-all duration-200 ${
+                mode === item 
+                  ? "bg-white text-[#2F6BFF] shadow-sm ring-1 ring-[#EDF0F2]" 
+                  : "text-[#9A9FA5] hover:text-[#6F767E]"
+              }`}
             >
               {item === "money" ? "$" : item}
             </button>
@@ -142,55 +150,43 @@ export default function IVSurface3D({ data, spot, loading }: IVSurface3DProps) {
       </div>
 
       {/* Chart / table */}
-      <div className="h-[280px] w-full">
+      <div className="h-[340px] w-full">
         {loading ? (
-          <div
-            className="h-full rounded-md animate-pulse"
-            style={{ background: "var(--bg-elevated)" }}
-          />
+          <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[#EDF0F2]" />
         ) : mode === "table" ? (
-          <div
-            className="h-full overflow-auto rounded border"
-            style={{ borderColor: "var(--border-default)" }}
-          >
-            <table className="w-full min-w-[520px] text-left font-mono text-xs">
-              <thead
-                className="sticky top-0"
-                style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}
-              >
+          <div className="h-full overflow-auto rounded-xl border border-[#EDF0F2] bg-white shadow-sm">
+            <table className="w-full min-w-[520px] text-left font-mono text-[11px]">
+              <thead className="sticky top-0 bg-gray-50 text-[#9A9FA5] border-b border-[#EDF0F2] z-10">
                 <tr>
-                  <th className="px-3 py-2">Strike</th>
-                  <th className="px-3 py-2">DTE</th>
-                  <th className="px-3 py-2">IV</th>
-                  <th className="px-3 py-2">价格偏移</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">Strike</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">DTE</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">IV</th>
+                  <th className="px-4 py-3 font-bold uppercase tracking-wider">Moneyness</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[#EDF0F2]">
                 {rows.map((p, idx) => (
                   <tr
                     key={`${p.strike}-${p.dte}-${idx}`}
-                    className="border-t"
-                    style={{ borderColor: "rgba(48,54,61,0.6)" }}
+                    className="hover:bg-gray-50/50 transition-colors"
                   >
-                    <td className="px-3 py-2" style={{ color: "var(--text-primary)" }}>
-                      ${p.strike}
+                    <td className="px-4 py-2.5 font-bold text-[#1A1D1F]">
+                      ${p.strike.toLocaleString()}
                     </td>
-                    <td className="px-3 py-2" style={{ color: "var(--text-secondary)" }}>
+                    <td className="px-4 py-2.5 text-[#6F767E]">
                       {p.dte}
                     </td>
-                    <td className="px-3 py-2" style={{ color: "var(--accent-blue)" }}>
+                    <td className="px-4 py-2.5 font-bold text-[#2F6BFF]">
                       {formatIV(p.iv)}
                     </td>
                     <td
-                      className="px-3 py-2"
-                      style={{
-                        color:
-                          p.strike >= (spot || 0)
-                            ? "var(--accent-green)"
-                            : "var(--accent-red)",
-                      }}
+                      className={`px-4 py-2.5 font-bold ${
+                        p.strike >= (spot || 0)
+                          ? "text-[#2EB6D2]"
+                          : "text-[#E91E63]"
+                      }`}
                     >
-                      {spot ? `${p.moneyness.toFixed(1)}%` : "—"}
+                      {spot ? `${p.moneyness > 0 ? "+" : ""}${p.moneyness.toFixed(1)}%` : "—"}
                     </td>
                   </tr>
                 ))}
