@@ -629,6 +629,16 @@ export default function PicksPage() {
   const returnMin = Math.min(...picks.map(p => Number(p.returnLow || 0)).filter(Boolean), 0);
   const returnMax = Math.max(...picks.map(p => Number(p.returnHigh || 0)).filter(Boolean), 0);
 
+  const handleCardClick = (index: number) => {
+    if (selectedIndex === index) {
+      setSelectedIndex(null);
+    } else {
+      setSelectedIndex(index);
+      // Smooth scroll to top when selecting a card
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 pb-12 px-6 max-w-[1600px] mx-auto">
 
@@ -761,7 +771,7 @@ export default function PicksPage() {
                   pick={pick} 
                   rank={idx + 1} 
                   isSelected={selectedIndex === idx}
-                  onSelect={() => setSelectedIndex(idx)}
+                  onSelect={() => handleCardClick(idx)}
                 />
               </div>
             ))}
