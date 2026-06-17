@@ -21,6 +21,12 @@ IBKR-enabled stack:
 docker compose -f docker-compose.yml -f docker-compose.ibkr.yml up -d
 ```
 
+Or use the helper script, which exports safe defaults, starts the same compose files, and prints the noVNC URL:
+
+```bash
+./scripts/start_ibkr.sh --build
+```
+
 ## 1. Prepare environment variables
 
 Copy the template and edit local values:
