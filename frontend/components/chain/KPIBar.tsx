@@ -32,7 +32,7 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
       label: "Max Pain",
       value: formatMoney(summary?.max_pain, { digits: 2 }),
       sub: summary?.expiry ?? "selected expiry",
-      colorClass: "text-primary",
+      colorClass: "text-[#1A1D1F]",
     },
     {
       label: "P/C 成交量",
