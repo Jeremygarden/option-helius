@@ -8,6 +8,11 @@ services:
       - DATABASE_URL=postgres://postgres:postgres@timescaledb:5432/postgres
       - FLASHALPHA_API_KEY=${FLASHALPHA_API_KEY:-kA3RN78I4T1lE1EyOyHiH9yfJs2QdX9HQuCQeOM5}
       - ALPHAVANTAGE_API_KEY=${ALPHAVANTAGE_API_KEY:-4ZVBTAERBE2N4AUG}
+      - IBKR_ENABLED=${IBKR_ENABLED:-false}
+      - IBKR_HOST=${IBKR_HOST:-localhost}
+      - IBKR_PORT=${IBKR_PORT:-4002}
+      - IBKR_CLIENT_ID=${IBKR_CLIENT_ID:-1}
+      - IBKR_ACCOUNT_TYPE=${IBKR_ACCOUNT_TYPE:-paper}
     depends_on:
       redis:
         condition: service_healthy

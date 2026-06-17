@@ -1,0 +1,47 @@
+# Optional local override loaded automatically by `docker compose`.
+# The ibgateway service is behind the `ibkr` profile, so default `docker compose up`
+# still starts only the base application. Use:
+#   docker compose --profile ibkr up -d
+# or set COMPOSE_PROFILES=ibkr in .env.
+
+services:
+  backend:
+    depends_on:
+      ibgateway:
+        condition: service_started
+        required: false
+
+  ibgateway:
+    profiles:
+      - ibkr
+    build:
+      context: ./infra/ibkr
+    image: option-helius-ibgateway:latest
+    container_name: ibgateway
+    restart: unless-stopped
+    environment:
+      - IBKR_USERNAME=${IBKR_USERNAME:-}
+      - IBKR_PASSWORD=${IBKR_PASSWORD:-}
+      - TRADING_MODE=${TRADING_MODE:-PAPER}
+      - TWS_VERSION=${TWS_VERSION:-1019}
+      - IBC_VERSION=${IBC_VERSION:-3.18.0}
+      - TZ=${TZ:-America/New_York}
+      - VNC_PASSWORD=${VNC_PASSWORD:-changeme123}
+    ports:
+      - "${PAPER_PORT:-4002}:4002"
+      - "${VNC_PORT:-6080}:6080"
+    volumes:
+      - ibgateway-settings:/home/ibgateway/.java
+      - ibgateway-ibc:/home/ibgateway/ibc
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 4002 || nc -z localhost 4001"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    networks:
+      - option-helius-net
+
+volumes:
+  ibgateway-settings:
+  ibgateway-ibc:

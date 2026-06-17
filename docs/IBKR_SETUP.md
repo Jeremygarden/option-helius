@@ -15,10 +15,16 @@ Default stack without IBKR remains unchanged:
 docker compose up -d
 ```
 
-IBKR-enabled stack:
+IBKR-enabled stack using the automatic `ibkr` profile:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.ibkr.yml up -d
+IBKR_ENABLED=true IBKR_HOST=ibgateway docker compose --profile ibkr up -d --build
+```
+
+Equivalent explicit override form:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.ibkr.yml up -d --build
 ```
 
 Or use the helper script, which exports safe defaults, starts the same compose files, and prints the noVNC URL:
@@ -69,7 +75,7 @@ PAPER_PORT=4002
 Start:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose.ibkr.yml up -d --build
+IBKR_ENABLED=true IBKR_HOST=ibgateway docker compose --profile ibkr up -d --build
 ```
 
 ### Live trading
@@ -173,6 +179,12 @@ Security notes:
 ## 7. Stop or reset
 
 Stop IBKR-enabled stack:
+
+```bash
+docker compose --profile ibkr down
+```
+
+If you used the explicit override form, stop with:
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.ibkr.yml down

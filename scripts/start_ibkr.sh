@@ -35,6 +35,7 @@ if [[ ! -f ".env" ]]; then
 MSG
 fi
 
+export COMPOSE_PROFILES="${COMPOSE_PROFILES:-ibkr}"
 export IBKR_ENABLED="${IBKR_ENABLED:-true}"
 export IBKR_HOST="${IBKR_HOST:-ibgateway}"
 export IBKR_CLIENT_ID="${IBKR_CLIENT_ID:-1}"
