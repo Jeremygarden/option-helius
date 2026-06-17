@@ -1,58 +1,131 @@
 "use client";
 
-import { Search, Bell, Settings } from "lucide-react";
+import { Search, Bell, Settings, TrendingUp, TrendingDown } from "lucide-react";
+import { usePathname } from "next/navigation";
+
+const PAGE_META: Record<string, { cn: string; en: string }> = {
+  "/macro":     { cn: "市场概览",   en: "Market Overview"  },
+  "/chain":     { cn: "期权链",     en: "Options Chain"    },
+  "/sentiment": { cn: "市场情绪",   en: "Market Sentiment" },
+  "/picks":     { cn: "精选策略",   en: "Weekly Picks"     },
+  "/profile":   { cn: "个人设置",   en: "Profile"          },
+  "/":          { cn: "仪表盘",     en: "Dashboard"        },
+};
+
+const TICKERS = [
+  { sym: "NVDA", price: "128.50", chg: "+2.4%", up: true  },
+  { sym: "VIX",  price: "14.50",  chg: "+1.2%", up: false },
+  { sym: "SPY",  price: "545.20", chg: "+0.8%", up: true  },
+];
 
 export default function TopBar() {
+  const pathname = usePathname();
+  const meta = PAGE_META[pathname] ?? { cn: "终端", en: "Terminal" };
+
   return (
-    <header className="h-12 border-b border-[var(--border-default)] flex items-center justify-between px-5 bg-[var(--bg-primary)] sticky top-0 z-10">
-      {/* Search */}
-      <div className="flex items-center gap-3 flex-1 max-w-md">
-        <div className="relative w-full">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={14} />
-          <input
-            type="text"
-            placeholder="Search ticker..."
-            className="w-full bg-[var(--bg-secondary)] border border-[var(--border-default)] rounded-md py-1.5 pl-8 pr-3 text-data-sm font-mono text-[var(--text-primary)] placeholder:text-[var(--text-placeholder)] focus:outline-none focus:border-[var(--accent-blue)] transition-colors"
-            defaultValue="NVDA"
-          />
-          <kbd className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-[var(--text-muted)] bg-[var(--bg-elevated)] border border-[var(--border-default)] rounded px-1 py-0.5 font-mono">
-            /
-          </kbd>
-        </div>
+    <header
+      className="h-14 border-b border-[#30363d] flex items-center justify-between gap-4 px-6 sticky top-0 z-20"
+      style={{ background: "var(--bg-base)" }}
+    >
+      {/* ── Left: page title ── */}
+      <div className="flex items-baseline gap-3 shrink-0">
+        <h1 className="text-xl font-bold leading-none tracking-tight" style={{ color: "var(--text-primary)" }}>
+          {meta.cn}
+        </h1>
+        <span className="text-[13px] font-normal" style={{ color: "var(--text-muted)" }}>
+          {meta.en}
+        </span>
       </div>
 
-      {/* Market Data Strip */}
-      <div className="flex items-center gap-5">
-        <div className="flex gap-5 font-mono text-data-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-[var(--text-muted)] text-data-xs">NVDA</span>
-            <span className="text-[var(--color-bullish)] font-medium">128.50</span>
-            <span className="text-[var(--color-bullish)] text-data-xs">+2.4%</span>
-          </div>
-          <div className="w-px h-4 bg-[var(--border-default)]" />
-          <div className="flex items-center gap-2">
-            <span className="text-[var(--text-muted)] text-data-xs">VIX</span>
-            <span className="text-[var(--color-bearish)] font-medium">14.50</span>
-            <span className="text-[var(--color-bearish)] text-data-xs">+1.2%</span>
-          </div>
-          <div className="w-px h-4 bg-[var(--border-default)]" />
-          <div className="flex items-center gap-2">
-            <span className="text-[var(--text-muted)] text-data-xs">SPY</span>
-            <span className="text-[var(--color-bullish)] font-medium">545.20</span>
-            <span className="text-[var(--color-bullish)] text-data-xs">+0.8%</span>
-          </div>
+      {/* ── Right cluster ── */}
+      <div className="flex items-center gap-3 ml-auto">
+
+        {/* Ticker strip */}
+        <div
+          className="hidden md:flex items-center gap-1 rounded-lg px-3 py-1.5 border border-[#21262d]"
+          style={{ background: "var(--bg-surface)" }}
+        >
+          {TICKERS.map((t, i) => (
+            <div key={t.sym} className="flex items-center gap-1.5">
+              {i > 0 && <div className="w-px h-3.5 bg-[#30363d]" />}
+              <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
+                {t.sym}
+              </span>
+              <span
+                className="text-[12px] font-mono font-semibold"
+                style={{ color: t.up ? "var(--accent-green)" : "var(--accent-red)" }}
+              >
+                {t.price}
+              </span>
+              <span
+                className="flex items-center gap-0.5 text-[10px] font-mono"
+                style={{ color: t.up ? "var(--accent-green)" : "var(--accent-red)" }}
+              >
+                {t.up ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                {t.chg}
+              </span>
+            </div>
+          ))}
         </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-2 ml-3">
-          <button className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors">
-            <Bell size={15} />
+        {/* Search */}
+        <div className="relative">
+          <Search
+            size={14}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+            style={{ color: "var(--text-muted)" }}
+          />
+          <input
+            type="text"
+            placeholder="搜索标的..."
+            defaultValue="NVDA"
+            className="w-36 rounded-lg py-1.5 pl-8 pr-3 text-[12px] font-mono border border-[#30363d] transition-all focus:outline-none focus:border-[#58a6ff] focus:w-48"
+            style={{
+              background: "var(--bg-surface)",
+              color: "var(--text-primary)",
+            }}
+          />
+        </div>
+
+        {/* Action icon buttons */}
+        <div className="flex items-center gap-1">
+          <button
+            className="p-1.5 rounded-lg transition-colors"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
+              (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.background = "transparent";
+              (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
+            }}
+            aria-label="通知"
+          >
+            <Bell size={16} />
           </button>
-          <button className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors">
-            <Settings size={15} />
+          <button
+            className="p-1.5 rounded-lg transition-colors"
+            style={{ color: "var(--text-muted)" }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
+              (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.background = "transparent";
+              (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
+            }}
+            aria-label="设置"
+          >
+            <Settings size={16} />
           </button>
-          <div className="w-7 h-7 rounded-md bg-[var(--bg-elevated)] border border-[var(--border-default)] flex items-center justify-center ml-1">
-            <span className="text-data-xs font-mono font-medium text-[var(--text-secondary)]">JJ</span>
+
+          {/* Avatar */}
+          <div
+            className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-mono font-bold ml-1 border border-[#30363d] cursor-pointer"
+            style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)" }}
+          >
+            JJ
           </div>
         </div>
       </div>
