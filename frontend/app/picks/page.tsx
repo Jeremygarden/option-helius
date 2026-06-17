@@ -96,12 +96,12 @@ type PicksResponse = {
 };
 
 /* ─── Type metadata ──────────────────────────────────────────── */
-const TYPE_META: Record<StrategyType, {
+const TYPE_META: Record<string, {
   label: string; cn: string; color: string; bg: string; border: string;
 }> = {
-  sell_put:    { label: "SELL PUT",    cn: "卖Put",  color: "#3fb950", bg: "rgba(63,185,80,0.12)",  border: "rgba(63,185,80,0.3)"  },
-  call_spread: { label: "CALL SPREAD", cn: "Call价差", color: "#58a6ff", bg: "rgba(88,166,255,0.12)", border: "rgba(88,166,255,0.3)" },
-  iron_condor: { label: "IRON CONDOR", cn: "铁鹰",   color: "#f0883e", bg: "rgba(240,136,62,0.12)", border: "rgba(240,136,62,0.3)" },
+  sell_put:    { label: "SELL PUT",    cn: "卖PUT",  color: "#f85149", bg: "rgba(248,81,73,0.1)",  border: "rgba(248,81,73,0.2)"  },
+  call_spread: { label: "CALL SPREAD", cn: "CALL价差", color: "#3fb950", bg: "rgba(63,185,80,0.1)", border: "rgba(63,185,80,0.2)" },
+  iron_condor: { label: "IRON CONDOR", cn: "铁鹰",   color: "#a371f7", bg: "rgba(163,113,247,0.1)", border: "rgba(163,113,247,0.2)" },
 };
 
 /* ─── Fallback data ──────────────────────────────────────────── */
