@@ -308,30 +308,30 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
 
   return (
     <div 
-      className="mb-6 rounded-2xl border border-[#30363d] overflow-hidden transition-all duration-300 animate-[slideDown_0.3s_ease-out_both]"
+      className="mb-6 rounded-2xl border border-[#30363d] overflow-hidden transition-all duration-300 animate-[slideDown_0.3s_ease-out_both] shadow-2xl"
       style={{ background: "linear-gradient(180deg, #1c2128 0%, #161b22 100%)" }}
     >
       {/* Header Info */}
-      <div className="px-6 py-4 border-b border-[#30363d] flex items-center justify-between">
+      <div className="px-6 py-5 border-b border-[#30363d] flex items-center justify-between bg-gradient-to-r from-[#1c2128] to-transparent">
         <div className="flex items-center gap-4">
-          <h2 className="text-xl font-bold font-mono text-[#e6edf3]">
-            {pick.ticker} <span className="text-[#8b949e] font-normal text-sm ml-1">{pick.strategyName || meta.cn}</span>
+          <h2 className="text-2xl font-black font-mono tracking-tighter text-[#e6edf3]">
+            {pick.ticker} <span className="text-[#6e7681] font-bold text-xs ml-2 tracking-widest uppercase">{pick.strategyName || meta.cn}</span>
           </h2>
           <div 
-            className="px-2 py-0.5 rounded text-[10px] font-bold font-mono"
-            style={{ backgroundColor: meta.bg, color: meta.color }}
+            className="px-2.5 py-1 rounded-lg text-[10px] font-black font-mono border"
+            style={{ backgroundColor: meta.bg, color: meta.color, borderColor: meta.border }}
           >
             {meta.label}
           </div>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-8">
           <div className="text-right">
-            <div className="text-[10px] text-[#6e7681] font-bold tracking-widest uppercase">Target</div>
-            <div className="text-sm font-bold font-mono text-[#3fb950]">{pick.target || "--"}</div>
+            <div className="text-[10px] text-[#6e7681] font-black tracking-[0.2em] uppercase mb-1">Target Price</div>
+            <div className="text-lg font-black font-mono text-[#3fb950] leading-none tabular-nums">{pick.target || "--"}</div>
           </div>
-          <div className="text-right">
-            <div className="text-[10px] text-[#6e7681] font-bold tracking-widest uppercase">Stop</div>
-            <div className="text-sm font-bold font-mono text-[#f85149]">{pick.stop || "--"}</div>
+          <div className="text-right border-l border-[#30363d] pl-8">
+            <div className="text-[10px] text-[#6e7681] font-black tracking-[0.2em] uppercase mb-1">Stop Loss</div>
+            <div className="text-lg font-black font-mono text-[#f85149] leading-none tabular-nums">{pick.stop || "--"}</div>
           </div>
         </div>
       </div>
