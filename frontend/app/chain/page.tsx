@@ -1,14 +1,77 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { RefreshCw, Search, ShieldCheck, WifiOff } from "lucide-react";
+import { RefreshCw, ShieldCheck, WifiOff, Zap } from "lucide-react";
 import KPIBar from "@/components/chain/KPIBar";
 import IVSurface3D from "@/components/chain/IVSurface3D";
 import TermStructure from "@/components/chain/TermStructure";
 import OIVolChart from "@/components/chain/OIVolChart";
 import GEXChart from "@/components/chain/GEXChart";
-import { ChainResponse, GexPoint, IVSurfacePoint, SummaryResponse, createMockChain, createMockExpirations, createMockGex, createMockIVSurface, fetchJson, formatMoney, normalizeTicker, summarizeChain, toExpirationItem } from "@/lib/chainData";
+import {
+  ChainResponse,
+  GexPoint,
+  IVSurfacePoint,
+  SummaryResponse,
+  createMockChain,
+  createMockExpirations,
+  createMockGex,
+  createMockIVSurface,
+  fetchJson,
+  formatMoney,
+  normalizeTicker,
+  summarizeChain,
+  toExpirationItem,
+} from "@/lib/chainData";
 
+/* ─── Chart card wrapper ─────────────────────────────────────── */
+function ChartCard({
+  title,
+  subtitle,
+  children,
+}: {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className="flex flex-col rounded-lg border overflow-hidden"
+      style={{ background: "var(--bg-surface)", borderColor: "var(--border-default)" }}
+    >
+      {/* Header */}
+      <div
+        className="flex items-start justify-between px-4 pt-4 pb-3 border-b"
+        style={{ borderColor: "var(--border-muted)" }}
+      >
+        <div>
+          <h3
+            className="text-sm font-semibold leading-tight"
+            style={{ color: "var(--text-primary)" }}
+          >
+            {title}
+          </h3>
+          {subtitle && (
+            <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+              {subtitle}
+            </p>
+          )}
+        </div>
+      </div>
+      {/* Body */}
+      <div className="flex-1 p-4">{children}</div>
+    </div>
+  );
+}
+
+/* ─── DTE badge color ────────────────────────────────────────── */
+function dteBadgeColor(dte: number): string {
+  if (dte <= 7) return "#f85149";
+  if (dte <= 21) return "#f0883e";
+  if (dte <= 45) return "#58a6ff";
+  return "#8b949e";
+}
+
+/* ─── Main page ──────────────────────────────────────────────── */
 export default function ChainPage() {
   const [ticker, setTicker] = useState("NVDA");
   const [draftTicker, setDraftTicker] = useState("NVDA");
@@ -28,7 +91,10 @@ export default function ChainPage() {
       setLoading(true);
       setError(null);
       const mockExp = createMockExpirations();
-      const expResult = await fetchJson<{ ticker: string; expirations: string[] }>(`/api/options/expirations/${ticker}`, { ticker, expirations: mockExp });
+      const expResult = await fetchJson<{ ticker: string; expirations: string[] }>(
+        `/api/options/expirations/${ticker}`,
+        { ticker, expirations: mockExp },
+      );
       const dates = expResult.data.expirations?.length ? expResult.data.expirations : mockExp;
       const selected = expiry && dates.includes(expiry) ? expiry : dates[0];
       const mockChain = createMockChain(ticker, selected);
@@ -41,23 +107,33 @@ export default function ChainPage() {
       if (cancelled) return;
       const nextChain = chainResult.data.options?.length ? chainResult.data : mockChain;
       const chainSummary = summarizeChain(nextChain);
-      const nextSummary = { ...chainSummary, ...summaryResult.data, expiry: selected, call_oi: chainSummary.call_oi, put_oi: chainSummary.put_oi, net_gex: gexResult.data.reduce((sum, p) => sum + p.gex * 1_000_000, 0) };
+      const nextSummary = {
+        ...chainSummary,
+        ...summaryResult.data,
+        expiry: selected,
+        call_oi: chainSummary.call_oi,
+        put_oi: chainSummary.put_oi,
+        net_gex: gexResult.data.reduce((sum, p) => sum + p.gex * 1_000_000, 0),
+      };
       setExpirations(dates);
       setExpiry(selected);
       setChain(nextChain);
       setSummary(nextSummary);
       setGex(gexResult.data.length ? gexResult.data : createMockGex(nextChain));
       setSurface(surfaceResult.data.length ? surfaceResult.data : createMockIVSurface(ticker));
-      const errors = [expResult, chainResult, summaryResult, gexResult, surfaceResult].filter((r) => r.fallback && r.error).map((r) => r.error);
+      const errors = [expResult, chainResult, summaryResult, gexResult, surfaceResult]
+        .filter((r) => r.fallback && r.error)
+        .map((r) => r.error);
       setError(errors.length ? Array.from(new Set(errors)).slice(0, 2).join("; ") : null);
       setLoading(false);
     }
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [ticker, expiry, refreshing]);
 
   const expiryItems = useMemo(() => expirations.map(toExpirationItem), [expirations]);
-  const activeExpiry = expiryItems.find((item) => item.date === expiry);
   const netGex = gex.reduce((sum, p) => sum + p.gex * 1_000_000, 0);
 
   function submitTicker(event: FormEvent) {
@@ -68,14 +144,164 @@ export default function ChainPage() {
     setTicker(next);
   }
 
-  return <div className="min-h-full bg-[radial-gradient(circle_at_top_left,rgba(88,166,255,0.10),transparent_34%),#0d1117] pb-8"><div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between"><div><div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#30363d] bg-[#161b22]/80 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-[#58a6ff]"><span className="h-1.5 w-1.5 rounded-full bg-[#3fb950] shadow-[0_0_12px_#3fb950]" /> NUX Options Terminal</div><h1 className="text-3xl font-black tracking-tight text-[#e6edf3]">{ticker} 期权链 / Options Chain</h1><p className="text-sm text-[#7d8590]">Production-grade derivatives cockpit with live API sync and deterministic fallback.</p></div><form onSubmit={submitTicker} className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"><div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7d8590]" size={16} /><input value={draftTicker} onChange={(e) => setDraftTicker(e.target.value)} className="h-10 w-full rounded-md border border-[#30363d] bg-[#161b22] pl-9 pr-3 font-mono text-sm uppercase outline-none transition focus:border-[#58a6ff] sm:w-56" placeholder="Ticker" /></div><button className="h-10 rounded-md border border-[#58a6ff]/50 bg-[#58a6ff]/10 px-4 text-sm font-bold text-[#58a6ff] transition hover:bg-[#58a6ff] hover:text-[#0d1117]">Load Chain</button><button type="button" onClick={() => setRefreshing((x) => x + 1)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#30363d] bg-[#161b22] px-3 text-sm text-[#7d8590] hover:text-[#e6edf3]"><RefreshCw size={14} className={loading ? "animate-spin" : ""} />Refresh</button></form></div>
+  return (
+    <div className="flex flex-col gap-4 pb-8">
 
-    <div className="mb-5 overflow-hidden rounded-lg border border-[#30363d] bg-[#161b22]/80"><div className="flex items-center gap-2 overflow-x-auto p-2">{expiryItems.map((item) => <button key={item.date} onClick={() => setExpiry(item.date)} className={`min-w-[132px] rounded-md border px-3 py-2 text-left transition ${item.date === expiry ? "border-[#58a6ff] bg-[#58a6ff]/12 shadow-[0_0_0_1px_rgba(88,166,255,0.22)_inset]" : "border-[#30363d] bg-[#0d1117] hover:border-[#58a6ff]/50"}`}><span className="block font-mono text-sm font-black text-[#e6edf3]">{item.label}</span><span className="mt-1 flex items-center justify-between text-[10px] uppercase tracking-wide text-[#7d8590]"><span>{item.dte} DTE</span><span className={item.kind === "Monthly" ? "text-[#f0883e]" : "text-[#58a6ff]"}>{item.kind}</span></span></button>)}</div></div>
+      {/* ── Page header row ── */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          {/* Spot price pill */}
+          {summary?.spot && (
+            <div
+              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 border font-mono text-sm font-bold"
+              style={{
+                background: "var(--bg-surface)",
+                borderColor: "var(--border-default)",
+                color: "var(--accent-green)",
+              }}
+            >
+              <Zap size={13} />
+              {formatMoney(summary.spot)}
+            </div>
+          )}
+          {/* Data state badge */}
+          <div
+            className="flex items-center gap-1.5 rounded-md px-3 py-1.5 border text-xs font-mono"
+            style={{
+              background: "var(--bg-surface)",
+              borderColor: "var(--border-default)",
+              color: error ? "var(--accent-yellow)" : "var(--accent-green)",
+            }}
+          >
+            {error ? <WifiOff size={12} /> : <ShieldCheck size={12} />}
+            {error ? "FALLBACK" : "LIVE"}
+          </div>
+        </div>
 
-    <KPIBar summary={summary} loading={loading} error={error} />
+        {/* Ticker form */}
+        <form onSubmit={submitTicker} className="flex items-center gap-2">
+          <input
+            value={draftTicker}
+            onChange={(e) => setDraftTicker(e.target.value)}
+            className="h-9 w-28 rounded-lg border px-3 font-mono text-sm uppercase transition focus:outline-none focus:border-[#58a6ff]"
+            style={{
+              background: "var(--bg-surface)",
+              borderColor: "var(--border-default)",
+              color: "var(--text-primary)",
+            }}
+            placeholder="Ticker"
+          />
+          <button
+            type="submit"
+            className="h-9 rounded-lg px-4 text-sm font-semibold transition hover:brightness-110"
+            style={{ background: "#1158c7", color: "#fff" }}
+          >
+            载入
+          </button>
+          <button
+            type="button"
+            onClick={() => setRefreshing((x) => x + 1)}
+            className="h-9 w-9 flex items-center justify-center rounded-lg border transition hover:brightness-110"
+            style={{
+              background: "var(--bg-surface)",
+              borderColor: "var(--border-default)",
+              color: "var(--text-muted)",
+            }}
+            aria-label="刷新"
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+          </button>
+        </form>
+      </div>
 
-    <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-4"><div className="card p-3"><p className="text-[10px] uppercase tracking-[0.16em] text-[#7d8590]">Selected Expiry</p><p className="mt-1 font-mono text-lg font-bold text-[#e6edf3]">{activeExpiry?.date || "—"}</p></div><div className="card p-3"><p className="text-[10px] uppercase tracking-[0.16em] text-[#7d8590]">Spot</p><p className="mt-1 font-mono text-lg font-bold text-[#58a6ff]">{formatMoney(summary?.spot)}</p></div><div className="card p-3"><p className="text-[10px] uppercase tracking-[0.16em] text-[#7d8590]">Contracts</p><p className="mt-1 font-mono text-lg font-bold text-[#e6edf3]">{(chain?.options.length || 0).toLocaleString()}</p></div><div className="card p-3"><p className="text-[10px] uppercase tracking-[0.16em] text-[#7d8590]">Data State</p><p className={`mt-1 flex items-center gap-2 font-mono text-sm font-bold ${error ? "text-[#f0883e]" : "text-[#3fb950]"}`}>{error ? <WifiOff size={15} /> : <ShieldCheck size={15} />}{error ? "FALLBACK" : "LIVE API"}</p></div></div>
+      {/* ── KPI bar ── */}
+      <KPIBar summary={summary} loading={loading} error={error} />
 
-    <div className="grid grid-cols-1 gap-4 xl:grid-cols-2"><IVSurface3D data={surface} spot={summary?.spot} loading={loading} /><TermStructure surface={surface} summary={summary} loading={loading} /><OIVolChart chain={chain} loading={loading} /><GEXChart data={gex} summary={{ ...(summary || { ticker }), net_gex: netGex }} loading={loading} /></div>
-  </div>;
+      {/* ── Expiry tab bar ── */}
+      <div
+        className="flex items-center gap-2 overflow-x-auto pb-1"
+        style={{ scrollbarWidth: "none" }}
+      >
+        <span
+          className="shrink-0 text-xs font-semibold mr-1"
+          style={{ color: "var(--text-muted)" }}
+        >
+          到期日
+        </span>
+        {expiryItems.map((item) => {
+          const isActive = item.date === expiry;
+          return (
+            <button
+              key={item.date}
+              onClick={() => setExpiry(item.date)}
+              className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium transition-colors border"
+              style={{
+                background: isActive ? "var(--accent-blue)" : "var(--bg-surface)",
+                borderColor: isActive ? "var(--accent-blue)" : "var(--border-default)",
+                color: isActive ? "#fff" : "var(--text-secondary)",
+              }}
+            >
+              <span>{item.label}</span>
+              <span
+                className="text-[10px] font-bold px-1 rounded"
+                style={{
+                  background: isActive ? "rgba(255,255,255,0.2)" : "var(--bg-elevated)",
+                  color: isActive ? "#fff" : dteBadgeColor(item.dte),
+                }}
+              >
+                {item.dte}D
+              </span>
+              {!isActive && (
+                <span
+                  className="text-[9px] uppercase"
+                  style={{ color: item.kind === "Monthly" ? "#f0883e" : "var(--text-muted)" }}
+                >
+                  {item.kind[0]}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ── Charts: 2-column top row ── */}
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <ChartCard
+          title="IV 曲面 / IV Surface 3D"
+          subtitle="Strike × DTE × 隐含波动率，悬停查看节点数据"
+        >
+          <IVSurface3D data={surface} spot={summary?.spot} loading={loading} />
+        </ChartCard>
+
+        <ChartCard
+          title="IV 期限结构 / Term Structure"
+          subtitle="ATM IV（蓝线）+ 预期波动（橙线）双轴"
+        >
+          <TermStructure surface={surface} summary={summary} loading={loading} />
+        </ChartCard>
+      </div>
+
+      {/* ── Charts: full-width bottom row ── */}
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <ChartCard
+          title="持仓/成交分布 / OI & Volume"
+          subtitle="各行权价 Call/Put 持仓量 + 成交量对比"
+        >
+          <OIVolChart chain={chain} loading={loading} />
+        </ChartCard>
+
+        <ChartCard
+          title="GEX 分布 / Gamma Exposure"
+          subtitle="各行权价正/负 Gamma 敞口，Max Pain 标记"
+        >
+          <GEXChart
+            data={gex}
+            summary={{ ...(summary || { ticker }), net_gex: netGex }}
+            loading={loading}
+          />
+        </ChartCard>
+      </div>
+
+    </div>
+  );
 }
