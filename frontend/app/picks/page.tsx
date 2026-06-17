@@ -416,86 +416,44 @@ function ScannerSummaryCard({
 }) {
   return (
     <div
-      className="rounded-lg border p-4"
+      className="rounded-2xl border p-5 h-full flex flex-col justify-between"
       style={{ background: "var(--bg-surface)", borderColor: "var(--border-default)" }}
     >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        {/* Left: title + meta */}
+      <div className="flex items-start justify-between gap-3 mb-4">
         <div>
-          <h2 className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>
-            本周扫描结果
-            <span
-              className="ml-2 text-[10px] font-mono px-1.5 py-0.5 rounded"
-              style={{ background: "rgba(63,185,80,0.12)", color: "#3fb950" }}
-            >
-              {error ? "FALLBACK" : dataSource?.toUpperCase() || "LIVE"}
-            </span>
+          <h2 className="text-sm font-black text-[#e6edf3] uppercase tracking-wider">
+            Market Scanner
           </h2>
-          <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
-            {weekStart && weekEnd ? `${fmtDate(weekStart)} → ${fmtDate(weekEnd)}` : "Weekly Options Scanner"}
-            {error && <span style={{ color: "var(--accent-yellow)" }}> · {error}</span>}
+          <p className="text-[10px] font-bold text-[#6e7681] mt-0.5">
+            {weekStart && weekEnd ? `${fmtDate(weekStart)} → ${fmtDate(weekEnd)}` : "Live Ticker Analysis"}
           </p>
         </div>
-
-        {/* Right: rescan button */}
-        <button
-          type="button"
-          onClick={onRescan}
-          disabled={loading}
-          className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors disabled:opacity-50"
-          style={{ background: "#1158c7", borderColor: "#1158c7", color: "#fff" }}
-        >
-          <RefreshCw size={12} className={loading ? "animate-spin" : ""} />
-          {loading ? "扫描中..." : "重新扫描"}
-        </button>
       </div>
 
-      {/* Bullet-point scan results */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
         {scanner.map(item => {
           const t = (item.ticker || "").toUpperCase();
           const isSelected = t === selected;
-          const ivHigh = (item.ivRank || 0) >= 60;
           return (
             <button
               key={t}
               type="button"
               onClick={() => onSelect(t)}
-              className="flex items-start gap-2 p-2.5 rounded-md border text-left transition-all hover:brightness-110"
+              className="flex flex-col items-center p-3 rounded-xl border text-center transition-all hover:scale-105"
               style={{
-                background: isSelected ? "rgba(17,88,199,0.15)" : "var(--bg-elevated)",
-                borderColor: isSelected ? "#1158c7" : "var(--border-default)",
+                background: isSelected ? "rgba(88,166,255,0.08)" : "var(--bg-elevated)",
+                borderColor: isSelected ? "#58a6ff" : "var(--border-default)",
               }}
             >
-              {/* Bullet dot */}
-              <span
-                className="mt-1 w-1.5 h-1.5 rounded-full shrink-0"
-                style={{ background: isSelected ? "#58a6ff" : "var(--text-muted)" }}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-1">
-                  <span className="font-mono font-bold text-xs" style={{ color: "var(--text-primary)" }}>{t}</span>
-                  <span className="font-mono text-[10px]" style={{ color: "var(--text-secondary)" }}>
-                    {fmtNum(item.price, 1)}
-                  </span>
-                </div>
-                <div className="text-[10px] truncate mt-0.5" style={{ color: "var(--text-muted)" }}>
-                  {item.bias}
-                </div>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <span
-                    className="text-[9px] font-mono px-1 py-0.5 rounded"
-                    style={{
-                      background: ivHigh ? "rgba(240,136,62,0.15)" : "var(--bg-surface)",
-                      color: ivHigh ? "#f0883e" : "var(--text-muted)",
-                    }}
-                  >
-                    IV {item.ivRank}
-                  </span>
-                  <span className="text-[9px] font-mono" style={{ color: "var(--text-muted)" }}>
-                    S:{fmtNum(item.support, 0)} / R:{fmtNum(item.resistance, 0)}
-                  </span>
-                </div>
+              <span className="font-mono font-black text-xs text-[#e6edf3] mb-1">{t}</span>
+              <span className="font-mono text-[9px] font-bold text-[#3fb950] tabular-nums">
+                {fmtNum(item.price, 1)}
+              </span>
+              <div className="mt-2 w-full h-1 bg-[#0d1117] rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[#58a6ff]" 
+                  style={{ width: `${item.ivRank}%` }}
+                />
               </div>
             </button>
           );

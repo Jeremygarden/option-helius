@@ -26,8 +26,10 @@
   --accent-pink: #E91E63;
   --accent-purple: #7B61FF;
   --accent-orange: #F5A623;
+  --accent-green: #2EB6D2;
+  --accent-red: #E91E63;
 
-  /* Trading semantics (Mapping from reference) */
+  /* Trading semantics */
   --color-call: #2EB6D2;
   --color-put: #E91E63;
   --color-gex: #7B61FF;
