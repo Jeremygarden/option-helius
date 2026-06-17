@@ -2,56 +2,49 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ─── CSS Custom Properties ─── */
+/* ─── CSS Custom Properties (Light Mode based on Reference) ─── */
 :root {
   /* Background tiers */
-  --bg-base: #0d1117;
-  --bg-surface: #161b22;
-  --bg-elevated: #1c2128;
-  --bg-overlay: #21262d;
-
-  /* Aliases for compatibility */
-  --bg-primary: #0d1117;
-  --bg-secondary: #161b22;
+  --bg-base: #F5F7FA;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-overlay: rgba(255, 255, 255, 0.8);
 
   /* Borders */
-  --border-default: #30363d;
-  --border-muted: #21262d;
+  --border-default: #EDF0F2;
+  --border-muted: #F0F2F5;
 
   /* Text hierarchy */
-  --text-primary: #e6edf3;
-  --text-secondary: #8b949e;
-  --text-muted: #6e7681;
-  --text-placeholder: #484f58;
+  --text-primary: #1A1D1F;
+  --text-secondary: #6F767E;
+  --text-muted: #9A9FA5;
+  --text-placeholder: #BEC4C9;
 
   /* Accent palette */
-  --accent-blue: #58a6ff;
-  --accent-green: #3fb950;
-  --accent-red: #f85149;
-  --accent-yellow: #d29922;
-  --accent-purple: #a371f7;
-  --accent-orange: #f0883e;
-  --accent-teal: #39d353;
-  
-  /* Pick Page Semantic Colors */
-  --color-call: #3fb950;
-  --color-put: #f85149;
-  --color-spread: #a371f7;
-  --color-selection: #58a6ff;
+  --accent-blue: #2F6BFF;
+  --accent-teal: #2EB6D2;
+  --accent-pink: #E91E63;
+  --accent-purple: #7B61FF;
+  --accent-orange: #F5A623;
 
-  /* Trading semantics */
-  --color-bullish: #3fb950;
-  --color-bullish-muted: rgba(63, 185, 80, 0.2);
-  --color-bearish: #f85149;
-  --color-bearish-muted: rgba(248, 81, 73, 0.2);
-  --color-neutral: #58a6ff;
-  --color-neutral-muted: rgba(88, 166, 255, 0.2);
-  --color-warning: #d29922;
-  --color-warning-muted: rgba(210, 153, 34, 0.2);
+  /* Trading semantics (Mapping from reference) */
+  --color-call: #2EB6D2;
+  --color-put: #E91E63;
+  --color-gex: #7B61FF;
+  --color-vol: #F5A623;
+  
+  --color-bullish: #2EB6D2;
+  --color-bearish: #E91E63;
 
   /* Font families */
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  /* Dimensions */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --container-padding: 24px;
 }
 
 /* ─── Base Styles ─── */
@@ -80,97 +73,96 @@ body {
 
 /* ─── Typography Scale ─── */
 
-/* Data values - monospace, for numbers/prices/greeks */
 .text-data-xl {
   font-family: var(--font-mono);
-  font-size: 1.5rem;
-  line-height: 1.2;
+  font-size: 1.75rem;
+  line-height: 1.1;
+  font-weight: 600;
   letter-spacing: -0.02em;
-  font-feature-settings: "tnum" 1, "zero" 1;
 }
 
 .text-data-lg {
   font-family: var(--font-mono);
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   line-height: 1.2;
-  letter-spacing: -0.01em;
-  font-feature-settings: "tnum" 1, "zero" 1;
+  font-weight: 600;
 }
 
 .text-data-md {
   font-family: var(--font-mono);
-  font-size: 0.875rem;
+  font-size: 1rem;
   line-height: 1.3;
-  font-feature-settings: "tnum" 1, "zero" 1;
 }
 
-.text-data-sm {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  line-height: 1.3;
-  letter-spacing: 0.01em;
-  font-feature-settings: "tnum" 1, "zero" 1;
-}
-
-.text-data-xs {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  line-height: 1.3;
-  letter-spacing: 0.02em;
-  font-feature-settings: "tnum" 1, "zero" 1;
-}
-
-/* UI labels - sans-serif, for headings and interface text */
+/* UI labels */
 .text-ui-xl {
   font-family: var(--font-sans);
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   line-height: 1.3;
-  letter-spacing: -0.01em;
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 .text-ui-lg {
   font-family: var(--font-sans);
-  font-size: 1rem;
+  font-size: 1.125rem;
   line-height: 1.4;
-  font-weight: 500;
-}
-
-.text-ui-md {
-  font-family: var(--font-sans);
-  font-size: 0.875rem;
-  line-height: 1.4;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .text-ui-sm {
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   line-height: 1.4;
-  letter-spacing: 0.01em;
-  font-weight: 500;
-}
-
-.text-ui-xs {
-  font-family: var(--font-sans);
-  font-size: 0.6875rem;
-  line-height: 1.4;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 /* ─── Card Components ─── */
 .card {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  padding: 20px;
 }
 
-.card-elevated {
-  background-color: var(--bg-elevated);
+.card-header {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ─── Tabs ─── */
+.tab-pill {
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.tab-pill-active {
+  background-color: var(--accent-blue);
+  color: white;
+}
+
+.tab-pill-inactive {
+  background-color: white;
+  color: var(--text-secondary);
   border: 1px solid var(--border-default);
-  border-radius: 8px;
+}
+
+.tab-pill-inactive:hover {
+  border-color: var(--accent-blue);
+  color: var(--accent-blue);
 }
 
 /* ─── Scrollbar ─── */
@@ -186,20 +178,4 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--border-default);
   border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
-}
-
-/* ─── Selection ─── */
-::selection {
-  background: var(--accent-blue);
-  color: var(--bg-base);
-}
-
-/* ─── Focus Ring ─── */
-:focus-visible {
-  outline: 2px solid var(--accent-blue);
-  outline-offset: 2px;
 }
