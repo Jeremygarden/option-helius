@@ -27,19 +27,19 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
       value: summary?.expected_move
         || (summary?.expected_move_dollar ? `±${formatMoney(summary.expected_move_dollar)}` : "—"),
       sub: summary?.spot ? `现价 ${formatMoney(summary.spot)}` : "front straddle",
-      colorClass: "text-[#F5A623]", // accent-orange
+      colorClass: "text-[var(--accent-orange)]", 
     },
     {
       label: "最大痛点 (MAX PAIN)",
       value: formatMoney(summary?.max_pain, { digits: 2 }),
       sub: summary?.expiry ?? "selected expiry",
-      colorClass: "text-[#1A1D1F]", // text-primary
+      colorClass: "text-[var(--text-primary)]",
     },
     {
       label: "成交量比例 (P/C VOL)",
       value: formatNumber(summary?.pcr_volume, 3),
       sub: `${callVol.toLocaleString()}C / ${putVol.toLocaleString()}P`,
-      colorClass: (summary?.pcr_volume ?? 0) > 1 ? "text-[#E91E63]" : "text-[#2EB6D2]", // red vs teal
+      colorClass: (summary?.pcr_volume ?? 0) > 1 ? "text-[var(--accent-red)]" : "text-[var(--accent-teal)]",
       trend: (summary?.pcr_volume ?? 0) > 1 ? "down" : "up",
     },
     {
@@ -48,7 +48,7 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
       sub: callOi
         ? `${Math.round(callOi).toLocaleString()}C / ${Math.round(putOi).toLocaleString()}P`
         : "open interest ratio",
-      colorClass: (summary?.pcr_oi ?? 0) > 1 ? "text-[#E91E63]" : "text-[#2EB6D2]",
+      colorClass: (summary?.pcr_oi ?? 0) > 1 ? "text-[var(--accent-red)]" : "text-[var(--accent-teal)]",
       trend: (summary?.pcr_oi ?? 0) > 1 ? "down" : "up",
     },
     {
@@ -60,7 +60,7 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
           ? summary.net_gex
           : "—",
       sub: (netGex ?? 0) < 0 ? "做市商短 Gamma" : "做市商多 Gamma",
-      colorClass: (netGex ?? 0) < 0 ? "text-[#E91E63]" : "text-[#2EB6D2]",
+      colorClass: (netGex ?? 0) < 0 ? "text-[var(--accent-red)]" : "text-[var(--accent-teal)]",
       trend: (netGex ?? 0) < 0 ? "down" : "up",
     },
   ];
@@ -74,34 +74,34 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
         </div>
       )}
 
-      <div className="grid grid-cols-5 bg-white border border-[#EDF0F2] rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+      <div className="grid grid-cols-5 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
         {kpis.map((kpi, idx) => (
           <div
             key={kpi.label}
-            className={`flex flex-col gap-1.5 px-8 py-6 min-w-0 transition-colors hover:bg-gray-50/50 ${
-              idx < kpis.length - 1 ? "border-r border-[#EDF0F2]" : ""
+            className={`flex flex-col gap-1.5 px-8 py-6 min-w-0 transition-colors hover:bg-[var(--bg-base)]/50 ${
+              idx < kpis.length - 1 ? "border-r border-[var(--border-default)]" : ""
             }`}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[10px] font-bold text-[#9A9FA5] uppercase tracking-[0.1em] truncate">
+              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.1em] truncate">
                 {kpi.label}
               </span>
               {kpi.trend && (
                 <div className={`w-1.5 h-1.5 rounded-full ${
-                  kpi.trend === "up" ? "bg-[#2EB6D2]" : kpi.trend === "down" ? "bg-[#E91E63]" : "bg-gray-300"
+                  kpi.trend === "up" ? "bg-[var(--accent-teal)]" : kpi.trend === "down" ? "bg-[var(--accent-pink)]" : "bg-gray-300"
                 }`} />
               )}
             </div>
 
             {loading ? (
-              <div className="h-8 w-28 rounded-lg bg-gray-100 animate-pulse my-1" />
+              <div className="h-8 w-28 rounded-lg bg-[var(--border-muted)] animate-pulse my-1" />
             ) : (
               <span className={`text-2xl font-bold font-mono tabular-nums leading-none tracking-tight ${kpi.colorClass}`}>
                 {kpi.value}
               </span>
             )}
 
-            <span className="text-[11px] font-semibold text-[#6F767E] truncate mt-0.5 opacity-80">
+            <span className="text-[11px] font-semibold text-[var(--text-secondary)] truncate mt-0.5 opacity-80">
               {loading ? "..." : kpi.sub}
             </span>
           </div>
