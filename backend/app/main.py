@@ -2,10 +2,25 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import json
+import logging
 from .routers import options, sentiment, macro, picks, report, analyze, strategies, notifications, scanner
 from .mock.options_chain import get_mock_chain
+from .core.config import get_settings, validate_ibkr_startup
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Options Helius API")
+
+
+@app.on_event("startup")
+async def validate_optional_ibkr_config() -> None:
+    """Warn when IBKR is enabled but Gateway is not reachable."""
+
+    settings = get_settings()
+    app.state.settings = settings
+    app.state.ibkr_reachable = await validate_ibkr_startup(settings)
+    logger.info("Application settings loaded (ibkr_enabled=%s)", settings.ibkr_enabled)
+
 
 app.add_middleware(
     CORSMiddleware,
