@@ -206,19 +206,17 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
   return (
     <article
       onClick={onSelect}
-      className={`relative cursor-pointer rounded-xl border transition-all duration-200 overflow-hidden flex flex-col h-full ${
-        isSelected ? 'ring-2 ring-inset ring-[#58a6ff]' : 'hover:border-[#484f58] hover:translate-y-[-2px]'
+      className={`relative cursor-pointer rounded-xl border transition-all duration-300 overflow-hidden flex flex-col h-full group ${
+        isSelected ? 'ring-2 ring-inset ring-[#58a6ff]' : 'hover:border-[#58a6ff]/50 hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-blue-500/10'
       }`}
       style={{
         background: "var(--bg-surface)",
         borderColor: isSelected ? "transparent" : "var(--border-default)",
-        boxShadow: isSelected ? "0 0 20px rgba(88,166,255,0.15)" : "none",
+        boxShadow: isSelected ? "0 0 30px rgba(88,166,255,0.2)" : "none",
       }}
     >
       {/* Selected Left Border Indicator */}
-      {isSelected && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#58a6ff] z-10" />
-      )}
+      <div className={`absolute left-0 top-0 bottom-0 w-1 bg-[#58a6ff] z-10 transition-transform duration-300 ${isSelected ? 'scale-y-100' : 'scale-y-0'}`} />
 
       {/* Card Header */}
       <div className="p-4">
