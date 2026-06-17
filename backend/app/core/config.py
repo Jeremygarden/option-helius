@@ -35,6 +35,17 @@ def _env_int(name: str, default: int) -> int:
         return default
 
 
+def _env_float(name: str, default: float) -> float:
+    value = os.getenv(name)
+    if value is None or value.strip() == "":
+        return default
+    try:
+        return float(value)
+    except ValueError:
+        logger.warning("Invalid %s=%r; using default %s", name, value, default)
+        return default
+
+
 @dataclass(frozen=True)
 class Settings:
     """Runtime settings loaded from environment variables."""
@@ -45,6 +56,20 @@ class Settings:
     ibkr_port: int = 4002
     ibkr_client_id: int = 1
     ibkr_account_type: str = "paper"
+    ibkr_connect_timeout: float = 30.0
+    ibkr_readonly: bool = True
+
+    @property
+    def ibkr_client_config(self) -> dict:
+        """Connection kwargs for the IBKR client layer."""
+
+        return {
+            "host": self.ibkr_host,
+            "port": self.ibkr_port,
+            "client_id": self.ibkr_client_id,
+            "connect_timeout": self.ibkr_connect_timeout,
+            "readonly": self.ibkr_readonly,
+        }
 
     # Safety limits used by future IBKR fetcher/provider layers
     max_tickers: int = 100
@@ -66,6 +91,8 @@ def get_settings() -> Settings:
         ibkr_port=_env_int("IBKR_PORT", 4002),
         ibkr_client_id=_env_int("IBKR_CLIENT_ID", 1),
         ibkr_account_type=account_type,
+        ibkr_connect_timeout=_env_float("IBKR_CONNECT_TIMEOUT", 30.0),
+        ibkr_readonly=_env_bool("IBKR_READONLY", True),
         max_tickers=_env_int("MAX_TICKERS", 100),
         atm_strike_radius=_env_int("ATM_STRIKE_RADIUS", 8),
     )
