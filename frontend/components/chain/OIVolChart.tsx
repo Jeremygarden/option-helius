@@ -1,11 +1,37 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 import { ChainResponse } from "@/lib/chainData";
 
 type OIVolChartProps = { chain?: ChainResponse | null; loading?: boolean };
 type Mode = "bars" | "heatmap";
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white/95 backdrop-blur-md border border-[#EDF0F2] rounded-xl p-4 shadow-xl">
+        <p className="text-xs font-bold text-[#1A1D1F] mb-3 border-b border-[#EDF0F2] pb-2 font-mono">
+          Strike: ${label.toLocaleString()}
+        </p>
+        <div className="space-y-2">
+          {payload.map((entry: any, index: number) => (
+            <div key={index} className="flex items-center justify-between gap-6 text-[11px]">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: entry.fill }} />
+                <span className="text-[#6F767E] font-medium">{entry.name}</span>
+              </div>
+              <span className="font-bold font-mono text-[#1A1D1F]">
+                {entry.value.toLocaleString()}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 export default function OIVolChart({ chain, loading }: OIVolChartProps) {
   const [mode, setMode] = useState<Mode>("bars");
@@ -41,102 +67,90 @@ export default function OIVolChart({ chain, loading }: OIVolChartProps) {
   );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       {/* Mode toggle */}
       <div className="flex justify-end">
-        <div
-          className="flex rounded-md border p-0.5 text-[11px]"
-          style={{
-            background: "var(--bg-elevated)",
-            borderColor: "var(--border-default)",
-          }}
-        >
+        <div className="flex rounded-xl bg-gray-50 border border-[#EDF0F2] p-1 shadow-inner">
           {(["bars", "heatmap"] as Mode[]).map((m) => (
             <button
               key={m}
               onClick={() => setMode(m)}
-              className="rounded px-2.5 py-1 transition-colors"
-              style={{
-                background: mode === m ? "var(--accent-blue)" : "transparent",
-                color: mode === m ? "#fff" : "var(--text-muted)",
-              }}
+              className={`rounded-lg px-4 py-1.5 text-[11px] font-bold transition-all duration-200 ${
+                mode === m 
+                  ? "bg-white text-[#2F6BFF] shadow-sm ring-1 ring-[#EDF0F2]" 
+                  : "text-[#9A9FA5] hover:text-[#6F767E]"
+              }`}
             >
-              {m === "bars" ? "柱状图" : "热力图"}
+              {m === "bars" ? "Chart" : "Heatmap"}
             </button>
           ))}
         </div>
       </div>
 
       {/* Chart area */}
-      <div className="h-[280px]">
+      <div className="h-[340px] w-full">
         {loading ? (
-          <div
-            className="h-full rounded-md animate-pulse"
-            style={{ background: "var(--bg-elevated)" }}
-          />
+          <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[#EDF0F2]" />
         ) : mode === "heatmap" ? (
-          <div
-            className="grid h-full content-start gap-1 overflow-auto rounded border p-2"
-            style={{
-              borderColor: "var(--border-default)",
-              gridTemplateColumns: "repeat(auto-fit, minmax(70px, 1fr))",
-            }}
-          >
-            {rows.map((r) => {
-              const intensity =
-                Math.max(r.callOi, r.putOi, r.callVol, r.putVol) / maxValue;
-              return (
-                <div
-                  key={r.strike}
-                  className="rounded border p-2 font-mono text-[10px]"
-                  style={{
-                    borderColor: "var(--border-default)",
-                    background: `rgba(88,166,255,${0.06 + intensity * 0.42})`,
-                  }}
-                >
-                  <div className="mb-1" style={{ color: "var(--text-primary)" }}>
-                    ${r.strike}
+          <div className="grid h-full content-start gap-2 overflow-auto rounded-xl border border-[#EDF0F2] bg-white p-4 shadow-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+              {rows.map((r) => {
+                const intensity = Math.max(r.callOi, r.putOi, r.callVol, r.putVol) / maxValue;
+                return (
+                  <div
+                    key={r.strike}
+                    className="rounded-lg border border-[#EDF0F2] p-2 font-mono text-[10px] transition-all hover:scale-[1.02] hover:shadow-md"
+                    style={{
+                      backgroundColor: `rgba(47, 107, 255, ${0.02 + intensity * 0.15})`,
+                    }}
+                  >
+                    <div className="mb-1.5 font-black text-[#1A1D1F] border-b border-[#EDF0F2] pb-1">
+                      ${r.strike}
+                    </div>
+                    <div className="flex justify-between text-[#2EB6D2] font-bold">
+                      <span>C OI</span>
+                      <span>{Math.round(r.callOi / 1000)}k</span>
+                    </div>
+                    <div className="flex justify-between text-[#E91E63] font-bold">
+                      <span>P OI</span>
+                      <span>{Math.round(r.putOi / 1000)}k</span>
+                    </div>
                   </div>
-                  <div style={{ color: "#3fb950" }}>C {Math.round(r.callOi / 1000)}k</div>
-                  <div style={{ color: "#f85149" }}>P {Math.round(r.putOi / 1000)}k</div>
-                  <div style={{ color: "var(--text-muted)" }}>
-                    V {Math.round((r.callVol + r.putVol) / 1000)}k
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={rows} margin={{ top: 10, right: 8, bottom: 0, left: 0 }}>
-              <CartesianGrid stroke="var(--border-default)" strokeDasharray="3 3" />
+            <BarChart data={rows} margin={{ top: 10, right: 0, bottom: 0, left: 0 }} barGap={2}>
+              <CartesianGrid stroke="#F0F2F5" vertical={false} />
               <XAxis
                 dataKey="strike"
-                tick={{ fill: "var(--text-muted)", fontSize: 10 }}
-                axisLine={{ stroke: "var(--border-default)" }}
+                tick={{ fill: "#9A9FA5", fontSize: 10, fontWeight: 500 }}
+                axisLine={false}
                 tickLine={false}
                 interval="preserveStartEnd"
+                dy={10}
               />
               <YAxis
-                tick={{ fill: "var(--text-muted)", fontSize: 11 }}
+                tick={{ fill: "#9A9FA5", fontSize: 10, fontWeight: 500 }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => `${Math.round(Number(v) / 1000)}k`}
+                dx={-10}
               />
-              <Tooltip
-                cursor={{ fill: "rgba(88,166,255,0.08)" }}
-                contentStyle={{
-                  background: "var(--bg-base)",
-                  border: "1px solid var(--border-default)",
-                  borderRadius: 8,
-                  color: "var(--text-primary)",
-                  fontSize: 12,
-                }}
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: "#F5F7FA", radius: 4 }} />
+              <Legend 
+                verticalAlign="top" 
+                align="left" 
+                iconType="rect" 
+                iconSize={10}
+                wrapperStyle={{ paddingBottom: 20, fontSize: 11, fontWeight: 600, color: "#6F767E" }}
               />
-              <Bar dataKey="callOi" name="Call OI" fill="#3fb950" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="putOi" name="Put OI" fill="#f85149" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="callVol" name="Call Vol" fill="#58a6ff" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="putVol" name="Put Vol" fill="#f0883e" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="callOi" name="Call OI" fill="#2EB6D2" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="putOi" name="Put OI" fill="#E91E63" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="callVol" name="Call Vol" fill="#7B61FF" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="putVol" name="Put Vol" fill="#F5A623" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
