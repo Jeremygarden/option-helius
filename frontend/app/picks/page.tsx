@@ -567,23 +567,6 @@ export default function PicksPage() {
     return c;
   }, [picks]);
 
-  const filtered = useMemo(() => {
-    return directionFilteredPicks
-      .filter(p => !selectedTicker || (p.ticker || "").toUpperCase() === selectedTicker)
-      .filter(p => tagFilter === "全部" || (p.tag || "核心") === tagFilter)
-      .filter(p => strategyFilter === "all" || normalizeType(p.strategyType) === strategyFilter)
-      .sort((a, b) => sortMode === "score"
-        ? clampScore(b.score) - clampScore(a.score)
-        : (a.ticker || "").localeCompare(b.ticker || ""));
-  }, [directionFilteredPicks, selectedTicker, tagFilter, strategyFilter, sortMode]);
-
-  const displayPicks = filtered.length ? filtered : picks.sort((a, b) => clampScore(b.score) - clampScore(a.score));
-
-  // Summary stats
-  const highCount = picks.filter(p => clampScore(p.score) >= 8).length;
-  const returnMin = Math.min(...picks.map(p => Number(p.returnLow || 0)).filter(Boolean), 0);
-  const returnMax = Math.max(...picks.map(p => Number(p.returnHigh || 0)).filter(Boolean), 0);
-
   // Direction tab filter logic
   const directionFilteredPicks = useMemo(() => {
     if (directionTab === "all") return picks;
@@ -602,6 +585,23 @@ export default function PicksPage() {
   // Bullish/bearish counts for scanner summary
   const bullishCount = picks.filter(p => p.direction === "up").length;
   const bearishCount = picks.filter(p => p.direction === "down").length;
+
+  const filtered = useMemo(() => {
+    return directionFilteredPicks
+      .filter(p => !selectedTicker || (p.ticker || "").toUpperCase() === selectedTicker)
+      .filter(p => tagFilter === "全部" || (p.tag || "核心") === tagFilter)
+      .filter(p => strategyFilter === "all" || normalizeType(p.strategyType) === strategyFilter)
+      .sort((a, b) => sortMode === "score"
+        ? clampScore(b.score) - clampScore(a.score)
+        : (a.ticker || "").localeCompare(b.ticker || ""));
+  }, [directionFilteredPicks, selectedTicker, tagFilter, strategyFilter, sortMode]);
+
+  const displayPicks = filtered.length ? filtered : picks.sort((a, b) => clampScore(b.score) - clampScore(a.score));
+
+  // Summary stats
+  const highCount = picks.filter(p => clampScore(p.score) >= 8).length;
+  const returnMin = Math.min(...picks.map(p => Number(p.returnLow || 0)).filter(Boolean), 0);
+  const returnMax = Math.max(...picks.map(p => Number(p.returnHigh || 0)).filter(Boolean), 0);
 
   return (
     <div className="flex flex-col gap-4 pb-8">
