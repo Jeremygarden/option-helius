@@ -488,69 +488,61 @@ function FilterBar({
   counts: Record<string, number>;
 }) {
   return (
-    <div
-      className="rounded-lg border p-3 flex flex-wrap items-center gap-3"
-      style={{ background: "var(--bg-surface)", borderColor: "var(--border-default)" }}
-    >
-      <SlidersHorizontal size={14} style={{ color: "var(--text-muted)", flexShrink: 0 }} />
-
-      {/* Tag filters */}
-      <div className="flex flex-wrap gap-1.5">
-        {TAGS.map(tag => (
-          <button
-            key={tag}
-            type="button"
-            onClick={() => setTagFilter(tag)}
-            className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
-            style={{
-              background: tagFilter === tag ? "rgba(63,185,80,0.15)" : "var(--bg-elevated)",
-              borderColor: tagFilter === tag ? "#3fb950" : "var(--border-default)",
-              color: tagFilter === tag ? "#3fb950" : "var(--text-muted)",
-            }}
-          >
-            {tag}
-          </button>
-        ))}
-      </div>
-
-      <div className="w-px h-4" style={{ background: "var(--border-default)" }} />
-
-      {/* Strategy filters */}
-      <div className="flex flex-wrap gap-1.5">
+    <div className="flex flex-wrap items-center gap-4">
+      {/* Strategy Type Pills */}
+      <div className="flex items-center p-1 rounded-xl bg-[#161b22] border border-[#30363d] shadow-inner overflow-x-auto">
         {STRATEGY_FILTERS.map(f => (
           <button
             key={f.value}
             type="button"
             onClick={() => setStrategyFilter(f.value)}
-            className="px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors"
-            style={{
-              background: strategyFilter === f.value ? "rgba(88,166,255,0.15)" : "var(--bg-elevated)",
-              borderColor: strategyFilter === f.value ? "#58a6ff" : "var(--border-default)",
-              color: strategyFilter === f.value ? "#58a6ff" : "var(--text-muted)",
-            }}
+            className={`whitespace-nowrap px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-2 ${
+              strategyFilter === f.value
+                ? "bg-[#1c2128] text-[#58a6ff] border border-[#484f58] shadow-sm"
+                : "text-[#6e7681] hover:text-[#e6edf3]"
+            }`}
           >
-            {f.label}
+            {f.label.toUpperCase()}
             {f.value !== "all" && (
-              <span className="ml-1 font-mono text-[9px]">({counts[f.value] ?? 0})</span>
+              <span className={`font-mono text-[10px] ${strategyFilter === f.value ? "text-[#58a6ff]" : "text-[#484f58]"}`}>
+                {counts[f.value] ?? 0}
+              </span>
             )}
           </button>
         ))}
       </div>
 
-      <div className="ml-auto">
+      {/* Risk Tag Pills */}
+      <div className="flex items-center p-1 rounded-xl bg-[#161b22] border border-[#30363d] shadow-inner">
+        {TAGS.map(tag => (
+          <button
+            key={tag}
+            type="button"
+            onClick={() => setTagFilter(tag)}
+            className={`px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+              tagFilter === tag
+                ? "bg-[#1c2128] text-[#3fb950] border border-[#484f58] shadow-sm"
+                : "text-[#6e7681] hover:text-[#e6edf3]"
+            }`}
+          >
+            {tag.toUpperCase()}
+          </button>
+        ))}
+      </div>
+
+      {/* Sort Select */}
+      <div className="ml-auto relative">
         <select
           value={sortMode}
           onChange={e => setSortMode(e.target.value as "score" | "ticker")}
-          className="rounded-md border px-2 py-1 text-[11px] outline-none transition-colors"
-          style={{
-            background: "var(--bg-elevated)",
-            borderColor: "var(--border-default)",
-            color: "var(--text-secondary)",
-          }}
+          className="appearance-none bg-[#161b22] border border-[#30363d] rounded-xl px-4 py-2 pr-10 text-[11px] font-bold text-[#e6edf3] outline-none hover:border-[#484f58] transition-colors cursor-pointer shadow-sm"
         >
-          <option value="score">按评分</option>
-          <option value="ticker">按Ticker</option>
+          <option value="score">SORT BY: SCORE</option>
+          <option value="ticker">SORT BY: TICKER</option>
         </select>
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#6e7681]">
+          <SlidersHorizontal size={12} />
+        </div>
       </div>
     </div>
   );
