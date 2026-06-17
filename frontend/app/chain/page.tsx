@@ -34,26 +34,26 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="card flex flex-col h-full">
-      <div className="card-header">
+    <div className="card flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-black/5">
+      <div className="card-header border-b border-[var(--border-muted)] -mx-5 -mt-5 px-5 py-4 bg-[var(--bg-base)]/30">
         <div>
-          <h3 className="card-title text-base">{title}</h3>
+          <h3 className="card-title text-sm font-bold tracking-tight text-[var(--text-primary)]">{title}</h3>
           {subtitle && (
-            <p className="text-ui-sm mt-0.5">{subtitle}</p>
+            <p className="text-[10px] font-medium text-[var(--text-secondary)] mt-0.5 uppercase tracking-wider">{subtitle}</p>
           )}
         </div>
       </div>
-      <div className="flex-1 min-h-[320px]">{children}</div>
+      <div className="flex-1 min-h-[320px] pt-4">{children}</div>
     </div>
   );
 }
 
 /* ─── DTE badge color ────────────────────────────────────────── */
 function dteBadgeColor(dte: number): string {
-  if (dte <= 7) return "#E91E63"; // accent-pink
-  if (dte <= 21) return "#F5A623"; // accent-orange
-  if (dte <= 45) return "#2F6BFF"; // accent-blue
-  return "#9A9FA5"; // text-muted
+  if (dte <= 7) return "var(--accent-pink)"; 
+  if (dte <= 21) return "var(--accent-orange)"; 
+  if (dte <= 45) return "var(--accent-blue)"; 
+  return "var(--text-muted)";
 }
 
 /* ─── Main page ──────────────────────────────────────────────── */
@@ -134,22 +134,25 @@ export default function ChainPage() {
 
       {/* ── Page header row ── */}
       <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
-        <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-extrabold tracking-tight text-[#1A1D1F]">
-            {ticker}
-            <span className="text-lg font-medium text-[#9A9FA5] ml-2">Chain</span>
-          </h1>
+        <div className="flex items-center gap-6">
+          <div className="flex items-baseline gap-2">
+            <h1 className="text-3xl font-black tracking-tighter text-[var(--text-primary)]">
+              {ticker}
+            </h1>
+            <span className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-widest">Options Terminal</span>
+          </div>
 
           {/* Spot price pill */}
           {summary?.spot && (
-            <div className="flex items-center gap-2 rounded-xl px-4 py-2 border border-[#EDF0F2] bg-white font-mono text-base font-bold text-[#2EB6D2] shadow-sm">
+            <div className="flex items-center gap-2 rounded-xl px-4 py-2 border border-[var(--border-default)] bg-[var(--bg-surface)] font-mono text-base font-bold text-[var(--accent-teal)] shadow-sm">
               <Zap size={14} fill="currentColor" />
               {formatMoney(summary.spot)}
             </div>
           )}
+
           {/* Quick Stats */}
-          <div className="flex items-center gap-3">
-            {["BTC", "ETH", "SOL", "NVDA", "AAPL", "TSLA"].map((t) => (
+          <div className="flex items-center gap-1.5 bg-[var(--bg-surface)] p-1 rounded-xl border border-[var(--border-default)] shadow-sm">
+            {["SPY", "QQQ", "NVDA", "AAPL", "TSLA", "VIX"].map((t) => (
               <button
                 key={t}
                 onClick={() => {
@@ -157,10 +160,10 @@ export default function ChainPage() {
                   setTicker(t);
                   setExpiry(null);
                 }}
-                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-black transition-all ${
                   ticker === t 
-                    ? "bg-[#2F6BFF] text-white shadow-md shadow-blue-200" 
-                    : "bg-white text-[#6F767E] border border-[#EDF0F2] hover:border-[#2F6BFF] hover:text-[#2F6BFF]"
+                    ? "bg-[var(--accent-blue)] text-white shadow-md shadow-blue-200" 
+                    : "text-[var(--text-secondary)] hover:bg-[var(--bg-base)]"
                 }`}
               >
                 {t}
@@ -171,37 +174,36 @@ export default function ChainPage() {
 
         {/* Ticker form */}
         <form onSubmit={submitTicker} className="flex items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A9FA5]" size={16} />
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--accent-blue)] transition-colors" size={16} />
             <input
               value={draftTicker}
               onChange={(e) => setDraftTicker(e.target.value)}
-              className="h-11 w-40 rounded-xl border border-[#EDF0F2] bg-white pl-10 pr-4 font-mono text-base font-bold uppercase transition focus:outline-none focus:ring-2 focus:ring-[#2F6BFF]/20 focus:border-[#2F6BFF] shadow-sm"
-              placeholder="Search..."
+              className="h-10 w-44 rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] pl-10 pr-4 font-mono text-sm font-bold uppercase transition focus:outline-none focus:ring-4 focus:ring-[var(--accent-blue)]/10 focus:border-[var(--accent-blue)] shadow-sm"
+              placeholder="ENTER TICKER..."
             />
           </div>
           <button
             type="submit"
-            className="h-11 rounded-xl bg-[#2F6BFF] px-6 text-sm font-bold text-white transition hover:bg-[#1A56FF] active:scale-95 shadow-lg shadow-blue-500/20"
+            className="h-10 rounded-xl bg-[var(--accent-blue)] px-6 text-xs font-black uppercase tracking-widest text-white transition hover:brightness-110 active:scale-95 shadow-lg shadow-blue-500/20"
           >
             Load
           </button>
-            <div className="flex items-center gap-2">
-              <div className={`flex items-center gap-2 rounded-xl px-3 py-1.5 border text-[10px] font-bold tracking-wider shadow-sm ${
-                error ? "bg-amber-50 border-amber-200 text-amber-600" : "bg-emerald-50 border-emerald-200 text-emerald-600"
-              }`}>
-                {error ? <WifiOff size={12} /> : <ShieldCheck size={12} />}
-                {error ? "FALLBACK" : "LIVE"}
-              </div>
-              <button
-                type="button"
-                onClick={() => setRefreshing((x) => x + 1)}
-                className="h-9 w-9 flex items-center justify-center rounded-xl border border-[#EDF0F2] bg-white text-[#6F767E] transition hover:bg-gray-50 active:scale-95 shadow-sm"
-                aria-label="Refresh"
-              >
-                <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              </button>
+          
+          <div className="flex items-center gap-2 ml-2">
+            <div className={`flex items-center gap-1.5 rounded-xl px-3 py-2 border text-[9px] font-black tracking-widest shadow-sm ${
+              error ? "bg-amber-50 border-amber-200 text-amber-600" : "bg-emerald-50 border-emerald-200 text-emerald-600"
+            }`}>
+              <div className={`w-1.5 h-1.5 rounded-full ${error ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
+              {error ? "OFFLINE" : "LIVE"}
             </div>
+            <button
+              type="button"
+              onClick={() => setRefreshing((x) => x + 1)}
+              className="h-10 w-10 flex items-center justify-center rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)] active:scale-95 shadow-sm"
+            >
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            </button>
           </div>
         </form>
       </div>
@@ -211,34 +213,40 @@ export default function ChainPage() {
 
       {/* ── Expiry tab bar ── */}
       <div className="flex flex-col gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-bold text-[#9A9FA5] uppercase tracking-widest px-1">
-            Expiration Select
+        <div className="flex items-center justify-between px-1">
+          <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">
+            Select Expiration
           </span>
+          {expiry && (
+             <span className="text-[10px] font-mono font-bold text-[var(--accent-blue)]">
+               Active: {expiry}
+             </span>
+          )}
         </div>
-        <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar">
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
           {expiryItems.map((item) => {
             const isActive = item.date === expiry;
             return (
               <button
                 key={item.date}
                 onClick={() => setExpiry(item.date)}
-                className={`tab-pill shrink-0 flex items-center gap-2 px-5 py-2.5 shadow-sm ${
-                  isActive ? "tab-pill-active" : "tab-pill-inactive"
+                className={`tab-pill shrink-0 flex items-center gap-2 px-4 py-2 border transition-all duration-200 ${
+                  isActive 
+                    ? "bg-[var(--accent-blue)] border-[var(--accent-blue)] text-white shadow-lg shadow-blue-500/25 translate-y-[-1px]" 
+                    : "bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--accent-blue)]"
                 }`}
               >
-                <span className="font-bold">{item.label}</span>
-                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${
-                  isActive ? "bg-white/20" : "bg-gray-100"
-                }`} style={{ color: isActive ? "#fff" : dteBadgeColor(item.dte) }}>
+                <span className="text-xs font-bold">{item.label}</span>
+                <span 
+                  className={`text-[9px] font-black px-1.5 py-0.5 rounded-md ${
+                    isActive ? "bg-white/20 text-white" : "bg-[var(--bg-base)]"
+                  }`} 
+                  style={{ color: isActive ? undefined : dteBadgeColor(item.dte) }}
+                >
                   {item.dte}D
                 </span>
-                {!isActive && (
-                  <span className={`text-[9px] font-bold uppercase ${
-                    item.kind === "Monthly" ? "text-orange-500" : "text-gray-400"
-                  }`}>
-                    {item.kind[0]}
-                  </span>
+                {!isActive && item.kind === "Monthly" && (
+                  <div className="w-1 h-1 rounded-full bg-[var(--accent-orange)]" />
                 )}
               </button>
             );
@@ -251,7 +259,7 @@ export default function ChainPage() {
         <div className="min-w-0">
           <ChartCard
             title="IV Surface 3D"
-            subtitle="Strike × DTE × Implied Volatility"
+            subtitle="STRIKE × DTE × IMPLIED VOLATILITY"
           >
             <IVSurface3D data={surface} spot={summary?.spot} loading={loading} />
           </ChartCard>
@@ -260,7 +268,7 @@ export default function ChainPage() {
         <div className="min-w-0">
           <ChartCard
             title="Term Structure"
-            subtitle="ATM IV vs Expected Volatility"
+            subtitle="ATM IV VS EXPECTED VOLATILITY"
           >
             <TermStructure surface={surface} summary={summary} loading={loading} />
           </ChartCard>
@@ -269,7 +277,7 @@ export default function ChainPage() {
         <div className="min-w-0">
           <ChartCard
             title="OI & Volume Distribution"
-            subtitle="Call/Put Open Interest and Volume by Strike"
+            subtitle="CALL/PUT OPEN INTEREST AND VOLUME BY STRIKE"
           >
             <OIVolChart chain={chain} loading={loading} />
           </ChartCard>
@@ -278,7 +286,7 @@ export default function ChainPage() {
         <div className="min-w-0">
           <ChartCard
             title="Gamma Exposure (GEX)"
-            subtitle="Gamma Exposure per Strike with Max Pain indicator"
+            subtitle="GAMMA EXPOSURE PER STRIKE WITH MAX PAIN"
           >
             <GEXChart
               data={gex}
