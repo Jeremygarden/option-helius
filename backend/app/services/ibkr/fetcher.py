@@ -197,15 +197,6 @@ class OptionChainFetcher:
         underlying_ticker = await self._subscribe_underlying(symbol, request.exchange, request.currency)
         spot = await self._wait_for_underlying_price(symbol, underlying_ticker)
 
-        chains = await self.get_option_chain_params(symbol, request.exchange, request.currency)
-        if not chains:
-            raise IBKRFallbackError(f"No IBKR option chains found for {symbol}")
-        chain = chains[0]
-        expiry = self._select_expiry(_chain_expirations(chain), request.expiration)
-        strikes = self._select_atm_strikes(_chain_strikes(chain), spot, request.strike_radius)
-        if not strikes:
-            raise IBKRFallbackError(f"No IBKR strikes found for {symbol}")
-
         rights: List[str] = []
         if request.include_calls:
             rights.append("C")
@@ -213,6 +204,25 @@ class OptionChainFetcher:
             rights.append("P")
         if not rights:
             raise ValueError("At least one of include_calls/include_puts must be true")
+
+        chains = await self.get_option_chain_params(symbol, request.exchange, request.currency)
+        if not chains:
+            raise IBKRFallbackError(f"No IBKR option chains found for {symbol}")
+        chain = chains[0]
+        expiry = self._select_expiry(_chain_expirations(chain), request.expiration)
+        available_slots = self._available_option_slots()
+        effective_radius = self._effective_strike_radius(request.strike_radius, len(rights), available_slots)
+        if effective_radius < request.strike_radius:
+            logger.info(
+                "Clamped IBKR ATM strike radius for %s from %s to %s to fit ticker limit (%s slots available)",
+                symbol,
+                request.strike_radius,
+                effective_radius,
+                available_slots,
+            )
+        strikes = self._select_atm_strikes(_chain_strikes(chain), spot, effective_radius)
+        if not strikes:
+            raise IBKRFallbackError(f"No IBKR strikes found for {symbol}")
 
         _Stock, Option = _load_contract_classes()
         contracts = [Option(symbol, expiry, strike, right, request.exchange) for strike in strikes for right in rights]
@@ -222,9 +232,9 @@ class OptionChainFetcher:
             raise IBKRFallbackError(f"IBKR failed to qualify option contracts for {symbol}: {exc}") from exc
 
         valid = [contract for contract in qualified if getattr(contract, "conId", 0)]
-        available = self._max_option_subs - self._client.subscription_count
+        available = self._available_option_slots()
         if len(valid) > available:
-            valid = self._trim_to_slot_limit(valid, spot, max(0, available))
+            valid = self._trim_to_slot_limit(valid, spot, available)
         if not valid:
             raise IBKRFallbackError(f"IBKR ticker limit leaves no slots for {symbol}")
 
@@ -308,6 +318,24 @@ class OptionChainFetcher:
         if price <= 0:
             raise IBKRFallbackError(f"IBKR returned no underlying price for {symbol}")
         return price
+
+    def _available_option_slots(self) -> int:
+        """Return remaining option ticker slots after reserved/non-option subscriptions."""
+        return max(0, self._max_option_subs - int(getattr(self._client, "subscription_count", 0)))
+
+    def _effective_strike_radius(self, requested_radius: int, right_count: int, available_slots: int) -> int:
+        """Clamp ATM radius so generated option contracts fit IBKR ticker limits.
+
+        A radius of 8 means up to 17 strikes around ATM. With calls and puts,
+        that is 34 option market-data subscriptions, plus the underlying. This
+        helper preserves the caller's requested ATM-window semantics while
+        preventing accidental subscription bursts above MAX_TICKERS.
+        """
+        if right_count <= 0 or available_slots <= 0:
+            return 0
+        max_strikes = max(1, available_slots // right_count)
+        max_radius = max(0, (max_strikes - 1) // 2)
+        return min(max(0, int(requested_radius)), max_radius)
 
     def _select_expiry(self, expirations: Sequence[str], requested: Optional[str]) -> str:
         if not expirations:

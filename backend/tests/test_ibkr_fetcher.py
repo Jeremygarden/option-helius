@@ -122,3 +122,32 @@ def test_fetch_option_chain_returns_option_helius_shape(monkeypatch):
         assert first["source"] == "ibkr"
 
     asyncio.run(scenario())
+
+
+def test_fetcher_clamps_radius_to_available_ticker_slots(monkeypatch):
+    install_fake_ib_async(monkeypatch)
+
+    async def scenario():
+        fake_ib = FakeIB()
+        client = IBKRClient(ClientConfig(), ib=fake_ib)
+        fetcher = OptionChainFetcher(client, settings=Settings(max_tickers=12, atm_strike_radius=8))
+        result = await fetcher.fetch_option_chain(ChainRequest(symbol="SPY", expiration="2099-01-20", strike_radius=8, wait_seconds=0))
+
+        # MAX_TICKERS=12 reserves 5 slots for underlyings/system use. After the
+        # underlying subscription there are 6 option slots, so calls+puts must be
+        # clamped to 3 strikes around ATM rather than the requested 17 strikes.
+        assert len(result["options"]) == 6
+        option_tickers = [ticker for ticker in fake_ib.tickers if ticker.contract.secType == "OPT"]
+        assert len(option_tickers) == 6
+        assert {ticker.contract.strike for ticker in option_tickers} == {95.0, 100.0, 105.0}
+
+    asyncio.run(scenario())
+
+
+def test_effective_radius_supports_single_sided_requests(monkeypatch):
+    install_fake_ib_async(monkeypatch)
+    client = IBKRClient(ClientConfig(), ib=FakeIB())
+    fetcher = OptionChainFetcher(client, settings=Settings(max_tickers=12, atm_strike_radius=8))
+
+    assert fetcher._effective_strike_radius(requested_radius=8, right_count=1, available_slots=7) == 3
+    assert fetcher._effective_strike_radius(requested_radius=8, right_count=2, available_slots=7) == 1
