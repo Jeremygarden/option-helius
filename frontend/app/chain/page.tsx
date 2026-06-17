@@ -247,38 +247,46 @@ export default function ChainPage() {
       </div>
 
       {/* ── Charts: 2-column grid ── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <ChartCard
-          title="IV Surface 3D"
-          subtitle="Strike × DTE × Implied Volatility"
-        >
-          <IVSurface3D data={surface} spot={summary?.spot} loading={loading} />
-        </ChartCard>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <div className="min-w-0">
+          <ChartCard
+            title="IV Surface 3D"
+            subtitle="Strike × DTE × Implied Volatility"
+          >
+            <IVSurface3D data={surface} spot={summary?.spot} loading={loading} />
+          </ChartCard>
+        </div>
 
-        <ChartCard
-          title="Term Structure"
-          subtitle="ATM IV vs Expected Volatility"
-        >
-          <TermStructure surface={surface} summary={summary} loading={loading} />
-        </ChartCard>
+        <div className="min-w-0">
+          <ChartCard
+            title="Term Structure"
+            subtitle="ATM IV vs Expected Volatility"
+          >
+            <TermStructure surface={surface} summary={summary} loading={loading} />
+          </ChartCard>
+        </div>
 
-        <ChartCard
-          title="OI & Volume Distribution"
-          subtitle="Call/Put Open Interest and Volume by Strike"
-        >
-          <OIVolChart chain={chain} loading={loading} />
-        </ChartCard>
+        <div className="min-w-0">
+          <ChartCard
+            title="OI & Volume Distribution"
+            subtitle="Call/Put Open Interest and Volume by Strike"
+          >
+            <OIVolChart chain={chain} loading={loading} />
+          </ChartCard>
+        </div>
 
-        <ChartCard
-          title="Gamma Exposure (GEX)"
-          subtitle="Gamma Exposure per Strike with Max Pain indicator"
-        >
-          <GEXChart
-            data={gex}
-            summary={{ ...(summary || { ticker }), net_gex: netGex }}
-            loading={loading}
-          />
-        </ChartCard>
+        <div className="min-w-0">
+          <ChartCard
+            title="Gamma Exposure (GEX)"
+            subtitle="Gamma Exposure per Strike with Max Pain indicator"
+          >
+            <GEXChart
+              data={gex}
+              summary={{ ...(summary || { ticker }), net_gex: netGex }}
+              loading={loading}
+            />
+          </ChartCard>
+        </div>
       </div>
 
     </div>
