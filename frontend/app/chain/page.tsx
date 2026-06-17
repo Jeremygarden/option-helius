@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { RefreshCw, ShieldCheck, WifiOff, Zap } from "lucide-react";
+import { RefreshCw, ShieldCheck, WifiOff, Zap, Search } from "lucide-react";
 import KPIBar from "@/components/chain/KPIBar";
 import IVSurface3D from "@/components/chain/IVSurface3D";
 import TermStructure from "@/components/chain/TermStructure";
@@ -34,41 +34,26 @@ function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className="flex flex-col rounded-lg border overflow-hidden"
-      style={{ background: "var(--bg-surface)", borderColor: "var(--border-default)" }}
-    >
-      {/* Header */}
-      <div
-        className="flex items-start justify-between px-4 pt-4 pb-3 border-b"
-        style={{ borderColor: "var(--border-muted)" }}
-      >
+    <div className="card flex flex-col h-full">
+      <div className="card-header">
         <div>
-          <h3
-            className="text-sm font-semibold leading-tight"
-            style={{ color: "var(--text-primary)" }}
-          >
-            {title}
-          </h3>
+          <h3 className="card-title text-base">{title}</h3>
           {subtitle && (
-            <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
-              {subtitle}
-            </p>
+            <p className="text-ui-sm mt-0.5">{subtitle}</p>
           )}
         </div>
       </div>
-      {/* Body */}
-      <div className="flex-1 p-4">{children}</div>
+      <div className="flex-1 min-h-[320px]">{children}</div>
     </div>
   );
 }
 
 /* ─── DTE badge color ────────────────────────────────────────── */
 function dteBadgeColor(dte: number): string {
-  if (dte <= 7) return "#f85149";
-  if (dte <= 21) return "#f0883e";
-  if (dte <= 45) return "#58a6ff";
-  return "#8b949e";
+  if (dte <= 7) return "#E91E63"; // accent-pink
+  if (dte <= 21) return "#F5A623"; // accent-orange
+  if (dte <= 45) return "#2F6BFF"; // accent-blue
+  return "#9A9FA5"; // text-muted
 }
 
 /* ─── Main page ──────────────────────────────────────────────── */
@@ -145,71 +130,56 @@ export default function ChainPage() {
   }
 
   return (
-    <div className="flex flex-col gap-4 pb-8">
+    <div className="flex flex-col gap-6 pb-12 max-w-[1600px] mx-auto px-4 md:px-8">
 
       {/* ── Page header row ── */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[#1A1D1F]">
+            {ticker}
+            <span className="text-lg font-medium text-[#9A9FA5] ml-2">Chain</span>
+          </h1>
+
           {/* Spot price pill */}
           {summary?.spot && (
-            <div
-              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 border font-mono text-sm font-bold"
-              style={{
-                background: "var(--bg-surface)",
-                borderColor: "var(--border-default)",
-                color: "var(--accent-green)",
-              }}
-            >
-              <Zap size={13} />
+            <div className="flex items-center gap-2 rounded-xl px-4 py-2 border border-[#EDF0F2] bg-white font-mono text-base font-bold text-[#2EB6D2] shadow-sm">
+              <Zap size={14} fill="currentColor" />
               {formatMoney(summary.spot)}
             </div>
           )}
           {/* Data state badge */}
-          <div
-            className="flex items-center gap-1.5 rounded-md px-3 py-1.5 border text-xs font-mono"
-            style={{
-              background: "var(--bg-surface)",
-              borderColor: "var(--border-default)",
-              color: error ? "var(--accent-yellow)" : "var(--accent-green)",
-            }}
-          >
-            {error ? <WifiOff size={12} /> : <ShieldCheck size={12} />}
-            {error ? "FALLBACK" : "LIVE"}
+          <div className={`flex items-center gap-2 rounded-xl px-4 py-2 border text-xs font-bold tracking-wider shadow-sm ${
+            error ? "bg-amber-50 border-amber-200 text-amber-600" : "bg-emerald-50 border-emerald-200 text-emerald-600"
+          }`}>
+            {error ? <WifiOff size={14} /> : <ShieldCheck size={14} />}
+            {error ? "FALLBACK" : "LIVE DATA"}
           </div>
         </div>
 
         {/* Ticker form */}
-        <form onSubmit={submitTicker} className="flex items-center gap-2">
-          <input
-            value={draftTicker}
-            onChange={(e) => setDraftTicker(e.target.value)}
-            className="h-9 w-28 rounded-lg border px-3 font-mono text-sm uppercase transition focus:outline-none focus:border-[#58a6ff]"
-            style={{
-              background: "var(--bg-surface)",
-              borderColor: "var(--border-default)",
-              color: "var(--text-primary)",
-            }}
-            placeholder="Ticker"
-          />
+        <form onSubmit={submitTicker} className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9A9FA5]" size={16} />
+            <input
+              value={draftTicker}
+              onChange={(e) => setDraftTicker(e.target.value)}
+              className="h-11 w-40 rounded-xl border border-[#EDF0F2] bg-white pl-10 pr-4 font-mono text-base font-bold uppercase transition focus:outline-none focus:ring-2 focus:ring-[#2F6BFF]/20 focus:border-[#2F6BFF] shadow-sm"
+              placeholder="Search..."
+            />
+          </div>
           <button
             type="submit"
-            className="h-9 rounded-lg px-4 text-sm font-semibold transition hover:brightness-110"
-            style={{ background: "#1158c7", color: "#fff" }}
+            className="h-11 rounded-xl bg-[#2F6BFF] px-6 text-sm font-bold text-white transition hover:bg-[#1A56FF] active:scale-95 shadow-lg shadow-blue-500/20"
           >
-            载入
+            Load
           </button>
           <button
             type="button"
             onClick={() => setRefreshing((x) => x + 1)}
-            className="h-9 w-9 flex items-center justify-center rounded-lg border transition hover:brightness-110"
-            style={{
-              background: "var(--bg-surface)",
-              borderColor: "var(--border-default)",
-              color: "var(--text-muted)",
-            }}
-            aria-label="刷新"
+            className="h-11 w-11 flex items-center justify-center rounded-xl border border-[#EDF0F2] bg-white text-[#6F767E] transition hover:bg-gray-50 active:scale-95 shadow-sm"
+            aria-label="Refresh"
           >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
           </button>
         </form>
       </div>
@@ -218,81 +188,68 @@ export default function ChainPage() {
       <KPIBar summary={summary} loading={loading} error={error} />
 
       {/* ── Expiry tab bar ── */}
-      <div
-        className="flex items-center gap-2 overflow-x-auto pb-1"
-        style={{ scrollbarWidth: "none" }}
-      >
-        <span
-          className="shrink-0 text-xs font-semibold mr-1"
-          style={{ color: "var(--text-muted)" }}
-        >
-          到期日
-        </span>
-        {expiryItems.map((item) => {
-          const isActive = item.date === expiry;
-          return (
-            <button
-              key={item.date}
-              onClick={() => setExpiry(item.date)}
-              className="shrink-0 flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-medium transition-colors border"
-              style={{
-                background: isActive ? "var(--accent-blue)" : "var(--bg-surface)",
-                borderColor: isActive ? "var(--accent-blue)" : "var(--border-default)",
-                color: isActive ? "#fff" : "var(--text-secondary)",
-              }}
-            >
-              <span>{item.label}</span>
-              <span
-                className="text-[10px] font-bold px-1 rounded"
-                style={{
-                  background: isActive ? "rgba(255,255,255,0.2)" : "var(--bg-elevated)",
-                  color: isActive ? "#fff" : dteBadgeColor(item.dte),
-                }}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-bold text-[#9A9FA5] uppercase tracking-widest px-1">
+            Expiration Select
+          </span>
+        </div>
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar">
+          {expiryItems.map((item) => {
+            const isActive = item.date === expiry;
+            return (
+              <button
+                key={item.date}
+                onClick={() => setExpiry(item.date)}
+                className={`tab-pill shrink-0 flex items-center gap-2 px-5 py-2.5 shadow-sm ${
+                  isActive ? "tab-pill-active" : "tab-pill-inactive"
+                }`}
               >
-                {item.dte}D
-              </span>
-              {!isActive && (
-                <span
-                  className="text-[9px] uppercase"
-                  style={{ color: item.kind === "Monthly" ? "#f0883e" : "var(--text-muted)" }}
-                >
-                  {item.kind[0]}
+                <span className="font-bold">{item.label}</span>
+                <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-md ${
+                  isActive ? "bg-white/20" : "bg-gray-100"
+                }`} style={{ color: isActive ? "#fff" : dteBadgeColor(item.dte) }}>
+                  {item.dte}D
                 </span>
-              )}
-            </button>
-          );
-        })}
+                {!isActive && (
+                  <span className={`text-[9px] font-bold uppercase ${
+                    item.kind === "Monthly" ? "text-orange-500" : "text-gray-400"
+                  }`}>
+                    {item.kind[0]}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* ── Charts: 2-column top row ── */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+      {/* ── Charts: 2-column grid ── */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <ChartCard
-          title="IV 曲面 / IV Surface 3D"
-          subtitle="Strike × DTE × 隐含波动率，悬停查看节点数据"
+          title="IV Surface 3D"
+          subtitle="Strike × DTE × Implied Volatility"
         >
           <IVSurface3D data={surface} spot={summary?.spot} loading={loading} />
         </ChartCard>
 
         <ChartCard
-          title="IV 期限结构 / Term Structure"
-          subtitle="ATM IV（蓝线）+ 预期波动（橙线）双轴"
+          title="Term Structure"
+          subtitle="ATM IV vs Expected Volatility"
         >
           <TermStructure surface={surface} summary={summary} loading={loading} />
         </ChartCard>
-      </div>
 
-      {/* ── Charts: full-width bottom row ── */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <ChartCard
-          title="持仓/成交分布 / OI & Volume"
-          subtitle="各行权价 Call/Put 持仓量 + 成交量对比"
+          title="OI & Volume Distribution"
+          subtitle="Call/Put Open Interest and Volume by Strike"
         >
           <OIVolChart chain={chain} loading={loading} />
         </ChartCard>
 
         <ChartCard
-          title="GEX 分布 / Gamma Exposure"
-          subtitle="各行权价正/负 Gamma 敞口，Max Pain 标记"
+          title="Gamma Exposure (GEX)"
+          subtitle="Gamma Exposure per Strike with Max Pain indicator"
         >
           <GEXChart
             data={gex}
