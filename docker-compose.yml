@@ -19,6 +19,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    networks:
+      - option-helius-net
 
   frontend:
     build: ./frontend
@@ -29,6 +31,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+    networks:
+      - option-helius-net
 
   redis:
     image: redis:alpine
@@ -39,6 +43,8 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+    networks:
+      - option-helius-net
 
   timescaledb:
     image: timescale/timescaledb:latest-pg15
@@ -51,3 +57,9 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    networks:
+      - option-helius-net
+
+networks:
+  option-helius-net:
+    driver: bridge
