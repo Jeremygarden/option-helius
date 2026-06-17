@@ -264,7 +264,7 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
             <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-1">
               {s.label}
             </div>
-            <div className="text-sm font-bold font-mono tabular-nums leading-none" style={{ color: s.color }}>
+            <div className="text-sm font-black font-mono tabular-nums leading-none" style={{ color: s.color }}>
               {s.value}
             </div>
           </div>
