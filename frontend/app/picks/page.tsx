@@ -755,8 +755,23 @@ export default function PicksPage() {
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="h-64 rounded-xl animate-pulse bg-[#161b22] border border-[#30363d]"
-              />
+                className="h-64 rounded-xl relative overflow-hidden bg-[#161b22] border border-[#30363d]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1c2128] to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                <div className="p-4 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div className="w-1/2 h-6 bg-[#0d1117] rounded" />
+                    <div className="w-1/4 h-4 bg-[#0d1117] rounded" />
+                  </div>
+                  <div className="w-full h-8 bg-[#0d1117] rounded" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="h-10 bg-[#0d1117] rounded" />
+                    <div className="h-10 bg-[#0d1117] rounded" />
+                    <div className="h-10 bg-[#0d1117] rounded" />
+                    <div className="h-10 bg-[#0d1117] rounded" />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         ) : (
@@ -797,6 +812,9 @@ export default function PicksPage() {
         @keyframes fadeIn {
           from { opacity: 0; transform: translateY(10px); }
           to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer {
+          100% { transform: translateX(100%); }
         }
         ${DETAIL_STYLES}
       `}</style>
