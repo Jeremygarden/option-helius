@@ -20,6 +20,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 from ...core.config import Settings, get_settings
 from .client import IBKRClient
+from .schemas import IBKROptionChain
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +174,7 @@ class OptionChainFetcher:
 
         atm_iv_values = [option["iv"] for option in options if option.get("iv", 0) > 0]
         atm_iv = sum(atm_iv_values) / len(atm_iv_values) if atm_iv_values else 0.0
-        return {
+        result = {
             "ticker": request.symbol,
             "expiry": _normalize_expiry_for_api(expiry),
             "spot": round(spot, 2),
@@ -182,6 +183,7 @@ class OptionChainFetcher:
             "atm_iv": round(atm_iv, 4),
             "source": "ibkr",
         }
+        return IBKROptionChain.from_fetcher_result(result).to_option_helius()
 
     async def get_expirations(self, symbol: str, exchange: str = "SMART", currency: str = "USD") -> List[str]:
         chains = await self.get_option_chain_params(symbol, exchange, currency)

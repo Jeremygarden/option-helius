@@ -1,6 +1,7 @@
 """IBKR provider package."""
 
 from .fetcher import ChainRequest, IBKRFallbackError, OptionChainFetcher
+from .schemas import IBKRGreeks, IBKROptionChain, IBKROptionData, IBKRQuote
 from .client import (
     ClientConfig,
     HealthStatus,
@@ -28,4 +29,8 @@ __all__ = [
     "ChainRequest",
     "IBKRFallbackError",
     "OptionChainFetcher",
+    "IBKRGreeks",
+    "IBKROptionChain",
+    "IBKROptionData",
+    "IBKRQuote",
 ]
