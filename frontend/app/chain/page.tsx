@@ -147,12 +147,25 @@ export default function ChainPage() {
               {formatMoney(summary.spot)}
             </div>
           )}
-          {/* Data state badge */}
-          <div className={`flex items-center gap-2 rounded-xl px-4 py-2 border text-xs font-bold tracking-wider shadow-sm ${
-            error ? "bg-amber-50 border-amber-200 text-amber-600" : "bg-emerald-50 border-emerald-200 text-emerald-600"
-          }`}>
-            {error ? <WifiOff size={14} /> : <ShieldCheck size={14} />}
-            {error ? "FALLBACK" : "LIVE DATA"}
+          {/* Quick Stats */}
+          <div className="flex items-center gap-3">
+            {["BTC", "ETH", "SOL", "NVDA", "AAPL", "TSLA"].map((t) => (
+              <button
+                key={t}
+                onClick={() => {
+                  setDraftTicker(t);
+                  setTicker(t);
+                  setExpiry(null);
+                }}
+                className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                  ticker === t 
+                    ? "bg-[#2F6BFF] text-white shadow-md shadow-blue-200" 
+                    : "bg-white text-[#6F767E] border border-[#EDF0F2] hover:border-[#2F6BFF] hover:text-[#2F6BFF]"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
           </div>
         </div>
 
