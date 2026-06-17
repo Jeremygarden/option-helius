@@ -14,6 +14,14 @@ const STRATEGY_FILTERS = [
   { label: "Iron Condor", value: "iron_condor" },
 ] as const;
 
+// Top-level direction filter tabs
+const DIRECTION_TABS = [
+  { label: "全部", value: "all" },
+  { label: "CALL", value: "call" },
+  { label: "PUT", value: "put" },
+  { label: "SPREAD", value: "spread" },
+] as const;
+
 type StrategyType = "sell_put" | "call_spread" | "iron_condor";
 type Direction = "up" | "down" | "flat";
 
@@ -525,6 +533,7 @@ export default function PicksPage() {
   const [tagFilter, setTagFilter] = useState<string>("全部");
   const [strategyFilter, setStrategyFilter] = useState<string>("all");
   const [sortMode, setSortMode] = useState<"score" | "ticker">("score");
+  const [directionTab, setDirectionTab] = useState<string>("all");
 
   const fetchPicks = useCallback(async () => {
     setLoading(true);
@@ -559,14 +568,14 @@ export default function PicksPage() {
   }, [picks]);
 
   const filtered = useMemo(() => {
-    return picks
+    return directionFilteredPicks
       .filter(p => !selectedTicker || (p.ticker || "").toUpperCase() === selectedTicker)
       .filter(p => tagFilter === "全部" || (p.tag || "核心") === tagFilter)
       .filter(p => strategyFilter === "all" || normalizeType(p.strategyType) === strategyFilter)
       .sort((a, b) => sortMode === "score"
         ? clampScore(b.score) - clampScore(a.score)
         : (a.ticker || "").localeCompare(b.ticker || ""));
-  }, [picks, selectedTicker, tagFilter, strategyFilter, sortMode]);
+  }, [directionFilteredPicks, selectedTicker, tagFilter, strategyFilter, sortMode]);
 
   const displayPicks = filtered.length ? filtered : picks.sort((a, b) => clampScore(b.score) - clampScore(a.score));
 
@@ -575,10 +584,76 @@ export default function PicksPage() {
   const returnMin = Math.min(...picks.map(p => Number(p.returnLow || 0)).filter(Boolean), 0);
   const returnMax = Math.max(...picks.map(p => Number(p.returnHigh || 0)).filter(Boolean), 0);
 
+  // Direction tab filter logic
+  const directionFilteredPicks = useMemo(() => {
+    if (directionTab === "all") return picks;
+    if (directionTab === "call") return picks.filter(p => {
+      const t = normalizeType(p.strategyType);
+      return t === "call_spread" || (t === "sell_put" && p.direction === "up");
+    });
+    if (directionTab === "put") return picks.filter(p => normalizeType(p.strategyType) === "sell_put");
+    if (directionTab === "spread") return picks.filter(p => {
+      const t = normalizeType(p.strategyType);
+      return t === "call_spread" || t === "iron_condor";
+    });
+    return picks;
+  }, [picks, directionTab]);
+
+  // Bullish/bearish counts for scanner summary
+  const bullishCount = picks.filter(p => p.direction === "up").length;
+  const bearishCount = picks.filter(p => p.direction === "down").length;
+
   return (
     <div className="flex flex-col gap-4 pb-8">
 
-      {/* ── Scanner summary card ── */}
+      {/* ── Page header ── */}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-xl font-bold" style={{ color: "var(--text-primary)" }}>
+          期权精选
+          <span className="text-[#8b949e] text-base font-normal ml-2">Picks</span>
+        </h1>
+        <button
+          type="button"
+          onClick={fetchPicks}
+          disabled={loading}
+          className="bg-[#1158c7] hover:bg-[#1f6feb] text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+          {loading ? "扫描中..." : "重新扫描"}
+        </button>
+      </div>
+
+      {/* ── Scanner summary stats card ── */}
+      <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 mb-4">
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center">
+            <div className="font-mono text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+              {picks.length}
+            </div>
+            <div className="text-[11px] uppercase tracking-wide mt-1" style={{ color: "var(--text-muted)" }}>
+              策略数
+            </div>
+          </div>
+          <div className="text-center border-x border-[#30363d]">
+            <div className="font-mono text-2xl font-bold" style={{ color: "#3fb950" }}>
+              {bullishCount}
+            </div>
+            <div className="text-[11px] uppercase tracking-wide mt-1" style={{ color: "var(--text-muted)" }}>
+              看涨
+            </div>
+          </div>
+          <div className="text-center">
+            <div className="font-mono text-2xl font-bold" style={{ color: "#f85149" }}>
+              {bearishCount}
+            </div>
+            <div className="text-[11px] uppercase tracking-wide mt-1" style={{ color: "var(--text-muted)" }}>
+              看跌
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Scanner detail card ── */}
       <ScannerSummaryCard
         scanner={scanner}
         selected={selectedTicker}
@@ -590,6 +665,24 @@ export default function PicksPage() {
         weekStart={payload?.week?.start}
         weekEnd={payload?.week?.end}
       />
+
+      {/* ── Direction filter tabs ── */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {DIRECTION_TABS.map(tab => (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() => setDirectionTab(tab.value)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+              directionTab === tab.value
+                ? "bg-[#1158c7] text-white border-[#1158c7]"
+                : "bg-[#1c2128] border border-[#30363d] text-[#8b949e] hover:text-white hover:border-[#8b949e]"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
       {/* ── Summary stat pills ── */}
       <div className="flex items-center gap-3 flex-wrap">
