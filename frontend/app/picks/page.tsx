@@ -274,6 +274,33 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
   );
 }
 
+/* ─── Base Components ─── */
+const PrimaryButton = ({ children, onClick, disabled, loading, icon: Icon }: any) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    className="bg-[#1158c7] hover:bg-[#1f6feb] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
+  >
+    {Icon && <Icon size={16} className={loading ? "animate-spin" : ""} />}
+    {children}
+  </button>
+);
+
+const GhostButton = ({ children, onClick, active }: any) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all ${
+      active
+        ? "bg-[#1158c7] text-white shadow-md"
+        : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#1c2128]"
+    }`}
+  >
+    {children}
+  </button>
+);
+
 /* ─── Detail Panel ─────────────────────────────────────────── */
 function DetailPanel({ pick }: { pick: StrategyPick }) {
   if (!pick) return null;
@@ -662,15 +689,14 @@ export default function PicksPage() {
           </p>
         </div>
         
-        <button
-          type="button"
+        <PrimaryButton
           onClick={fetchPicks}
           disabled={loading}
-          className="bg-[#1158c7] hover:bg-[#1f6feb] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
+          loading={loading}
+          icon={RefreshCw}
         >
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
           {loading ? "SCANNING MARKET..." : "REFRESH PICKS"}
-        </button>
+        </PrimaryButton>
       </div>
 
       {/* ── Scanner Summary Section ── */}
@@ -708,18 +734,13 @@ export default function PicksPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
         <div className="flex items-center gap-2 p-1 rounded-xl bg-[#161b22] border border-[#30363d]">
           {DIRECTION_TABS.map(tab => (
-            <button
+            <GhostButton
               key={tab.value}
-              type="button"
               onClick={() => setDirectionTab(tab.value)}
-              className={`px-5 py-2 rounded-lg text-xs font-bold transition-all ${
-                directionTab === tab.value
-                  ? "bg-[#1158c7] text-white shadow-md"
-                  : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#1c2128]"
-              }`}
+              active={directionTab === tab.value}
             >
               {tab.label.toUpperCase()}
-            </button>
+            </GhostButton>
           ))}
         </div>
 
