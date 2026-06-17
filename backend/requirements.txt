@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+redis
+asyncpg
+numpy
+pandas
+scipy
+yfinance
+httpx
+ibflex
+ib-async>=1.0.0
+python-dotenv

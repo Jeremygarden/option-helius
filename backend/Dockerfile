@@ -4,8 +4,8 @@ WORKDIR /app
 
 RUN pip install uv -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-COPY pyproject.toml .
-RUN uv pip install --system -r pyproject.toml --index-url https://pypi.tuna.tsinghua.edu.cn/simple
+COPY pyproject.toml requirements.txt ./
+RUN uv pip install --system -r requirements.txt --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
 COPY . .
 
