@@ -791,17 +791,23 @@ export default function PicksPage() {
               </div>
             ))}
             {displayPicks.length === 0 && (
-              <div className="col-span-full py-24 flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#30363d] bg-[#0d1117]">
-                <div className="w-12 h-12 rounded-full bg-[#161b22] flex items-center justify-center mb-4 text-[#484f58]">
-                  <SlidersHorizontal size={24} />
+              <div className="col-span-full py-32 flex flex-col items-center justify-center rounded-3xl border border-dashed border-[#30363d] bg-[#0d1117] relative overflow-hidden">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-[100px]" />
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-20 h-20 rounded-2xl bg-[#161b22] border border-[#30363d] flex items-center justify-center mb-6 text-[#484f58] shadow-2xl">
+                    <SlidersHorizontal size={32} />
+                  </div>
+                  <h3 className="text-lg font-black text-[#e6edf3] mb-2 tracking-tight">No Matching Strategies Found</h3>
+                  <p className="text-sm font-medium text-[#6e7681] text-center max-w-xs mb-8">
+                    Try broadening your search by adjusting filters or clearing ticker selection.
+                  </p>
+                  <button 
+                    onClick={() => {setTagFilter("全部"); setStrategyFilter("all"); setDirectionTab("all"); setSelectedTicker("");}}
+                    className="px-6 py-2.5 rounded-xl bg-[#1c2128] border border-[#30363d] text-xs font-bold text-[#e6edf3] hover:bg-[#21262d] transition-all active:scale-95 shadow-lg"
+                  >
+                    Clear All Active Filters
+                  </button>
                 </div>
-                <p className="text-sm font-bold text-[#8b949e]">No strategies match your filters.</p>
-                <button 
-                  onClick={() => {setTagFilter("全部"); setStrategyFilter("all"); setDirectionTab("all"); setSelectedTicker("");}}
-                  className="mt-4 text-xs font-bold text-[#58a6ff] hover:underline"
-                >
-                  Clear all filters
-                </button>
               </div>
             )}
           </div>
