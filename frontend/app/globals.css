@@ -32,6 +32,12 @@
   --accent-purple: #a371f7;
   --accent-orange: #f0883e;
   --accent-teal: #39d353;
+  
+  /* Pick Page Semantic Colors */
+  --color-call: #3fb950;
+  --color-put: #f85149;
+  --color-spread: #a371f7;
+  --color-selection: #58a6ff;
 
   /* Trading semantics */
   --color-bullish: #3fb950;
