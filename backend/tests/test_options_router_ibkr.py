@@ -107,3 +107,49 @@ def test_expirations_use_ibkr_then_normalize_dates(monkeypatch):
         assert result == {"ticker": "SPY", "expirations": ["2099-01-20"], "source": "ibkr"}
 
     asyncio.run(scenario())
+
+
+def test_iv_surface_uses_ibkr_multi_expiry_data(monkeypatch):
+    async def scenario():
+        class SurfaceFetcher(FakeFetcher):
+            async def get_expirations(self, ticker):
+                return ["20990120", "20990217"]
+
+            async def fetch_option_chain(self, request):
+                return {
+                    "ticker": request.symbol,
+                    "expiry": request.expiration,
+                    "spot": 100.0,
+                    "options": [
+                        {"strike": 95, "type": "put", "iv": 0.22},
+                        {"strike": 100, "type": "call", "iv": 0.25},
+                        {"strike": 105, "type": "call", "iv": 0.0},
+                    ],
+                    "source": "ibkr",
+                }
+
+        monkeypatch.setattr(options, "OptionChainFetcher", SurfaceFetcher)
+        request = FakeRequest(Settings(ibkr_enabled=True, atm_strike_radius=2), FakeClient())
+        result = await options.get_iv_surface_data(request, "spy")
+
+        assert len(result) == 4
+        assert {point["source"] for point in result} == {"ibkr"}
+        assert {point["iv"] for point in result} == {0.22, 0.25}
+        assert {point["type"] for point in result} == {"call", "put"}
+        assert all(point["dte"] > 0 for point in result)
+
+    asyncio.run(scenario())
+
+
+def test_iv_surface_falls_back_to_yfinance_when_ibkr_disabled(monkeypatch):
+    async def scenario():
+        async def fake_yfinance(ticker):
+            return [{"strike": 100, "dte": 30, "iv": 0.2, "type": "call"}]
+
+        monkeypatch.setattr(options, "async_get_iv_surface", fake_yfinance)
+        request = FakeRequest(Settings(ibkr_enabled=False))
+        result = await options.get_iv_surface_data(request, "spy")
+
+        assert result == [{"strike": 100, "dte": 30, "iv": 0.2, "type": "call"}]
+
+    asyncio.run(scenario())

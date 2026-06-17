@@ -1,4 +1,5 @@
 import logging
+from datetime import date, datetime
 
 from fastapi import APIRouter, Query, Request
 from ..core.config import get_settings
@@ -101,6 +102,77 @@ async def _get_ibkr_expirations_or_none(request: Request, ticker: str) -> list[s
                 logger.debug("Failed to disconnect transient IBKR client", exc_info=True)
 
 
+def _normalize_ibkr_expiry(expiry: str) -> str:
+    expiry = str(expiry)
+    return expiry if "-" in expiry else f"{expiry[:4]}-{expiry[4:6]}-{expiry[6:8]}"
+
+
+async def _get_ibkr_iv_surface_or_none(request: Request, ticker: str) -> list[dict] | None:
+    """Build an IV surface from IBKR multi-expiry option chains when available."""
+    client, transient = await _get_ibkr_client(request)
+    if client is None:
+        return None
+
+    settings = getattr(request.app.state, "settings", get_settings())
+    try:
+        fetcher = getattr(request.app.state, "ibkr_fetcher", None)
+        if fetcher is None or getattr(fetcher, "_client", None) is not client:
+            fetcher = OptionChainFetcher(client, settings=settings)
+            if not transient:
+                request.app.state.ibkr_fetcher = fetcher
+
+        raw_expirations = await fetcher.get_expirations(ticker.upper())
+        today = date.today()
+        expirations: list[tuple[str, str, int]] = []
+        for raw_expiry in raw_expirations:
+            try:
+                api_expiry = _normalize_ibkr_expiry(raw_expiry)
+                dte = (datetime.strptime(api_expiry, "%Y-%m-%d").date() - today).days
+                if dte >= 1:
+                    expirations.append((raw_expiry, api_expiry, dte))
+            except Exception:
+                logger.debug("Skipping malformed IBKR expiry for %s: %s", ticker, raw_expiry, exc_info=True)
+
+        points: list[dict] = []
+        # Match the yfinance endpoint's expiry breadth while using the configured
+        # ATM window to stay within IBKR ticker limits.
+        for _raw_expiry, api_expiry, dte in expirations[:8]:
+            chain = await fetcher.fetch_option_chain(
+                ChainRequest(
+                    symbol=ticker.upper(),
+                    expiration=api_expiry,
+                    strike_radius=settings.atm_strike_radius,
+                    wait_seconds=0.5,
+                )
+            )
+            for option in chain.get("options", []):
+                iv = float(option.get("iv") or 0.0)
+                if iv > 0.01:
+                    points.append(
+                        {
+                            "strike": float(option.get("strike") or 0.0),
+                            "dte": dte,
+                            "iv": round(iv, 4),
+                            "type": option.get("type"),
+                            "source": "ibkr",
+                        }
+                    )
+
+        return points or None
+    except (IBKRFallbackError, ConnectionError, RuntimeError) as exc:
+        logger.warning("IBKR IV surface fetch failed for %s; falling back to yfinance (%s)", ticker, exc)
+        return None
+    except Exception:
+        logger.exception("Unexpected IBKR IV surface failure for %s; falling back to yfinance", ticker)
+        return None
+    finally:
+        if transient:
+            try:
+                await client.disconnect()
+            except Exception:
+                logger.debug("Failed to disconnect transient IBKR client", exc_info=True)
+
+
 @router.get("/expirations/{ticker}")
 async def list_expirations(request: Request, ticker: str):
     """List all available expiration dates for a ticker."""
@@ -137,8 +209,11 @@ async def get_gex_data(ticker: str, expiry: str = Query(None)):
 
 
 @router.get("/iv-surface/{ticker}")
-async def get_iv_surface_data(ticker: str):
+async def get_iv_surface_data(request: Request, ticker: str):
     """IV surface across all expirations (for 3D chart)."""
+    ibkr_surface = await _get_ibkr_iv_surface_or_none(request, ticker)
+    if ibkr_surface:
+        return ibkr_surface
     return await async_get_iv_surface(ticker.upper())
 
 
