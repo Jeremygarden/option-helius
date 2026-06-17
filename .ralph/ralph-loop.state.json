@@ -1,0 +1,13 @@
+{
+  "active": true,
+  "iteration": 1,
+  "minIterations": 1,
+  "maxIterations": 1,
+  "completionPromise": "COMPLETE",
+  "tasksMode": false,
+  "taskPromise": "READY_FOR_NEXT_TASK",
+  "prompt": "# Chain Page UI Deep Polish — Phase 2 Redux\n\n## Reference\n`/home/azureuser/projects/options-dashboard/ref-chain.png`\n\n## Skill\nRead `~/.openclaw/skills/frontend-design/SKILL.md` before starting.\n\n## Context\nThis is a professional options trading terminal (Next.js + Tailwind). Chain page shows:\n- IV Surface 3D, Term Structure, OI/Volume, GEX charts\n- KPIBar with 5 metrics\n- Expiry tabs (DTE-based)\n- Ticker search\n\nCurrent code already has baseline styling from previous rounds. Your job is to DEEPEN and REFINE it, referencing the PNG image closely.\n\n## This Round's Focus\nCheck `git log --oneline -40` first to see what round-N style(chain-round-*) commits already exist.\nPick the NEXT incomplete area from the list below and implement it fully.\n\n### Areas (pick the next uncovered one):\n1. CSS token system — globals.css color/font/spacing variables\n2. KPIBar — 5-col horizontal bar, large monospace values, green/red delta coloring\n3. Expiry tabs — pill shape, active=blue fill, horizontal scroll, DTE format\n4. Page main layout — header + KPIBar + tabs + 2-col charts + full-width charts below\n5. IV Surface 3D — Plotly transparent bg, dark axis colors, Viridis colorscale\n6. OI/Volume chart — Recharts call=blue/put=red, dark tooltip, grid styling\n7. GEX chart — positive=green/negative=red bars, zero ReferenceLine\n8. Term Structure — multi-line color series, styled legend and tooltip\n9. Chart card containers — unified card wrapper with title bar + content area\n10. Ticker search UX — styled input + quick-select ticker pills (SPY NVDA TSLA AAPL QQQ)\n11. Loading skeleton — shimmer placeholders for charts and KPIBar\n12. Empty/error states — centered icon + message for no data\n13. Number formatting — font-mono everywhere, 2 decimal percentages, green/red coloring\n14. Color audit — replace all hardcoded hex with CSS var tokens\n15. Final polish — spacing rhythm, hover states, border consistency\n\n## Rules\n- Read the relevant source files BEFORE making changes\n- Make targeted, precise edits — do NOT rewrite whole files unnecessarily\n- Preserve ALL data logic and API calls\n- After editing: `git add -A && git commit -m \"style(chain-round-N): <english description>\" && git pull --rebase origin main && git push origin main`\n- Output exactly: COMPLETE\n\nWorking dir: `/home/azureuser/projects/options-dashboard`\n",
+  "startedAt": "2026-06-17T10:19:55.897Z",
+  "model": "github-copilot/claude-sonnet-4.7",
+  "agent": "openclaw"
+}
