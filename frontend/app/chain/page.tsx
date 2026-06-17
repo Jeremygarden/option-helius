@@ -186,14 +186,23 @@ export default function ChainPage() {
           >
             Load
           </button>
-          <button
-            type="button"
-            onClick={() => setRefreshing((x) => x + 1)}
-            className="h-11 w-11 flex items-center justify-center rounded-xl border border-[#EDF0F2] bg-white text-[#6F767E] transition hover:bg-gray-50 active:scale-95 shadow-sm"
-            aria-label="Refresh"
-          >
-            <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-          </button>
+            <div className="flex items-center gap-2">
+              <div className={`flex items-center gap-2 rounded-xl px-3 py-1.5 border text-[10px] font-bold tracking-wider shadow-sm ${
+                error ? "bg-amber-50 border-amber-200 text-amber-600" : "bg-emerald-50 border-emerald-200 text-emerald-600"
+              }`}>
+                {error ? <WifiOff size={12} /> : <ShieldCheck size={12} />}
+                {error ? "FALLBACK" : "LIVE"}
+              </div>
+              <button
+                type="button"
+                onClick={() => setRefreshing((x) => x + 1)}
+                className="h-9 w-9 flex items-center justify-center rounded-xl border border-[#EDF0F2] bg-white text-[#6F767E] transition hover:bg-gray-50 active:scale-95 shadow-sm"
+                aria-label="Refresh"
+              >
+                <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              </button>
+            </div>
+          </div>
         </form>
       </div>
 
