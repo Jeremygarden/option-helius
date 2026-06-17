@@ -86,7 +86,7 @@ def test_chain_uses_ibkr_when_enabled_and_client_connected(monkeypatch):
 
 def test_chain_falls_back_when_ibkr_disabled(monkeypatch):
     async def scenario():
-        async def fake_yfinance(ticker, expiry):
+        async def fake_yfinance(ticker, expiry, **_kwargs):
             return {"ticker": ticker, "expiry": expiry, "options": [], "source": "yfinance"}
 
         monkeypatch.setattr(options, "async_get_options_chain", fake_yfinance)

@@ -11,7 +11,65 @@ import logging
 import asyncio
 import json
 
+from ..core.config import Settings, get_settings
+
 logger = logging.getLogger(__name__)
+
+
+
+# ---------------------------------------------------------------------------
+# Optional IBKR provider helpers
+# ---------------------------------------------------------------------------
+
+IBKR_CHAIN_TTL_SECONDS = 15
+
+
+async def _fetch_ibkr_options_chain(ticker: str, expiry: Optional[str] = None, settings: Optional[Settings] = None) -> Optional[dict]:
+    """Fetch an option chain from IBKR when enabled.
+
+    This is intentionally best-effort: any connection, entitlement, timeout, or
+    subscription-limit issue returns None so yfinance/AlphaVantage fallback paths
+    remain the stable default. IBKR chains carry IBKR modelGreeks-derived
+    delta/gamma/theta/vega from OptionChainFetcher, replacing BSM estimates when
+    available to async service callers.
+    """
+    settings = settings or get_settings()
+    if not settings.ibkr_enabled:
+        return None
+
+    try:
+        from .ibkr import ChainRequest, IBKRFallbackError, OptionChainFetcher, create_client_from_settings
+    except Exception as exc:
+        logger.warning("IBKR provider import failed; using fallback data for %s (%s)", ticker, exc)
+        return None
+
+    client = None
+    try:
+        client = create_client_from_settings(settings)
+        await client.connect()
+        fetcher = OptionChainFetcher(client, settings=settings)
+        chain = await fetcher.fetch_option_chain(
+            ChainRequest(
+                symbol=ticker.upper(),
+                expiration=expiry,
+                strike_radius=settings.atm_strike_radius,
+            )
+        )
+        chain.setdefault("source", "ibkr")
+        chain["greeks_source"] = "ibkr_model"
+        return chain
+    except (IBKRFallbackError, ConnectionError, RuntimeError) as exc:
+        logger.warning("IBKR market_data chain unavailable for %s/%s; using fallback (%s)", ticker, expiry, exc)
+        return None
+    except Exception as exc:
+        logger.exception("Unexpected IBKR market_data failure for %s/%s; using fallback", ticker, expiry)
+        return None
+    finally:
+        if client is not None:
+            try:
+                await client.disconnect()
+            except Exception:
+                logger.debug("Failed to disconnect IBKR market_data client", exc_info=True)
 
 # ---------------------------------------------------------------------------
 # Utilities
@@ -610,7 +668,20 @@ def get_iv_surface(ticker: str) -> list:
 # Async versions (for router use with Redis)
 # ---------------------------------------------------------------------------
 
-async def async_get_options_chain(ticker: str, expiry: Optional[str] = None) -> dict:
+async def async_get_options_chain(ticker: str, expiry: Optional[str] = None, *, prefer_ibkr: bool = True) -> dict:
+    settings = get_settings()
+
+    if prefer_ibkr and settings.ibkr_enabled:
+        ibkr_cache_key = f"chain:ibkr:{ticker.upper()}:{expiry}:{settings.atm_strike_radius}"
+        cached_ibkr = await _redis_get(ibkr_cache_key)
+        if cached_ibkr:
+            return cached_ibkr
+
+        ibkr_result = await _fetch_ibkr_options_chain(ticker, expiry, settings)
+        if ibkr_result:
+            await _redis_set(ibkr_cache_key, ibkr_result, IBKR_CHAIN_TTL_SECONDS)
+            return ibkr_result
+
     cache_key = f"chain:{ticker.upper()}:{expiry}"
     cached = await _redis_get(cache_key)
     if cached:

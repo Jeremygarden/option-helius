@@ -119,7 +119,7 @@ async def get_chain(request: Request, ticker: str, expiry: str = Query(None), st
     ibkr_chain = await _get_ibkr_chain_or_none(request, ticker, expiry, strike_radius)
     if ibkr_chain:
         return ibkr_chain
-    return await async_get_options_chain(ticker.upper(), expiry)
+    return await async_get_options_chain(ticker.upper(), expiry, prefer_ibkr=False)
 
 
 @router.get("/summary/{ticker}")
