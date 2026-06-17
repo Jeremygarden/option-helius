@@ -628,15 +628,23 @@ export default function PicksPage() {
       {/* ── Page Header ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 py-6 border-b border-[#30363d]">
         <div>
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-3 mb-2">
             <h1 className="text-2xl font-black tracking-tight text-[#e6edf3]">
               TOP PICKS
             </h1>
-            <div className="flex gap-1">
+            <div className="flex flex-wrap gap-1.5">
               {WATCHLIST.map(t => (
-                <span key={t} className="px-1.5 py-0.5 rounded bg-[#1c2128] border border-[#30363d] text-[10px] font-bold font-mono text-[#8b949e]">
+                <button
+                  key={t}
+                  onClick={() => setSelectedTicker(prev => prev === t ? "" : t)}
+                  className={`px-2 py-0.5 rounded border text-[10px] font-bold font-mono transition-all ${
+                    selectedTicker === t
+                      ? "bg-[#58a6ff]/10 border-[#58a6ff] text-[#58a6ff] shadow-[0_0_10px_rgba(88,166,255,0.2)]"
+                      : "bg-[#1c2128] border-[#30363d] text-[#6e7681] hover:text-[#e6edf3] hover:border-[#484f58]"
+                  }`}
+                >
                   {t}
-                </span>
+                </button>
               ))}
             </div>
           </div>
