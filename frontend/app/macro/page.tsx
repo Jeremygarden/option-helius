@@ -77,7 +77,7 @@ export default function MacroPage() {
           { label: "DXY INDEX", value: "104.2", change: "+0.1%", color: "text-[var(--accent-blue)]" },
           { label: "GOLD", value: "$2350", change: "+1.2%", color: "text-accent-green" },
         ].map((item) => (
-          <div key={item.label} className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4">
+          <div key={item.label} className="card">
             <span className="text-[10px] text-[var(--accent-blue)] uppercase font-bold tracking-wide font-mono">{item.label}</span>
             <div className="flex items-baseline gap-4 mt-1">
               <span className="text-xl font-bold font-mono font-mono">{item.value}</span>
@@ -88,7 +88,7 @@ export default function MacroPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4">
+        <div className="lg:col-span-2 card">
            <h3 className="text-sm font-semibold mb-4 font-sans">收益率曲线 / Yield Curve (1M - 30Y)</h3>
            <div className="h-64 border-l border-b border-[var(--border-default)] relative rounded">
               <div className="absolute inset-0 flex items-center justify-center text-[var(--accent-blue)] text-4xl font-bold uppercase rotate-12">
@@ -96,7 +96,7 @@ export default function MacroPage() {
               </div>
            </div>
         </div>
-        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4">
+        <div className="card">
            <h3 className="text-sm font-semibold mb-4 font-sans">当前市场状态 / Market Regime</h3>
            <div className="flex flex-col gap-4 mt-8">
               <div className="flex flex-col items-center">
