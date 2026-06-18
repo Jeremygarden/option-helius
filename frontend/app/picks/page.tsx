@@ -309,10 +309,10 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
   return (
     <div 
       className="mb-6 rounded-2xl border border-[var(--border-default)] overflow-hidden transition-all duration-300 animate-[slideDown_0.3s_ease-out_both] shadow-2xl"
-      style={{ background: "linear-gradient(180deg, var(--accent-blue) 0%, var(--accent-blue) 100%)" }}
+      style={{ background: "var(--bg-surface)" }}
     >
       {/* Header Info */}
-      <div className="px-6 py-5 border-b border-[var(--border-default)] flex items-center justify-between bg-gradient-to-r from-[var(--accent-blue)] to-transparent">
+      <div className="px-6 py-5 border-b border-[var(--border-default)] flex items-center justify-between">
         <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
           <h2 className="text-2xl font-black font-mono tracking-tighter text-[var(--accent-blue)] font-sans">
             {pick.ticker} <span className="text-[var(--accent-blue)] font-bold text-xs ml-2 tracking-widest uppercase font-mono">{pick.strategyName || meta.cn}</span>
@@ -336,7 +336,7 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
         </div>
       </div>
 
-      <div className="p-4 grid grid-cols-1 lg:grid-cols-1 md:grid-cols-12 gap-4 font-mono">
+      <div className="p-4 grid grid-cols-1 md:grid-cols-12 gap-4 font-mono">
         {/* Left: 4 Metrics Grid */}
         <div className="lg:col-span-5 grid grid-cols-2 gap-4">
           {[
@@ -537,7 +537,7 @@ export default function PicksPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedTicker, setSelectedTicker] = useState<string>("");
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(0);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [tagFilter, setTagFilter] = useState<string>("全部");
   const [strategyFilter, setStrategyFilter] = useState<string>("all");
   const [sortMode, setSortMode] = useState<"score" | "ticker">("score");
@@ -605,18 +605,19 @@ export default function PicksPage() {
   }, [directionFilteredPicks, selectedTicker, tagFilter, strategyFilter, sortMode]);
 
   const displayPicks = filtered.length ? filtered : picks.sort((a, b) => clampScore(b.score) - clampScore(a.score));
-  const selectedPick = selectedIndex !== null ? displayPicks[selectedIndex] : null;
+  const selectedPick = selectedId ? displayPicks.find(p => (p.id || p.ticker) === selectedId) ?? null : null;
 
   // Summary stats
   const highCount = picks.filter(p => clampScore(p.score) >= 8).length;
   const returnMin = Math.min(...picks.map(p => Number(p.returnLow || 0)).filter(Boolean), 0);
   const returnMax = Math.max(...picks.map(p => Number(p.returnHigh || 0)).filter(Boolean), 0);
 
-  const handleCardClick = (index: number) => {
-    if (selectedIndex === index) {
-      setSelectedIndex(null);
+  const handleCardClick = (pick: StrategyPick) => {
+    const id = pick.id || pick.ticker || null;
+    if (selectedId === id) {
+      setSelectedId(null);
     } else {
-      setSelectedIndex(index);
+      setSelectedId(id ?? null);
       // Smooth scroll to top when selecting a card
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -666,7 +667,7 @@ export default function PicksPage() {
       </div>
 
       {/* ── Scanner Summary Section ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-1 md:grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
         <div className="lg:col-span-4 space-y-4">
           <ScannerSummaryStats picks={picks} bullish={bullishCount} bearish={bearishCount} />
           <div className="p-4 rounded-lg bg-[var(--bg-base)] border border-[var(--border-default)] flex items-center justify-between shadow-inner">
@@ -772,8 +773,8 @@ export default function PicksPage() {
                 <PickCard 
                   pick={pick} 
                   rank={idx + 1} 
-                  isSelected={selectedIndex === idx}
-                  onSelect={() => handleCardClick(idx)}
+                  isSelected={(pick.id || pick.ticker) === selectedId}
+                  onSelect={() => handleCardClick(pick)}
                 />
               </div>
             ))}
