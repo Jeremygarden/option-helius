@@ -10,7 +10,7 @@ from datetime import datetime, date
 
 logger = logging.getLogger(__name__)
 
-AV_API_KEY = os.getenv("ALPHAVANTAGE_API_KEY", "4ZVBTAERBE2N4AUG")
+AV_API_KEY = os.getenv("ALPHAVANTAGE_API_KEY", "")
 AV_BASE_URL = "https://www.alphavantage.co/query"
 
 _av_session = requests.Session()
