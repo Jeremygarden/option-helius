@@ -11,11 +11,29 @@ async def get_refresh_service(redis=Depends(get_redis)):
 
 @router.get("/indicators")
 async def get_all_indicators(service: IndicatorRefreshService = Depends(get_refresh_service)):
-    """Return all 18 indicators with real values + staleness info."""
+    """Return all 18 indicators with real values + staleness info.
+    
+    Uses a single batch fetch from Redis instead of N individual lookups.
+    """
     from ..services.indicator_refresh import INDICATOR_CONFIG
+    from ..core.cache import get_cached, set_cached
+    
+    # Try batch cache first (single Redis round-trip)
+    cached = await get_cached("macro:all_indicators:batch")
+    if cached is not None:
+        return cached
+    
+    # Fetch all indicators concurrently
+    tasks = {id: service.get_indicator_value(id) for id in INDICATOR_CONFIG.keys()}
     results = {}
-    for id in INDICATOR_CONFIG.keys():
-        results[id] = await service.get_indicator_value(id)
+    for id, task in tasks.items():
+        try:
+            results[id] = await task
+        except Exception as e:
+            results[id] = {"error": str(e), "value": None}
+    
+    # Cache the batch result (60s — real-time tier)
+    await set_cached("macro:all_indicators:batch", results, 60)
     return results
 
 @router.get("/indicator/{id}")

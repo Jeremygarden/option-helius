@@ -147,7 +147,18 @@ def _response(tickers: Optional[List[str]] = None) -> Dict[str, Any]:
 @router.get("")
 async def get_picks(tickers: Optional[str] = Query(None)):
     ticker_list = [t.strip().upper() for t in tickers.split(",") if t.strip()] if tickers else None
-    return _response(ticker_list)
+    # Cache picks for 5 minutes — strategy scoring is expensive
+    try:
+        from ..core.cache import get_cached, set_cached
+        cache_key = f"picks:response:{','.join(ticker_list) if ticker_list else 'default'}"
+        cached = await get_cached(cache_key)
+        if cached is not None:
+            return cached
+        result = _response(ticker_list)
+        await set_cached(cache_key, result, 300)
+        return result
+    except Exception:
+        return _response(ticker_list)
 
 
 @router.get("/")
