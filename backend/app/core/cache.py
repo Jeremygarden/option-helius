@@ -102,8 +102,15 @@ async def flush_ticker_cache(ticker: str) -> int:
         client = await get_redis()
         if not client:
             return 0
-        pattern = f"*:{ticker.upper()}:*"
-        keys = await client.keys(pattern)
+        ticker_upper = ticker.upper()
+        # Match both "prefix:TICKER:suffix" and "prefix:TICKER" (no trailing segment)
+        patterns = [f"*:{ticker_upper}:*", f"*:{ticker_upper}"]
+        keys: list = []
+        for pattern in patterns:
+            found = await client.keys(pattern)
+            keys.extend(found)
+        # Deduplicate
+        keys = list(set(keys))
         if keys:
             await client.delete(*keys)
             return len(keys)

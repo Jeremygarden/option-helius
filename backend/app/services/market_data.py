@@ -95,6 +95,12 @@ def _safe_int(val, default: int = 0) -> int:
 # ---------------------------------------------------------------------------
 _local_cache: dict = {}
 
+# TTL constants aligned with core/cache.py tiers
+_TTL_REALTIME = 60     # 1 minute — prices, chains, GEX
+_TTL_COMPUTED = 300    # 5 minutes — summaries, derived data
+_TTL_SURFACE  = 600    # 10 minutes — IV surface (more expensive to build)
+
+
 def _cache_get(key: str):
     import time
     entry = _local_cache.get(key)
@@ -102,7 +108,7 @@ def _cache_get(key: str):
         return entry["data"]
     return None
 
-def _cache_set(key: str, data, ttl: int = 300):
+def _cache_set(key: str, data, ttl: int = _TTL_COMPUTED):
     import time
     _local_cache[key] = {"data": data, "ts": time.time(), "ttl": ttl}
 
@@ -115,7 +121,7 @@ async def _redis_get(key: str):
         return _cache_get(key)
 
 
-async def _redis_set(key: str, data, ttl: int = 300):
+async def _redis_set(key: str, data, ttl: int = _TTL_COMPUTED):
     try:
         from ..core.cache import set_cached
         await set_cached(key, data, ttl)
@@ -434,7 +440,7 @@ def get_options_chain(ticker: str, expiry: Optional[str] = None) -> dict:
             # AlphaVantage fallback
             from .alphavantage import av_get_options_chain
             result = av_get_options_chain(ticker)
-            _cache_set(cache_key, result, ttl=300)
+            _cache_set(cache_key, result, ttl=_TTL_COMPUTED)
             return result
 
         if expiry is None or expiry not in expirations:
@@ -506,7 +512,7 @@ def get_options_chain(ticker: str, expiry: Optional[str] = None) -> dict:
             "max_pain": max_pain,
             "atm_iv": round(atm_iv, 4),
         }
-        _cache_set(cache_key, result, ttl=300)
+        _cache_set(cache_key, result, ttl=_TTL_COMPUTED)
         return result
 
     except Exception as e:
@@ -613,7 +619,7 @@ def get_summary(ticker: str) -> dict:
             "call_oi": int(call_oi),
             "put_oi": int(put_oi),
         }
-        _cache_set(cache_key, result, ttl=300)
+        _cache_set(cache_key, result, ttl=_TTL_COMPUTED)
         return result
 
     except Exception as e:
@@ -660,7 +666,7 @@ def get_gex(ticker: str, expiry: Optional[str] = None) -> list:
                     }
                     for s in fa_result
                 ]
-                _cache_set(cache_key, result, ttl=300)
+                _cache_set(cache_key, result, ttl=_TTL_COMPUTED)
                 logger.info(f"get_gex {ticker}: using FlashAlpha ({len(result)} strikes)")
                 return result
     except Exception as e:
@@ -681,7 +687,7 @@ def get_gex(ticker: str, expiry: Optional[str] = None) -> list:
         spot = get_spot_price(ticker)
 
         result = _calculate_gex(chain.calls, chain.puts, spot, expiry)
-        _cache_set(cache_key, result, ttl=300)
+        _cache_set(cache_key, result, ttl=_TTL_COMPUTED)
         return result
 
     except Exception as e:
@@ -743,7 +749,7 @@ def get_iv_surface(ticker: str) -> list:
             except Exception:
                 continue
 
-        _cache_set(cache_key, points, ttl=600)
+        _cache_set(cache_key, points, ttl=_TTL_SURFACE)
         return points
 
     except Exception as e:
@@ -774,7 +780,7 @@ async def async_get_options_chain(ticker: str, expiry: Optional[str] = None, *, 
     if cached:
         return cached
     result = get_options_chain(ticker, expiry)
-    await _redis_set(cache_key, result, 300)
+    await _redis_set(cache_key, result, _TTL_COMPUTED)
     return result
 
 
@@ -784,7 +790,7 @@ async def async_get_summary(ticker: str) -> dict:
     if cached:
         return cached
     result = get_summary(ticker)
-    await _redis_set(cache_key, result, 300)
+    await _redis_set(cache_key, result, _TTL_COMPUTED)
     return result
 
 
@@ -811,7 +817,7 @@ async def async_get_gex(ticker: str, expiry: Optional[str] = None, *, prefer_ibk
     if cached:
         return cached
     result = get_gex(ticker, expiry)
-    await _redis_set(cache_key, result, 300)
+    await _redis_set(cache_key, result, _TTL_COMPUTED)
     return result
 
 
@@ -821,5 +827,5 @@ async def async_get_iv_surface(ticker: str) -> list:
     if cached:
         return cached
     result = get_iv_surface(ticker)
-    await _redis_set(cache_key, result, 600)
+    await _redis_set(cache_key, result, _TTL_SURFACE)
     return result

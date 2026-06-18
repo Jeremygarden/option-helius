@@ -65,19 +65,23 @@ async def get_refresh_status(service: IndicatorRefreshService = Depends(get_refr
 @router.post("/refresh/daily")
 async def refresh_daily(service: IndicatorRefreshService = Depends(get_refresh_service)):
     from ..core.cache import invalidate_namespace
+    # Invalidate the batch cache AND individual indicator caches so fresh data is returned
     await invalidate_namespace("macro:")
+    await invalidate_namespace("indicator:")
     return await service.refresh_daily_indicators()
 
 @router.post("/refresh/monthly")
 async def refresh_monthly(service: IndicatorRefreshService = Depends(get_refresh_service)):
     from ..core.cache import invalidate_namespace
     await invalidate_namespace("macro:")
+    await invalidate_namespace("indicator:")
     return await service.refresh_monthly_indicators()
 
 @router.post("/refresh/full")
 async def refresh_full(service: IndicatorRefreshService = Depends(get_refresh_service)):
     from ..core.cache import invalidate_namespace
     await invalidate_namespace("macro:")
+    await invalidate_namespace("indicator:")
     return await service.force_full_refresh()
 
 @router.post("/refresh/weekly-composite")
