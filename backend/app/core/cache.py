@@ -108,13 +108,36 @@ async def flush_ticker_cache(ticker: str) -> int:
         return 0
 
 
+async def invalidate_namespace(namespace: str) -> int:
+    """Invalidate all keys under a namespace prefix (e.g. 'macro:' or 'picks:').
+    Called after data refresh to ensure stale computed results are cleared."""
+    try:
+        client = await get_redis()
+        if not client:
+            return 0
+        pattern = f"{namespace}*"
+        keys = await client.keys(pattern)
+        if keys:
+            await client.delete(*keys)
+            logger.info("Invalidated %d cache keys under namespace '%s'", len(keys), namespace)
+            return len(keys)
+        return 0
+    except Exception as e:
+        logger.debug(f"Cache invalidation error ({namespace}): {e}")
+        return 0
+
+
 def cached(ttl_key: str):
-    """Decorator for async functions to cache their results in Redis."""
+    """Decorator for async functions to cache their results in Redis.
+    Uses namespaced keys: {service}:{function}:{args_hash}"""
     def decorator(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            cache_key = f"{func.__name__}:{args}:{kwargs}"
-            ttl = CACHE_TTL.get(ttl_key, 300)
+            # Build a stable, namespaced cache key
+            arg_parts = ":".join(str(a) for a in args if not hasattr(a, "__dict__"))
+            kw_parts = ":".join(f"{k}={v}" for k, v in sorted(kwargs.items()))
+            cache_key = f"{ttl_key}:{func.__name__}:{arg_parts}:{kw_parts}".rstrip(":")
+            ttl = CACHE_TTL.get(ttl_key, CACHE_TTL_COMPUTED)
             cached_data = await get_cached(cache_key)
             if cached_data is not None:
                 return cached_data
