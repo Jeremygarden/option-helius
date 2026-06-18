@@ -251,6 +251,28 @@ class IndicatorRefreshService:
         # M7 = AAPL+MSFT+NVDA+AMZN+GOOGL+META+TSLA weight sum
         # Mocking for now, as yfinance doesn't easily expose current SPY weights
         return {"value": 31.5, "source": "estimate"}
+    async def fetch_cape(self):
+        val = await fetch_fred("CAPE")
+        if val is None:
+            # Fallback to multpl.com scrape
+            try:
+                from bs4 import BeautifulSoup
+                async with httpx.AsyncClient() as client:
+                    resp = await client.get("https://www.multpl.com/shiller-pe/table/by-month", timeout=10.0)
+                    resp.raise_for_status()
+                    soup = BeautifulSoup(resp.text, 'lxml')
+                    table = soup.find('table', id='multpl-table')
+                    if table:
+                        row = table.find_all('tr')[1] # Latest month
+                        val = float(row.find_all('td')[1].text.strip())
+            except Exception:
+                pass
+        return {"value": val or 30.0, "source": "FRED" if val else "multpl.com"}
+
+    async def fetch_aiae(self):
+        # FRED BOGZ1FL153064476Q — Fed Z.1 household equity allocation
+        val = await fetch_fred("BOGZ1FL153064476Q")
+        return {"value": val or 0.0, "source": "FRED"}
         except Exception:
             pass
         return {"value": 0.0, "source": "error"}
@@ -331,6 +353,28 @@ class IndicatorRefreshService:
         # M7 = AAPL+MSFT+NVDA+AMZN+GOOGL+META+TSLA weight sum
         # Mocking for now, as yfinance doesn't easily expose current SPY weights
         return {"value": 31.5, "source": "estimate"}
+    async def fetch_cape(self):
+        val = await fetch_fred("CAPE")
+        if val is None:
+            # Fallback to multpl.com scrape
+            try:
+                from bs4 import BeautifulSoup
+                async with httpx.AsyncClient() as client:
+                    resp = await client.get("https://www.multpl.com/shiller-pe/table/by-month", timeout=10.0)
+                    resp.raise_for_status()
+                    soup = BeautifulSoup(resp.text, 'lxml')
+                    table = soup.find('table', id='multpl-table')
+                    if table:
+                        row = table.find_all('tr')[1] # Latest month
+                        val = float(row.find_all('td')[1].text.strip())
+            except Exception:
+                pass
+        return {"value": val or 30.0, "source": "FRED" if val else "multpl.com"}
+
+    async def fetch_aiae(self):
+        # FRED BOGZ1FL153064476Q — Fed Z.1 household equity allocation
+        val = await fetch_fred("BOGZ1FL153064476Q")
+        return {"value": val or 0.0, "source": "FRED"}
         return {"value": 0.0, "source": "error"}
 
     async def fetch_dxy(self):
@@ -406,6 +450,28 @@ class IndicatorRefreshService:
         # M7 = AAPL+MSFT+NVDA+AMZN+GOOGL+META+TSLA weight sum
         # Mocking for now, as yfinance doesn't easily expose current SPY weights
         return {"value": 31.5, "source": "estimate"}
+    async def fetch_cape(self):
+        val = await fetch_fred("CAPE")
+        if val is None:
+            # Fallback to multpl.com scrape
+            try:
+                from bs4 import BeautifulSoup
+                async with httpx.AsyncClient() as client:
+                    resp = await client.get("https://www.multpl.com/shiller-pe/table/by-month", timeout=10.0)
+                    resp.raise_for_status()
+                    soup = BeautifulSoup(resp.text, 'lxml')
+                    table = soup.find('table', id='multpl-table')
+                    if table:
+                        row = table.find_all('tr')[1] # Latest month
+                        val = float(row.find_all('td')[1].text.strip())
+            except Exception:
+                pass
+        return {"value": val or 30.0, "source": "FRED" if val else "multpl.com"}
+
+    async def fetch_aiae(self):
+        # FRED BOGZ1FL153064476Q — Fed Z.1 household equity allocation
+        val = await fetch_fred("BOGZ1FL153064476Q")
+        return {"value": val or 0.0, "source": "FRED"}
         return {"value": 0.0, "source": "error"}
 
     async def fetch_erp(self):
@@ -506,6 +572,28 @@ class IndicatorRefreshService:
         # M7 = AAPL+MSFT+NVDA+AMZN+GOOGL+META+TSLA weight sum
         # Mocking for now, as yfinance doesn't easily expose current SPY weights
         return {"value": 31.5, "source": "estimate"}
+    async def fetch_cape(self):
+        val = await fetch_fred("CAPE")
+        if val is None:
+            # Fallback to multpl.com scrape
+            try:
+                from bs4 import BeautifulSoup
+                async with httpx.AsyncClient() as client:
+                    resp = await client.get("https://www.multpl.com/shiller-pe/table/by-month", timeout=10.0)
+                    resp.raise_for_status()
+                    soup = BeautifulSoup(resp.text, 'lxml')
+                    table = soup.find('table', id='multpl-table')
+                    if table:
+                        row = table.find_all('tr')[1] # Latest month
+                        val = float(row.find_all('td')[1].text.strip())
+            except Exception:
+                pass
+        return {"value": val or 30.0, "source": "FRED" if val else "multpl.com"}
+
+    async def fetch_aiae(self):
+        # FRED BOGZ1FL153064476Q — Fed Z.1 household equity allocation
+        val = await fetch_fred("BOGZ1FL153064476Q")
+        return {"value": val or 0.0, "source": "FRED"}
         return {"value": 0.0, "source": "error"}
 
     async def fetch_dxy(self):
@@ -581,6 +669,28 @@ class IndicatorRefreshService:
         # M7 = AAPL+MSFT+NVDA+AMZN+GOOGL+META+TSLA weight sum
         # Mocking for now, as yfinance doesn't easily expose current SPY weights
         return {"value": 31.5, "source": "estimate"}
+    async def fetch_cape(self):
+        val = await fetch_fred("CAPE")
+        if val is None:
+            # Fallback to multpl.com scrape
+            try:
+                from bs4 import BeautifulSoup
+                async with httpx.AsyncClient() as client:
+                    resp = await client.get("https://www.multpl.com/shiller-pe/table/by-month", timeout=10.0)
+                    resp.raise_for_status()
+                    soup = BeautifulSoup(resp.text, 'lxml')
+                    table = soup.find('table', id='multpl-table')
+                    if table:
+                        row = table.find_all('tr')[1] # Latest month
+                        val = float(row.find_all('td')[1].text.strip())
+            except Exception:
+                pass
+        return {"value": val or 30.0, "source": "FRED" if val else "multpl.com"}
+
+    async def fetch_aiae(self):
+        # FRED BOGZ1FL153064476Q — Fed Z.1 household equity allocation
+        val = await fetch_fred("BOGZ1FL153064476Q")
+        return {"value": val or 0.0, "source": "FRED"}
         return {"value": 0.0, "source": "error"}
 
     def _compute_indicator_score(self, indicator_id: str, value: float) -> float:
