@@ -75,7 +75,8 @@ fastapi_stub.Depends = Depends
 fastapi_stub.HTTPException = HTTPException
 fastapi_stub.Body = Body
 fastapi_stub.Request = type("Request", (), {})
-sys.modules.setdefault("fastapi", fastapi_stub)
+# Force the stub even if another test imported a partial fastapi module first.
+sys.modules["fastapi"] = fastapi_stub
 
 middleware_stub = types.ModuleType("fastapi.middleware")
 cors_stub = types.ModuleType("fastapi.middleware.cors")

@@ -1,4 +1,7 @@
-import redis.asyncio as redis
+try:
+    import redis.asyncio as redis
+except ImportError:  # pragma: no cover - test environments may omit optional Redis dep
+    redis = None
 import json
 import os
 from functools import wraps
@@ -8,7 +11,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
-redis_client: Optional[redis.Redis] = None
+redis_client: Optional[Any] = None
 
 # TTL tiers (seconds) — standardized across all services
 # Real-time: data that changes intraday (prices, chains, GEX)
@@ -35,8 +38,10 @@ CACHE_TTL = {
 }
 
 
-async def get_redis() -> Optional[redis.Redis]:
+async def get_redis() -> Optional[Any]:
     global redis_client
+    if redis is None:
+        return None
     if redis_client is None:
         try:
             redis_client = redis.from_url(REDIS_URL, decode_responses=True, socket_connect_timeout=2)

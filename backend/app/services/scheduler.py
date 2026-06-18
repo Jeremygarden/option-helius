@@ -1,8 +1,27 @@
 import logging
 import asyncio
 from datetime import datetime
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
+try:
+    from apscheduler.schedulers.asyncio import AsyncIOScheduler
+    from apscheduler.triggers.cron import CronTrigger
+except ImportError:  # pragma: no cover - keeps tests importable without optional scheduler dep
+    class CronTrigger:
+        def __init__(self, *args, **kwargs):
+            self.args = args
+            self.kwargs = kwargs
+
+    class AsyncIOScheduler:
+        def __init__(self):
+            self.jobs = []
+
+        def add_job(self, *args, **kwargs):
+            self.jobs.append((args, kwargs))
+
+        def start(self):
+            logger.warning("APScheduler unavailable; macro scheduler disabled")
+
+        def shutdown(self):
+            pass
 from .indicator_refresh import IndicatorRefreshService
 from ..core.cache import get_redis
 
@@ -22,10 +41,7 @@ async def refresh_macro_job():
         
         # Weekly (Monday)
         if now.weekday() == 0:
-            await service.refresh_weekly_indicators(), instruction said Weekly for Weekly tier
-            # Re-read: Schedule: every Monday 07:00 UTC — refresh WEEKLY tier
-            # IndicatorRefreshService only has refresh_daily, refresh_monthly, refresh_quarterly
-            # Let's add refresh_weekly to service or just use the dispatch logic
+            await service.refresh_weekly_indicators()
             
         # Monthly (1st)
         if now.day == 1:
