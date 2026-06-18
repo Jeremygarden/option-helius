@@ -623,7 +623,23 @@ export default function PicksPage() {
     }
   };
 
-  if (loading) return <div className="p-8 animate-pulse text-[var(--accent-blue)] font-mono">LOADING_DATA_STREAM...</div>;
+  if (loading) return (
+    <div className="flex flex-col gap-4 pb-12 px-6 max-w-[1600px] mx-auto font-mono">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 py-6 border-b border-[var(--border-default)]">
+        <div className="h-8 w-48 bg-[var(--bg-surface)] rounded animate-pulse" />
+        <div className="h-10 w-36 bg-[var(--bg-surface)] rounded animate-pulse" />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <div className="md:col-span-4 h-40 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] animate-pulse" />
+        <div className="md:col-span-8 h-40 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] animate-pulse" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="h-56 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-default)] animate-pulse" />
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-4 pb-12 px-6 max-w-[1600px] mx-auto font-mono">

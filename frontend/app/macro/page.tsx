@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { RefreshCw } from 'lucide-react';
 import RunRiskPanel from '@/components/macro/RunRiskPanel';
 import BacktestTable from '@/components/macro/BacktestTable';
 
@@ -8,47 +9,50 @@ export default function MacroPage() {
   const [macroData, setMacroData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [indicatorsResp, compositeResp] = await Promise.all([
+        fetch("/api/macro/indicators"),
+        fetch("/api/macro/composite")
+      ]);
+
+      if (!indicatorsResp.ok || !compositeResp.ok) {
+        throw new Error(`API error: indicators=${indicatorsResp.status} composite=${compositeResp.status}`);
+      }
+
+      const indicators = await indicatorsResp.json();
+      const composite = await compositeResp.json();
+
+      setMacroData({
+        run_risk: {
+          composite_score: composite.score,
+          ...composite
+        },
+        warning_indicators: {
+          composite_score: composite.score,
+          indicators: Object.entries(indicators).map(([id, data]: [string, any]) => ({
+            id,
+            ...data,
+            value_display: typeof data.value === 'number' ? data.value.toFixed(2) : data.value,
+          }))
+        }
+      });
+    } catch (err) {
+      console.error("Failed to fetch macro data", err);
+      setError(err instanceof Error ? err.message : "API unavailable");
+      // Keep macroData null — RunRiskPanel has its own mock data and will still render
+    } finally {
+      setLoading(false);
+    }
+  }, [retryCount]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [indicatorsResp, compositeResp] = await Promise.all([
-          fetch("/api/macro/indicators"),
-          fetch("/api/macro/composite")
-        ]);
-
-        if (!indicatorsResp.ok || !compositeResp.ok) {
-          throw new Error(`API error: indicators=${indicatorsResp.status} composite=${compositeResp.status}`);
-        }
-
-        const indicators = await indicatorsResp.json();
-        const composite = await compositeResp.json();
-
-        setMacroData({
-          run_risk: {
-            composite_score: composite.score,
-            ...composite
-          },
-          warning_indicators: {
-            composite_score: composite.score,
-            indicators: Object.entries(indicators).map(([id, data]: [string, any]) => ({
-              id,
-              ...data,
-              value_display: typeof data.value === 'number' ? data.value.toFixed(2) : data.value,
-            }))
-          }
-        });
-      } catch (err) {
-        console.error("Failed to fetch macro data", err);
-        setError(err instanceof Error ? err.message : "API unavailable");
-        // Keep macroData null — RunRiskPanel has its own mock data and will still render
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   // Helper to extract a specific indicator value from macroData
   function getIndicatorValue(id: string): string | null {
@@ -86,9 +90,20 @@ export default function MacroPage() {
   ];
 
   if (loading) return (
-    <div className="p-8 flex flex-col gap-2">
-      <div className="animate-pulse text-[var(--accent-blue)] font-mono text-sm">LOADING_DATA_STREAM...</div>
-      <div className="h-2 w-64 bg-[var(--bg-surface)] rounded animate-pulse" />
+    <div className="flex flex-col gap-4 pb-8">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-xl font-bold font-sans">宏观概览
+          <span className="text-[var(--accent-blue)] text-base font-normal ml-2">Macro Dashboard</span>
+        </h1>
+      </div>
+      {/* Skeleton loading state for each section */}
+      <div className="h-64 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] animate-pulse" />
+      <div className="h-48 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] animate-pulse" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1,2,3,4].map(i => (
+          <div key={i} className="h-20 rounded-xl bg-[var(--bg-surface)] border border-[var(--border-default)] animate-pulse" />
+        ))}
+      </div>
     </div>
   );
 
@@ -98,12 +113,22 @@ export default function MacroPage() {
         <h1 className="text-xl font-bold font-sans">宏观概览
           <span className="text-[var(--accent-blue)] text-base font-normal ml-2">Macro Dashboard</span>
         </h1>
-        {error && (
-          <div className="flex items-center gap-2 rounded-lg px-3 py-1.5 bg-amber-950/30 border border-amber-500/30 text-amber-400 text-xs font-mono">
-            <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-            OFFLINE: {error}
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {error && (
+            <div className="flex items-center gap-2 rounded-lg px-3 py-1.5 bg-amber-950/30 border border-amber-500/30 text-amber-400 text-xs font-mono">
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              OFFLINE: {error}
+            </div>
+          )}
+          <button
+            onClick={() => setRetryCount(c => c + 1)}
+            disabled={loading}
+            className="h-8 w-8 flex items-center justify-center rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)] active:scale-95 disabled:opacity-50"
+            title="Refresh macro data"
+          >
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+          </button>
+        </div>
       </div>
 
       {/* RunRiskPanel always renders — it has its own mock data and gracefully shows it */}
