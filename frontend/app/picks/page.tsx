@@ -201,36 +201,39 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
     `${l.strike}${l.optionType}`
   ).join("/");
 
-  const dirColor = pick.direction === "down" ? "var(--color-put)" : pick.direction === "flat" ? "var(--accent-orange)" : "var(--color-call)";
+  const dirColor = pick.direction === "down" ? "var(--color-put)" : pick.direction === "flat" ? "var(--color-flat)" : "var(--color-call)";
   const DirIcon = pick.direction === "down" ? TrendingDown : pick.direction === "flat" ? Minus : TrendingUp;
 
   return (
     <article
       onClick={onSelect}
-      className={`relative cursor-pointer rounded-lg border transition-all duration-300 overflow-hidden flex flex-col h-full group ${
-        isSelected ? 'ring-2 ring-inset ring-[var(--accent-blue)]' : 'hover:border-[var(--accent-blue)]/50 hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-blue-500/10'
+      className={`relative cursor-pointer rounded-lg border transition-all duration-200 overflow-hidden flex flex-col h-full group ${
+        isSelected ? 'ring-1 ring-inset ring-[var(--accent-blue)]' : 'hover:border-[var(--accent-blue)]/60 hover:-translate-y-px'
       }`}
       style={{
         background: "var(--bg-surface)",
         borderColor: isSelected ? "transparent" : "var(--border-default)",
-        boxShadow: isSelected ? "0 0 30px rgba(88,166,255,0.2)" : "none",
+        boxShadow: isSelected ? "0 0 0 1px var(--accent-blue), 0 6px 18px rgba(88,166,255,0.10)" : "none",
       }}
     >
       {/* Selected Left Border Indicator */}
-      <div className={`absolute left-0 top-0 bottom-0 w-1 bg-[var(--accent-blue)] z-10 transition-transform duration-300 ${isSelected ? 'scale-y-100' : 'scale-y-0'}`} />
+      <div className={`absolute left-0 top-0 bottom-0 w-[3px] bg-[var(--accent-blue)] z-10 transition-transform duration-200 origin-top ${isSelected ? 'scale-y-100' : 'scale-y-0'}`} />
 
-      {/* Card Header */}
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
-            <span className="flex items-center justify-center w-5 h-5 rounded bg-[var(--bg-elevated)] text-[10px] font-mono font-bold text-[var(--accent-blue)] font-mono">
+      {/* Card Header: rank + ticker (eye anchor) / strategy badge */}
+      <div className="p-4 pb-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span
+              className="flex items-center justify-center w-5 h-5 rounded text-[10px] font-mono font-bold tabular-nums"
+              style={{ background: "var(--bg-elevated)", color: "var(--text-muted)" }}
+            >
               {rank}
             </span>
-            <span className="text-lg font-bold font-mono tracking-tight text-[var(--accent-blue)] font-mono">
+            <span className="text-lg font-bold font-mono tracking-tight" style={{ color: "var(--text-primary)" }}>
               {ticker}
             </span>
           </div>
-          <div 
+          <div
             className="px-2 py-0.5 rounded text-[10px] font-bold font-mono"
             style={{ backgroundColor: meta.bg, color: meta.color }}
           >
@@ -247,23 +250,30 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
       </div>
 
       {/* Contract Code Bar */}
-      <div className="px-4 py-2 bg-[var(--bg-elevated)] border-y border-[var(--border-default)] font-mono font-bold text-xs tracking-wider text-[var(--accent-blue)] font-mono">
+      <div
+        className="px-4 py-2 border-y font-mono font-bold text-xs tracking-wider tabular-nums truncate"
+        style={{ background: "var(--bg-elevated)", borderColor: "var(--border-default)", color: "var(--text-primary)" }}
+        title={legsSummary || pick.strategyName}
+      >
         {legsSummary || pick.strategyName}
       </div>
 
       {/* Stats Grid 2x2 */}
-      <div className="p-4 grid grid-cols-2 gap-4 flex-1">
+      <div className="p-4 grid grid-cols-2 gap-3 flex-1">
         {[
-          { label: "SCORE", value: `${score}/10`, color: score >= 9 ? "var(--color-call)" : "var(--accent-yellow)" },
-          { label: "RETURN", value: pick.expectedReturn || "--", color: "var(--accent-blue)" },
+          { label: "SCORE", value: `${score}/10`, color: score >= 9 ? "var(--color-call)" : score >= 7 ? "var(--color-warning)" : "var(--text-secondary)" },
+          { label: "RETURN", value: pick.expectedReturn || "--", color: "var(--color-call)" },
           { label: "MAX RISK", value: pick.maxRisk || "--", color: "var(--color-put)" },
           { label: "PERIOD", value: pick.holdingPeriod || "--", color: "var(--text-secondary)" },
         ].map(s => (
           <div key={s.label}>
-            <div className="text-[10px] font-bold text-[var(--accent-blue)] tracking-widest uppercase mb-1 font-mono">
+            <div
+              className="text-[10px] font-semibold tracking-widest uppercase mb-1"
+              style={{ color: "var(--text-muted)" }}
+            >
               {s.label}
             </div>
-            <div className="text-sm font-black font-mono tabular-nums leading-none font-mono" style={{ color: s.color }}>
+            <div className="text-sm font-bold font-mono tabular-nums leading-none" style={{ color: s.color }}>
               {s.value}
             </div>
           </div>
@@ -279,7 +289,7 @@ const PrimaryButton = ({ children, onClick, disabled, loading, icon: Icon }: any
     type="button"
     onClick={onClick}
     disabled={disabled}
-    className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-4 overflow-x-auto no-scrollbar transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
+    className="bg-[var(--accent-blue)] hover:brightness-110 text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 whitespace-nowrap transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)] outline-none"
   >
     {Icon && <Icon size={16} className={loading ? "animate-spin" : ""} />}
     {children}
@@ -290,10 +300,10 @@ const GhostButton = ({ children, onClick, active }: any) => (
   <button
     type="button"
     onClick={onClick}
-    className={`px-5 py-2 rounded-lg text-xs font-bold transition-all ${
+    className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all whitespace-nowrap ${
       active
-        ? "bg-[var(--accent-blue)] text-white shadow-md"
-        : "text-[var(--accent-blue)] hover:text-[var(--accent-blue)] hover:bg-[var(--bg-elevated)]"
+        ? "bg-[var(--accent-blue)] text-white shadow-sm"
+        : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
     }`}
   >
     {children}
