@@ -719,6 +719,7 @@ def get_iv_surface(ticker: str) -> list:
         points = []
 
         # Limit to first 8 expirations to avoid rate limiting
+        # Only return CALL IVs: halves payload; put skew visible as asymmetry in call surface
         for exp in expirations[:8]:
             try:
                 exp_date = datetime.strptime(exp, "%Y-%m-%d").date()
@@ -727,24 +728,16 @@ def get_iv_surface(ticker: str) -> list:
                     continue
                 chain = t.option_chain(exp)
 
+                spot_for_filter = get_spot_price(ticker)
                 for _, row in chain.calls.iterrows():
                     iv = _safe_float(row.get("impliedVolatility"))
-                    if iv > 0.01:
+                    strike_val = _safe_float(row.get("strike"))
+                    # Filter to ATM ±35% to reduce payload; extreme wing IVs are rarely used
+                    if iv > 0.01 and spot_for_filter > 0 and abs(strike_val / spot_for_filter - 1.0) <= 0.35:
                         points.append({
-                            "strike": _safe_float(row.get("strike")),
+                            "strike": strike_val,
                             "dte": dte,
                             "iv": round(iv, 4),
-                            "type": "call",
-                        })
-
-                for _, row in chain.puts.iterrows():
-                    iv = _safe_float(row.get("impliedVolatility"))
-                    if iv > 0.01:
-                        points.append({
-                            "strike": _safe_float(row.get("strike")),
-                            "dte": dte,
-                            "iv": round(iv, 4),
-                            "type": "put",
                         })
             except Exception:
                 continue

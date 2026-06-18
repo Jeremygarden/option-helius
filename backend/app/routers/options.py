@@ -183,15 +183,31 @@ async def list_expirations(request: Request, ticker: str):
 
 
 @router.get("/chain/{ticker}")
-async def get_chain(request: Request, ticker: str, expiry: str = Query(None), strike_radius: int | None = Query(None, ge=0, le=50)):
+async def get_chain(
+    request: Request,
+    ticker: str,
+    expiry: str = Query(None),
+    strike_radius: int | None = Query(None, ge=0, le=50),
+    atm_pct: float = Query(0.30, ge=0.05, le=1.0, description="ATM filter: include strikes within ±pct of spot (default 30%)"),
+):
     """
     Full options chain (calls + puts) with Greeks, IV, OI.
     Includes IV Rank, IV Percentile, Max Pain.
+    Filtered to ATM ± atm_pct (default ±30%) to reduce payload size.
     """
     ibkr_chain = await _get_ibkr_chain_or_none(request, ticker, expiry, strike_radius)
-    if ibkr_chain:
-        return ibkr_chain
-    return await async_get_options_chain(ticker.upper(), expiry, prefer_ibkr=False)
+    chain_data = ibkr_chain if ibkr_chain else await async_get_options_chain(ticker.upper(), expiry, prefer_ibkr=False)
+
+    # Filter options to ATM window to reduce payload
+    spot = chain_data.get("spot", 0.0) or 0.0
+    if spot > 0 and chain_data.get("options"):
+        lo = spot * (1.0 - atm_pct)
+        hi = spot * (1.0 + atm_pct)
+        chain_data = {
+            **chain_data,
+            "options": [o for o in chain_data["options"] if lo <= (o.get("strike") or 0) <= hi],
+        }
+    return chain_data
 
 
 @router.get("/summary/{ticker}")
