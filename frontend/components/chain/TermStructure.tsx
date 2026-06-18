@@ -9,8 +9,8 @@ type TermStructureProps = { surface: IVSurfacePoint[]; summary?: SummaryResponse
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/95 backdrop-blur-md border border-[#EDF0F2] rounded-lg p-4 shadow-xl">
-        <p className="text-xs font-bold text-[#1A1D1F] mb-3 border-b border-[#EDF0F2] pb-2 font-mono">
+      <div className="bg-white/95 backdrop-blur-md border border-[var(--accent-blue)] rounded-lg p-4 shadow-xl">
+        <p className="text-xs font-bold text-[var(--accent-blue)] mb-3 border-b border-[var(--accent-blue)] pb-2 font-mono">
           Term: {label}
         </p>
         <div className="space-y-4">
@@ -18,9 +18,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             <div key={index} className="flex items-center justify-between gap-4 text-[11px]">
               <div className="flex items-center gap-4">
                 <div className="w-2.5 h-2.5 rounded-lg" style={{ backgroundColor: entry.stroke }} />
-                <span className="text-[#6F767E] font-medium">{entry.name}</span>
+                <span className="text-[var(--accent-blue)] font-medium">{entry.name}</span>
               </div>
-              <span className="font-bold font-mono text-[#1A1D1F]">
+              <span className="font-bold font-mono text-[var(--accent-blue)]">
                 {entry.name === "Expected Move" ? formatMoney(entry.value) : `${entry.value}%`}
               </span>
             </div>
@@ -57,27 +57,27 @@ export default function TermStructure({ surface, summary, loading }: TermStructu
   return (
     <div className="h-[340px] w-full">
       {loading ? (
-        <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[#EDF0F2]" />
+        <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[var(--accent-blue)]" />
       ) : (
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 10, right: 0, bottom: 0, left: 0 }}>
             <defs>
               <linearGradient id="ivFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="#2F6BFF" stopOpacity={0.15} />
-                <stop offset="100%" stopColor="#2F6BFF" stopOpacity={0} />
+                <stop offset="0%" stopColor="var(--accent-blue)" stopOpacity={0.15} />
+                <stop offset="100%" stopColor="var(--accent-blue)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid stroke="#F0F2F5" vertical={false} />
+            <CartesianGrid stroke="var(--accent-blue)" vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fill: "#9A9FA5", fontSize: 10, fontWeight: 500 }}
+              tick={{ fill: "var(--accent-blue)", fontSize: 10, fontWeight: 500 }}
               axisLine={false}
               tickLine={false}
               dy={10}
             />
             <YAxis
               yAxisId="iv"
-              tick={{ fill: "#9A9FA5", fontSize: 10, fontWeight: 500 }}
+              tick={{ fill: "var(--accent-blue)", fontSize: 10, fontWeight: 500 }}
               axisLine={false}
               tickLine={false}
               unit="%"
@@ -86,7 +86,7 @@ export default function TermStructure({ surface, summary, loading }: TermStructu
             <YAxis
               yAxisId="move"
               orientation="right"
-              tick={{ fill: "#9A9FA5", fontSize: 10, fontWeight: 500 }}
+              tick={{ fill: "var(--accent-blue)", fontSize: 10, fontWeight: 500 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `$${v}`}
@@ -98,28 +98,28 @@ export default function TermStructure({ surface, summary, loading }: TermStructu
               align="left" 
               iconType="circle" 
               iconSize={8}
-              wrapperStyle={{ paddingBottom: 20, fontSize: 11, fontWeight: 600, color: "#6F767E" }}
+              wrapperStyle={{ paddingBottom: 20, fontSize: 11, fontWeight: 600, color: "var(--accent-blue)" }}
             />
             <Area
               yAxisId="iv"
               type="monotone"
               dataKey="atmIv"
               name="ATM IV"
-              stroke="#2F6BFF"
+              stroke="var(--accent-blue)"
               fill="url(#ivFill)"
               strokeWidth={3}
-              dot={{ r: 4, fill: "#FFFFFF", stroke: "#2F6BFF", strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: "#2F6BFF" }}
+              dot={{ r: 4, fill: "var(--accent-blue)", stroke: "var(--accent-blue)", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: "var(--accent-blue)" }}
             />
             <Line
               yAxisId="move"
               type="monotone"
               dataKey="expectedMove"
               name="Expected Move"
-              stroke="#F5A623"
+              stroke="var(--accent-blue)"
               strokeWidth={3}
-              dot={{ r: 4, fill: "#FFFFFF", stroke: "#F5A623", strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: "#F5A623" }}
+              dot={{ r: 4, fill: "var(--accent-blue)", stroke: "var(--accent-blue)", strokeWidth: 2 }}
+              activeDot={{ r: 6, fill: "var(--accent-blue)" }}
             />
           </ComposedChart>
         </ResponsiveContainer>

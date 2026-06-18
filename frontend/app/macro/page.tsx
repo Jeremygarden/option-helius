@@ -60,7 +60,7 @@ export default function MacroPage() {
     <div className="flex flex-col gap-4 pb-8">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold font-sans">宏观概览
-          <span className="text-[#8b949e] text-base font-normal ml-2">Macro Dashboard</span>
+          <span className="text-[var(--accent-blue)] text-base font-normal ml-2">Macro Dashboard</span>
         </h1>
       </div>
 
@@ -74,11 +74,11 @@ export default function MacroPage() {
         {[
           { label: "VIX INDEX", value: "14.50", change: "-2.1%", color: "text-accent-green" },
           { label: "US 10Y YIELD", value: "4.25%", change: "+0.5%", color: "text-accent-red" },
-          { label: "DXY INDEX", value: "104.2", change: "+0.1%", color: "text-[#7d8590]" },
+          { label: "DXY INDEX", value: "104.2", change: "+0.1%", color: "text-[var(--accent-blue)]" },
           { label: "GOLD", value: "$2350", change: "+1.2%", color: "text-accent-green" },
         ].map((item) => (
-          <div key={item.label} className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
-            <span className="text-[10px] text-[#7d8590] uppercase font-bold tracking-wide font-mono">{item.label}</span>
+          <div key={item.label} className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4">
+            <span className="text-[10px] text-[var(--accent-blue)] uppercase font-bold tracking-wide font-mono">{item.label}</span>
             <div className="flex items-baseline gap-4 mt-1">
               <span className="text-xl font-bold font-mono font-mono">{item.value}</span>
               <span className={`text-xs font-bold font-mono transition-colors ${item.color}`}>{item.change}</span>
@@ -88,15 +88,15 @@ export default function MacroPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 bg-[#161b22] border border-[#30363d] rounded-lg p-4">
+        <div className="lg:col-span-2 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4">
            <h3 className="text-sm font-semibold mb-4 font-sans">收益率曲线 / Yield Curve (1M - 30Y)</h3>
-           <div className="h-64 border-l border-b border-[#30363d] relative rounded">
-              <div className="absolute inset-0 flex items-center justify-center text-[#30363d] text-4xl font-bold uppercase rotate-12">
+           <div className="h-64 border-l border-b border-[var(--border-default)] relative rounded">
+              <div className="absolute inset-0 flex items-center justify-center text-[var(--accent-blue)] text-4xl font-bold uppercase rotate-12">
                  Coming Soon
               </div>
            </div>
         </div>
-        <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
+        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4">
            <h3 className="text-sm font-semibold mb-4 font-sans">当前市场状态 / Market Regime</h3>
            <div className="flex flex-col gap-4 mt-8">
               <div className="flex flex-col items-center">
@@ -107,10 +107,10 @@ export default function MacroPage() {
               </div>
               <div className="space-y-4 mt-4">
                  <div className="flex justify-between text-xs">
-                    <span className="text-[#7d8590]">Bullish Prob.</span>
+                    <span className="text-[var(--accent-blue)]">Bullish Prob.</span>
                     <span className="text-accent-green font-mono">78%</span>
                  </div>
-                 <div className="w-full h-1 bg-[#30363d] rounded-full overflow-hidden">
+                 <div className="w-full h-1 bg-[var(--accent-blue)] rounded-full overflow-hidden">
                     <div className="h-full bg-accent-teal transition-all" style={{ width: '78%' }} />
                  </div>
               </div>

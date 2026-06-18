@@ -24,7 +24,7 @@ export default function TopBar() {
 
   return (
     <header
-      className="h-14 border-b border-[#30363d] flex items-center justify-between gap-4 px-6 sticky top-0 z-20"
+      className="h-14 border-b border-[var(--border-default)] flex items-center justify-between gap-4 px-6 sticky top-0 z-20"
       style={{ background: "var(--bg-base)" }}
     >
       {/* ── Left: page title ── */}
@@ -42,12 +42,12 @@ export default function TopBar() {
 
         {/* Ticker strip */}
         <div
-          className="hidden md:flex items-center gap-4 rounded-lg px-3 py-1.5 border border-[#21262d]"
+          className="hidden md:flex items-center gap-4 rounded-lg px-3 py-1.5 border border-[var(--accent-blue)]"
           style={{ background: "var(--bg-surface)" }}
         >
           {TICKERS.map((t, i) => (
             <div key={t.sym} className="flex items-center gap-4.5">
-              {i > 0 && <div className="w-px h-3.5 bg-[#30363d]" />}
+              {i > 0 && <div className="w-px h-3.5 bg-[var(--accent-blue)]" />}
               <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
                 {t.sym}
               </span>
@@ -79,7 +79,7 @@ export default function TopBar() {
             type="text"
             placeholder="搜索标的..."
             defaultValue="NVDA"
-            className="w-36 rounded-lg py-1.5 pl-8 pr-3 text-[12px] font-mono border border-[#30363d] transition-all focus:outline-none focus:border-[#58a6ff] focus:w-48"
+            className="w-36 rounded-lg py-1.5 pl-8 pr-3 text-[12px] font-mono border border-[var(--border-default)] transition-all focus:outline-none focus:border-[var(--accent-blue)] focus:w-48"
             style={{
               background: "var(--bg-surface)",
               color: "var(--text-primary)",
@@ -122,7 +122,7 @@ export default function TopBar() {
 
           {/* Avatar */}
           <div
-            className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-mono font-bold ml-1 border border-[#30363d] cursor-pointer"
+            className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-mono font-bold ml-1 border border-[var(--border-default)] cursor-pointer"
             style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)" }}
           >
             JJ

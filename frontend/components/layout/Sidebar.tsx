@@ -48,8 +48,8 @@ export default function Sidebar() {
         className={clsx(
           "flex items-center gap-4 px-4 py-2.5 rounded-lg mx-2 transition-all duration-150 group",
           isActive
-            ? "bg-[#1158c7] text-white"
-            : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#1c2128]"
+            ? "bg-[var(--accent-blue)] text-white"
+            : "text-[var(--accent-blue)] hover:text-[var(--accent-blue)] hover:bg-[var(--bg-elevated)]"
         )}
       >
         <Icon
@@ -62,7 +62,7 @@ export default function Sidebar() {
           <span
             className={clsx(
               "text-[11px] leading-tight mt-0.5",
-              isActive ? "text-blue-200" : "text-[#6e7681] group-hover:text-[#8b949e]"
+              isActive ? "text-blue-200" : "text-[var(--accent-blue)] group-hover:text-[var(--accent-blue)]"
             )}
           >
             {sub}
@@ -77,30 +77,30 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="w-[220px] flex flex-col shrink-0 h-screen sticky top-0 border-r border-[#30363d]"
+      className="w-[220px] flex flex-col shrink-0 h-screen sticky top-0 border-r border-[var(--border-default)]"
       style={{ background: "var(--bg-base)" }}
     >
       {/* ─── Logo ─── */}
-      <div className="flex items-center gap-4 px-5 py-5 border-b border-[#21262d]">
+      <div className="flex items-center gap-4 px-5 py-5 border-b border-[var(--accent-blue)]">
         <div
           className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 font-mono font-bold text-[15px]"
           style={{
-            background: "linear-gradient(135deg, #1158c7 0%, #58a6ff 100%)",
+            background: "linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue) 100%)",
             boxShadow: "0 0 16px rgba(88,166,255,0.35)",
-            color: "#fff",
+            color: "var(--accent-blue)",
           }}
         >
           H
         </div>
         <div className="flex flex-col leading-none">
-          <span className="text-[14px] font-bold text-[#e6edf3] tracking-tight">Helius</span>
-          <span className="text-[11px] text-[#6e7681] mt-0.5">Options Terminal</span>
+          <span className="text-[14px] font-bold text-[var(--accent-blue)] tracking-tight">Helius</span>
+          <span className="text-[11px] text-[var(--accent-blue)] mt-0.5">Options Terminal</span>
         </div>
       </div>
 
       {/* ─── Main nav ─── */}
       <nav className="flex flex-col gap-0.5 pt-3 pb-2">
-        <span className="px-5 pb-1.5 text-[10px] uppercase tracking-widest text-[#484f58] font-semibold">
+        <span className="px-5 pb-1.5 text-[10px] uppercase tracking-widest text-[var(--accent-blue)] font-semibold">
           主菜单
         </span>
         {mainNavItems.map((item) => (
@@ -109,11 +109,11 @@ export default function Sidebar() {
       </nav>
 
       {/* ─── Divider ─── */}
-      <div className="mx-4 border-t border-[#21262d]" />
+      <div className="mx-4 border-t border-[var(--accent-blue)]" />
 
       {/* ─── Tools nav ─── */}
       <nav className="flex flex-col gap-0.5 pt-3 pb-2">
-        <span className="px-5 pb-1.5 text-[10px] uppercase tracking-widest text-[#484f58] font-semibold">
+        <span className="px-5 pb-1.5 text-[10px] uppercase tracking-widest text-[var(--accent-blue)] font-semibold">
           工具
         </span>
         {toolsNavItems.map((item) => (
@@ -125,12 +125,12 @@ export default function Sidebar() {
       <div className="flex-1" />
 
       {/* ─── Status footer ─── */}
-      <div className="px-5 py-4 border-t border-[#21262d]">
+      <div className="px-5 py-4 border-t border-[var(--accent-blue)]">
         <div className="flex items-center gap-4">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#3fb950] animate-pulse" />
-          <span className="text-[11px] text-[#6e7681]">Market Open</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-blue)] animate-pulse" />
+          <span className="text-[11px] text-[var(--accent-blue)]">Market Open</span>
         </div>
-        <div className="mt-1 text-[10px] font-mono text-[#484f58]">
+        <div className="mt-1 text-[10px] font-mono text-[var(--accent-blue)]">
           {new Date().toLocaleDateString("zh-CN", { weekday: "short", month: "short", day: "numeric" })}
         </div>
       </div>

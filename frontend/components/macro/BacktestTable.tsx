@@ -51,9 +51,9 @@ const BacktestTable: React.FC<{ data?: BacktestEvent[] }> = ({ data = [] }) => {
   }, [data]);
 
   const getScoreStyle = (score: number, redThr: number) => {
-    if (score > redThr) return "bg-red-500/20 text-red-400 font-bold border border-red-500/30";
+    if (score > redThr) return "bg-red-500/20 text-[var(--accent-red)] font-bold border border-red-500/30";
     if (score > orangeThreshold) return "bg-orange-500/20 text-orange-400 border border-orange-500/30";
-    return "bg-green-500/10 text-green-400 border border-green-500/20";
+    return "bg-green-500/10 text-[var(--accent-green)] border border-green-500/20";
   };
 
   return (
@@ -120,8 +120,8 @@ const BacktestTable: React.FC<{ data?: BacktestEvent[] }> = ({ data = [] }) => {
                   </div>
                 </td>
 
-                <td className="px-4 py-2 text-red-400/80">{row.max_dd}%</td>
-                <td className={`px-4 py-2 ${row.return_1y < 0 ? 'text-red-400' : 'text-green-400'}`}>
+                <td className="px-4 py-2 text-[var(--accent-red)]/80">{row.max_dd}%</td>
+                <td className={`px-4 py-2 ${row.return_1y < 0 ? 'text-[var(--accent-red)]' : 'text-[var(--accent-green)]'}`}>
                   {row.return_1y > 0 ? '+' : ''}{row.return_1y}%
                 </td>
               </tr>
@@ -134,7 +134,7 @@ const BacktestTable: React.FC<{ data?: BacktestEvent[] }> = ({ data = [] }) => {
                 <td className="px-4 py-3 text-blue-400">{stats.model_a}</td>
                 <td className="px-4 py-3 text-blue-400">{stats.model_b}</td>
                 <td className="px-4 py-3 text-blue-400">{stats.model_c}</td>
-                <td className="px-4 py-3 text-green-400">{stats.model_d}</td>
+                <td className="px-4 py-3 text-[var(--accent-green)]">{stats.model_d}</td>
                 <td className="px-4 py-3" colSpan={2}></td>
               </tr>
             </tfoot>

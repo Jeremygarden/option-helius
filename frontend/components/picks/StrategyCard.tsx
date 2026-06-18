@@ -40,16 +40,16 @@ interface Strategy {
 function getTypeBadge(strategy: string): { label: string; bg: string; color: string } {
   const s = strategy.toLowerCase();
   if (s.includes("put") && (s.includes("sell") || s.includes("short")))
-    return { label: "SELL PUT", bg: "rgba(63,185,80,0.15)", color: "#3fb950" };
+    return { label: "SELL PUT", bg: "rgba(63,185,80,0.15)", color: "var(--accent-blue)" };
   if (s.includes("call spread") || s.includes("call_spread"))
-    return { label: "CALL SPREAD", bg: "rgba(88,166,255,0.15)", color: "#58a6ff" };
+    return { label: "CALL SPREAD", bg: "rgba(88,166,255,0.15)", color: "var(--accent-blue)" };
   if (s.includes("condor"))
-    return { label: "IRON CONDOR", bg: "rgba(240,136,62,0.15)", color: "#f0883e" };
+    return { label: "IRON CONDOR", bg: "rgba(240,136,62,0.15)", color: "var(--accent-blue)" };
   if (s.includes("call"))
-    return { label: "CALL", bg: "rgba(63,185,80,0.15)", color: "#3fb950" };
+    return { label: "CALL", bg: "rgba(63,185,80,0.15)", color: "var(--accent-blue)" };
   if (s.includes("put"))
-    return { label: "PUT", bg: "rgba(248,81,73,0.15)", color: "#f85149" };
-  return { label: "SPREAD", bg: "rgba(88,166,255,0.15)", color: "#58a6ff" };
+    return { label: "PUT", bg: "rgba(248,81,73,0.15)", color: "var(--accent-blue)" };
+  return { label: "SPREAD", bg: "rgba(88,166,255,0.15)", color: "var(--accent-blue)" };
 }
 
 /** Format a number for display */
@@ -75,12 +75,12 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
 
   // Stats for 2-col grid
   const stats: { label: string; value: string; color?: string }[] = [
-    { label: "Max Profit",    value: `$${strategy.max_profit}`,                    color: "#3fb950" },
-    { label: "Max Loss",      value: `$${strategy.max_loss}`,                      color: "#f85149" },
-    { label: "Win Rate",      value: `${(strategy.prob_profit * 100).toFixed(1)}%`, color: "#58a6ff" },
-    { label: "Ann. Return",   value: `${strategy.annualized_return}%`,             color: "#d29922" },
-    { label: "Safety Margin", value: strategy.safety_margin,                       color: "#8b949e" },
-    { label: "Score",         value: `${strategy.score}/100`,                      color: strategy.score > 80 ? "#3fb950" : "#58a6ff" },
+    { label: "Max Profit",    value: `$${strategy.max_profit}`,                    color: "var(--accent-blue)" },
+    { label: "Max Loss",      value: `$${strategy.max_loss}`,                      color: "var(--accent-blue)" },
+    { label: "Win Rate",      value: `${(strategy.prob_profit * 100).toFixed(1)}%`, color: "var(--accent-blue)" },
+    { label: "Ann. Return",   value: `${strategy.annualized_return}%`,             color: "var(--accent-blue)" },
+    { label: "Safety Margin", value: strategy.safety_margin,                       color: "var(--accent-blue)" },
+    { label: "Score",         value: `${strategy.score}/100`,                      color: strategy.score > 80 ? "var(--accent-blue)" : "var(--accent-blue)" },
   ];
 
   return (
@@ -89,14 +89,14 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
         "relative rounded-lg border transition-all duration-150",
         "hover:-translate-y-px",
         isTop
-          ? "border-l-4 border-l-[#3fb950]"
+          ? "border-l-4 border-l-[var(--accent-blue)]"
           : "border-l-4 border-l-transparent",
       ].join(" ")}
       style={{
         background: "var(--bg-surface)",
         borderColor: isTop ? undefined : "var(--border-default)",
         // override border-l for highlight cards
-        ...(isTop ? { borderLeftColor: "#3fb950" } : {}),
+        ...(isTop ? { borderLeftColor: "var(--accent-blue)" } : {}),
       }}
     >
       {/* ── Top row: rank badge left, type badge right ── */}
@@ -106,7 +106,7 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
           className="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-mono font-bold"
           style={{
             background: isTop ? "rgba(63,185,80,0.15)" : "var(--bg-elevated)",
-            color: isTop ? "#3fb950" : "var(--text-muted)",
+            color: isTop ? "var(--accent-blue)" : "var(--text-muted)",
             border: `1px solid ${isTop ? "rgba(63,185,80,0.3)" : "var(--border-default)"}`,
           }}
         >
@@ -142,7 +142,7 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
               className="text-[11px] px-1.5 py-0.5 rounded font-mono"
               style={{
                 background: "rgba(88,166,255,0.12)",
-                color: "#58a6ff",
+                color: "var(--accent-blue)",
               }}
             >
               {strategy.signal_badge}
@@ -200,7 +200,7 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
               className="text-[10px] font-mono px-1.5 py-0.5 rounded border"
               style={{
                 background: "rgba(248,81,73,0.08)",
-                color: "#f85149",
+                color: "var(--accent-blue)",
                 borderColor: "rgba(248,81,73,0.2)",
               }}
             >
@@ -221,7 +221,7 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
         >
           <span
             className="w-1.5 h-1.5 rounded-full shrink-0"
-            style={{ background: "#58a6ff" }}
+            style={{ background: "var(--accent-blue)" }}
           />
           {strategy.gex_note}
         </p>
@@ -231,7 +231,7 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
         >
           <span
             className="w-1.5 h-1.5 rounded-full shrink-0"
-            style={{ background: "#a371f7" }}
+            style={{ background: "var(--accent-blue)" }}
           />
           {strategy.skew_note}
         </p>

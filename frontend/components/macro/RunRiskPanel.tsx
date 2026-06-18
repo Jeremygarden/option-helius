@@ -66,10 +66,10 @@ interface SentinelIndicator {
 
 // ── Color helpers ──────────────────────────────────────────────
 const SIGNAL_COLORS = {
-  1: { bg: "bg-green-900/30", border: "border-green-500", text: "text-green-400", dot: "bg-green-400" },
+  1: { bg: "bg-green-900/30", border: "border-green-500", text: "text-[var(--accent-green)]", dot: "bg-green-400" },
   2: { bg: "bg-yellow-900/30", border: "border-yellow-500", text: "text-yellow-400", dot: "bg-yellow-400" },
   3: { bg: "bg-orange-900/30", border: "border-orange-500", text: "text-orange-400", dot: "bg-orange-400" },
-  4: { bg: "bg-red-900/30", border: "border-red-500", text: "text-red-400", dot: "bg-red-400" },
+  4: { bg: "bg-red-900/30", border: "border-red-500", text: "text-[var(--accent-red)]", dot: "bg-red-400" },
 };
 
 // ── Mock Data ──────────────────────────────────────────────────
@@ -124,7 +124,7 @@ const MOCK_DATA: RunRiskData = {
 
 // ── Semicircle Gauge ───────────────────────────────────────────
 function SemiCircleGauge({ score, level }: { score: number; level: number }) {
-  const colors = ["#22c55e", "#eab308", "#f97316", "#ef4444"];
+  const colors = ["var(--accent-blue)", "var(--accent-blue)", "var(--accent-blue)", "var(--accent-blue)"];
   const color = colors[level - 1];
   const angle = (score / 100) * 180 - 90; // -90 to +90 degrees
   const r = 70;
@@ -132,10 +132,10 @@ function SemiCircleGauge({ score, level }: { score: number; level: number }) {
   
   // Arc segments for gauge background
   const segments = [
-    { start: -90, end: -18, color: "#166534" },   // 0-40 green
-    { start: -18, end: 18, color: "#713f12" },    // 40-55 yellow  
-    { start: 18, end: 54, color: "#7c2d12" },     // 55-65 orange
-    { start: 54, end: 90, color: "#7f1d1d" },     // 65-100 red
+    { start: -90, end: -18, color: "var(--accent-blue)" },   // 0-40 green
+    { start: -18, end: 18, color: "var(--accent-blue)" },    // 40-55 yellow  
+    { start: 18, end: 54, color: "var(--accent-blue)" },     // 55-65 orange
+    { start: 54, end: 90, color: "var(--accent-blue)" },     // 65-100 red
   ];
   
   function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
@@ -172,9 +172,9 @@ function SemiCircleGauge({ score, level }: { score: number; level: number }) {
         fill={color} opacity="0.9" />
       <circle cx={cx} cy={cy} r="6" fill={color} />
       {/* Labels */}
-      <text x="18" y="95" fill="#6b7280" fontSize="9">0</text>
-      <text x="82" y="22" fill="#6b7280" fontSize="9">50</text>
-      <text x="150" y="95" fill="#6b7280" fontSize="9">100</text>
+      <text x="18" y="95" fill="var(--accent-blue)" fontSize="9">0</text>
+      <text x="82" y="22" fill="var(--accent-blue)" fontSize="9">50</text>
+      <text x="150" y="95" fill="var(--accent-blue)" fontSize="9">100</text>
     </svg>
   );
 }
@@ -183,14 +183,14 @@ function SemiCircleGauge({ score, level }: { score: number; level: number }) {
 function IndicatorCard({ ind }: { ind: IndicatorCard }) {
   const colors = SIGNAL_COLORS[ind.status_level];
   const trendIcon = ind.trend === "up" ? "↑" : ind.trend === "down" ? "↓" : "→";
-  const trendColor = ind.trend === "up" ? "text-red-400" : ind.trend === "down" ? "text-green-400" : "text-gray-400";
+  const trendColor = ind.trend === "up" ? "text-[var(--accent-red)]" : ind.trend === "down" ? "text-[var(--accent-green)]" : "text-gray-400";
   
   return (
     <div className={`flex-shrink-0 w-36 rounded-lg border ${colors.border} ${colors.bg} p-4 flex flex-col gap-4.5`}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <span className="text-[10px] text-gray-500 font-mono">{ind.category}</span>
-        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${colors.text} bg-black/30`}>
+        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${colors.text} bg-[var(--bg-base)]/30`}>
           {ind.status_label}
         </span>
       </div>
@@ -215,7 +215,7 @@ function IndicatorCard({ ind }: { ind: IndicatorCard }) {
         <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500`}
-            style={{ width: `${ind.danger_score}%`, backgroundColor: ind.danger_score > 70 ? "#ef4444" : ind.danger_score > 50 ? "#f97316" : ind.danger_score > 30 ? "#eab308" : "#22c55e" }}
+            style={{ width: `${ind.danger_score}%`, backgroundColor: ind.danger_score > 70 ? "var(--accent-blue)" : ind.danger_score > 50 ? "var(--accent-blue)" : ind.danger_score > 30 ? "var(--accent-blue)" : "var(--accent-blue)" }}
           />
         </div>
       </div>
@@ -264,10 +264,10 @@ function CategoryFilteredCards({ indicators }: { indicators: IndicatorCard[] }) 
       {/* Summary stats bar */}
       <div className="mt-3 grid grid-cols-4 gap-4">
         {[
-          { label: "🔴 极高危", count: indicators.filter(i => i.status_level === 4).length, color: "text-red-400" },
+          { label: "🔴 极高危", count: indicators.filter(i => i.status_level === 4).length, color: "text-[var(--accent-red)]" },
           { label: "🟠 偏高", count: indicators.filter(i => i.status_level === 3).length, color: "text-orange-400" },
           { label: "🟡 中等", count: indicators.filter(i => i.status_level === 2).length, color: "text-yellow-400" },
-          { label: "🟢 正常", count: indicators.filter(i => i.status_level === 1).length, color: "text-green-400" },
+          { label: "🟢 正常", count: indicators.filter(i => i.status_level === 1).length, color: "text-[var(--accent-green)]" },
         ].map(s => (
           <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-lg p-4 text-center">
             <div className={`text-xl font-bold ${s.color}`}>{s.count}</div>
@@ -310,7 +310,7 @@ function SentinelCard({ s }: { s: SentinelIndicator }) {
             ? "border-red-500 text-red-300 bg-red-950"
             : isNearThreshold
             ? "border-orange-500 text-orange-300 bg-orange-950/50"
-            : "border-green-700 text-green-400 bg-green-950/30"}`}>
+            : "border-green-700 text-[var(--accent-green)] bg-green-950/30"}`}>
           {s.triggered ? (
             <><span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse inline-block" />已触发</>
           ) : (
@@ -344,7 +344,7 @@ function SentinelCard({ s }: { s: SentinelIndicator }) {
       </div>
 
       {/* Distance */}
-      <div className={`text-xs font-mono mb-2 ${s.triggered ? "text-red-400" : "text-gray-400"}`}>
+      <div className={`text-xs font-mono mb-2 ${s.triggered ? "text-[var(--accent-red)]" : "text-gray-400"}`}>
         {s.distance}
       </div>
 
@@ -370,7 +370,7 @@ function SentinelSection({ sentinels }: { sentinels: SentinelIndicator[] }) {
             <span className="text-xl">🚨</span>
             <span>最高警戒 — {triggeredCount}/3 哨兵触发 · 综合分已失效 · 立即行动</span>
           </div>
-          <div className="mt-2 text-red-400 text-xs font-mono">
+          <div className="mt-2 text-[var(--accent-red)] text-xs font-mono">
             {sentinels.filter(s => s.triggered).map(s => s.subtitle).join(" + ")} 同时触发
           </div>
           <div className="mt-1 text-red-500 text-xs">
@@ -386,7 +386,7 @@ function SentinelSection({ sentinels }: { sentinels: SentinelIndicator[] }) {
           <span className="text-[11px] text-gray-500">任意两个触发 → 立即升级警戒（不管综合分）</span>
         </div>
         <div className={`text-xs px-2 py-0.5 rounded-full border font-mono
-          ${triggeredCount === 0 ? "border-green-700 text-green-400 bg-green-950/30" :
+          ${triggeredCount === 0 ? "border-green-700 text-[var(--accent-green)] bg-green-950/30" :
             triggeredCount === 1 ? "border-orange-600 text-orange-400 bg-orange-950/30" :
             "border-red-500 text-red-300 bg-red-950/50 animate-pulse"}`}>
           {triggeredCount}/3 触发
@@ -403,7 +403,7 @@ function SentinelSection({ sentinels }: { sentinels: SentinelIndicator[] }) {
         {sentinels.map(s => (
           <span key={s.id}>
             <span className="text-gray-600 font-mono">{s.subtitle}: </span>
-            <span className={s.triggered ? "text-red-400 font-semibold" : "text-gray-400"}>
+            <span className={s.triggered ? "text-[var(--accent-red)] font-semibold" : "text-gray-400"}>
               {s.distance}
             </span>
           </span>
@@ -426,9 +426,9 @@ export default function RunRiskPanel() {
   const regimeColors: Record<string, string> = {
     bull_late: "text-orange-400",
     rate_shock: "text-yellow-400",
-    credit_stress: "text-red-400",
+    credit_stress: "text-[var(--accent-red)]",
     vol_spike: "text-purple-400",
-    normal: "text-green-400",
+    normal: "text-[var(--accent-green)]",
     mixed: "text-gray-400",
   };
   const regimeEmoji: Record<string, string> = {
@@ -497,7 +497,7 @@ export default function RunRiskPanel() {
   const nuclearAlert = sentinels.filter(s => s.triggered).length >= 2;
 
   return (
-    <div className="space-y-4 p-4 bg-[#0d1117] min-h-screen text-white font-mono">
+    <div className="space-y-4 p-4 bg-[var(--bg-base)] min-h-screen text-white font-mono">
       {/* Nuclear Alert at the very top if triggered */}
       {nuclearAlert && (
         <div className="rounded-2xl border-2 border-red-500 bg-red-950/80 p-4 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)] mb-4">
@@ -505,7 +505,7 @@ export default function RunRiskPanel() {
             <span className="text-3xl">🚨</span>
             <span>最高警戒 — {sentinels.filter(s => s.triggered).length}/3 哨兵触发 · 综合分已失效 · 立即行动</span>
           </div>
-          <div className="mt-3 text-red-400 text-sm font-medium font-mono">
+          <div className="mt-3 text-[var(--accent-red)] text-sm font-medium font-mono">
             {sentinels.filter(s => s.triggered).map(s => s.subtitle).join(" + ")} 同时触发
           </div>
           <div className="mt-2 text-red-500 text-sm">
@@ -539,14 +539,14 @@ export default function RunRiskPanel() {
           {/* Score bar */}
           <div className="w-full mt-3 h-2 bg-gray-800 rounded-full overflow-hidden">
             <div className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${data.score}%`, background: `linear-gradient(to right, #22c55e, #eab308, #f97316, #ef4444)` }} />
+              style={{ width: `${data.score}%`, background: `linear-gradient(to right, var(--accent-blue), var(--accent-blue), var(--accent-blue), var(--accent-blue))` }} />
           </div>
           <div className="flex justify-between w-full text-[10px] text-gray-600 mt-0.5">
             <span>🟢 安全</span><span>🟡 警戒</span><span>🟠 预警</span><span>🔴 危险</span>
           </div>
 
           {/* Dynamic score */}
-          <div className="mt-4 w-full rounded-lg bg-black/30 border border-gray-800 p-4 space-y-4">
+          <div className="mt-4 w-full rounded-lg bg-[var(--bg-base)]/30 border border-gray-800 p-4 space-y-4">
             <div className="flex justify-between text-xs">
               <span className="text-gray-400">当前市场环境</span>
               <span className={`font-semibold ${regimeColors[data.regime] || "text-gray-300"}`}>
@@ -561,7 +561,7 @@ export default function RunRiskPanel() {
               <span className="text-gray-400">动态加权分</span>
               <span className="text-gray-200 font-mono font-mono">
                 {data.dynamic_score.toFixed(1)}
-                <span className={`ml-1 text-[10px] ${data.regime_impact >= 0 ? "text-red-400" : "text-green-400"}`}>
+                <span className={`ml-1 text-[10px] ${data.regime_impact >= 0 ? "text-[var(--accent-red)]" : "text-[var(--accent-green)]"}`}>
                   {data.regime_impact >= 0 ? "+" : ""}{data.regime_impact.toFixed(1)}
                 </span>
               </span>
@@ -573,7 +573,7 @@ export default function RunRiskPanel() {
             <div className="text-[11px] text-gray-500 mb-1.5">主要风险来源</div>
             {data.top_risks.map((r, i) => (
               <div key={i} className="flex items-start gap-4.5 text-[11px] text-gray-300 mb-1">
-                <span className="text-red-400 mt-0.5">▸</span>
+                <span className="text-[var(--accent-red)] mt-0.5">▸</span>
                 <span>{r}</span>
               </div>
             ))}
@@ -585,7 +585,7 @@ export default function RunRiskPanel() {
           <div className="text-sm font-semibold text-gray-200 font-mono">⚡ 行动建议</div>
           
           {/* Regime evidence */}
-          <div className="rounded-lg bg-black/40 border border-gray-800 p-4">
+          <div className="rounded-lg bg-[var(--bg-base)]/40 border border-gray-800 p-4">
             <div className="text-[11px] text-gray-500 mb-2">环境识别依据</div>
             <div className="flex flex-wrap gap-4.5">
               {data.regime_evidence.map((e, i) => (
@@ -621,7 +621,7 @@ export default function RunRiskPanel() {
                     <span className={tw.triggered ? "text-red-300 font-semibold" : "text-gray-300"}>{tw.condition}</span>
                     <span className="text-gray-600 ml-2 text-[10px] font-mono">{tw.description}</span>
                   </div>
-                  <span className={`font-mono text-[11px] ${tw.triggered ? "text-red-300" : "text-green-400"}`}>
+                  <span className={`font-mono text-[11px] ${tw.triggered ? "text-red-300" : "text-[var(--accent-green)]"}`}>
                     {tw.triggered ? "⚡已触发" : `现值 ${tw.current_value}`}
                   </span>
                 </div>

@@ -31,13 +31,13 @@ const RefreshStatus: React.FC<RefreshStatusProps> = ({ status, onRefreshDaily, o
       <div className="space-y-4 mb-4">
         <div className="flex justify-between items-center">
           <span>日频指标:</span>
-          <span className={allDailyUpdated ? "text-green-400" : "text-yellow-400"}>
+          <span className={allDailyUpdated ? "text-[var(--accent-green)]" : "text-yellow-400"}>
             {allDailyUpdated ? "✅ 今日已更新" : "⚠️ 部分指标待更新"}
           </span>
         </div>
         <div className="flex justify-between items-center">
           <span>月频指标:</span>
-          <span className="text-green-400">✅ 本月已更新</span>
+          <span className="text-[var(--accent-green)]">✅ 本月已更新</span>
         </div>
         <div className="flex justify-between items-center text-slate-500">
           <span>季频指标:</span>
@@ -54,7 +54,7 @@ const RefreshStatus: React.FC<RefreshStatusProps> = ({ status, onRefreshDaily, o
         </button>
         <button 
           onClick={onRefreshFull}
-          className="flex-1 py-1.5 px-3 bg-red-900/30 hover:bg-red-800/40 border border-red-700/50 text-red-400 rounded text-xs transition-colors"
+          className="flex-1 py-1.5 px-3 bg-red-900/30 hover:bg-red-800/40 border border-red-700/50 text-[var(--accent-red)] rounded text-xs transition-colors"
         >
           ⚡ 强制全量刷新 (管理员)
         </button>

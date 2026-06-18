@@ -54,16 +54,16 @@ export default function IVSurface3D({ data, spot, loading }: IVSurface3DProps) {
           y: matrix.dtes,
           z: matrix.z,
           colorscale: [
-            [0, "#E3F2FD"],
-            [0.2, "#90CAF9"],
-            [0.4, "#42A5F5"],
-            [0.6, "#2F6BFF"],
-            [0.8, "#1A56FF"],
-            [1, "#0D47A1"],
+            [0, "var(--accent-blue)"],
+            [0.2, "var(--accent-blue)"],
+            [0.4, "var(--accent-blue)"],
+            [0.6, "var(--accent-blue)"],
+            [0.8, "var(--accent-blue)"],
+            [1, "var(--accent-blue)"],
           ],
           hovertemplate: "Strike $%{x}<br>DTE %{y}<br>IV %{z:.2%}<extra></extra>",
           contours: {
-            z: { show: true, usecolormap: true, highlightcolor: "#2F6BFF", project: { z: true } },
+            z: { show: true, usecolormap: true, highlightcolor: "var(--accent-blue)", project: { z: true } },
           },
           showscale: false,
           lighting: {
@@ -90,40 +90,40 @@ export default function IVSurface3D({ data, spot, loading }: IVSurface3DProps) {
     margin: { l: 0, r: 0, b: 0, t: 8 },
     paper_bgcolor: "rgba(0,0,0,0)",
     plot_bgcolor: "rgba(0,0,0,0)",
-    font: { color: "#6F767E", size: 10, family: "var(--font-sans)" },
+    font: { color: "var(--accent-blue)", size: 10, family: "var(--font-sans)" },
     scene: {
       xaxis: {
         title: { text: "Strike", font: { size: 10, weight: 600 } },
-        gridcolor: "#EDF0F2",
-        color: "#9A9FA5",
-        zerolinecolor: "#EDF0F2",
+        gridcolor: "var(--accent-blue)",
+        color: "var(--accent-blue)",
+        zerolinecolor: "var(--accent-blue)",
         showbackground: false,
       },
       yaxis: {
         title: { text: "DTE", font: { size: 10, weight: 600 } },
-        gridcolor: "#EDF0F2",
-        color: "#9A9FA5",
-        zerolinecolor: "#EDF0F2",
+        gridcolor: "var(--accent-blue)",
+        color: "var(--accent-blue)",
+        zerolinecolor: "var(--accent-blue)",
         showbackground: false,
       },
       zaxis: {
         title: { text: "IV", font: { size: 10, weight: 600 } },
         tickformat: ".0%",
-        gridcolor: "#EDF0F2",
-        color: "#9A9FA5",
+        gridcolor: "var(--accent-blue)",
+        color: "var(--accent-blue)",
         showbackground: false,
       },
       camera: { eye: { x: 1.55, y: 1.35, z: 0.92 } },
       bgcolor: "rgba(0,0,0,0)",
     },
     xaxis: {
-      color: "#9A9FA5",
-      gridcolor: "#EDF0F2",
+      color: "var(--accent-blue)",
+      gridcolor: "var(--accent-blue)",
       title: { text: "Strike", font: { size: 10, weight: 600 } },
     },
     yaxis: {
-      color: "#9A9FA5",
-      gridcolor: "#EDF0F2",
+      color: "var(--accent-blue)",
+      gridcolor: "var(--accent-blue)",
       title: { text: "DTE", font: { size: 10, weight: 600 } },
     },
   };
@@ -132,15 +132,15 @@ export default function IVSurface3D({ data, spot, loading }: IVSurface3DProps) {
     <div className="flex flex-col gap-4">
       {/* Mode toggle */}
       <div className="flex justify-end">
-        <div className="flex rounded-lg bg-gray-50 border border-[#EDF0F2] p-1 shadow-inner">
+        <div className="flex rounded-lg bg-gray-50 border border-[var(--accent-blue)] p-1 shadow-inner">
           {(["3d", "money", "table"] as Mode[]).map((item) => (
             <button
               key={item}
               onClick={() => setMode(item)}
               className={`rounded-lg px-4 py-1.5 text-[11px] font-bold uppercase transition-all duration-200 ${
                 mode === item 
-                  ? "bg-white text-[#2F6BFF] shadow-sm ring-1 ring-[#EDF0F2]" 
-                  : "text-[#9A9FA5] hover:text-[#6F767E]"
+                  ? "bg-white text-[var(--accent-blue)] shadow-sm ring-1 ring-[var(--accent-blue)]" 
+                  : "text-[var(--accent-blue)] hover:text-[var(--accent-blue)]"
               }`}
             >
               {item === "money" ? "$" : item}
@@ -152,11 +152,11 @@ export default function IVSurface3D({ data, spot, loading }: IVSurface3DProps) {
       {/* Chart / table */}
       <div className="h-[340px] w-full">
         {loading ? (
-          <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[#EDF0F2]" />
+          <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[var(--accent-blue)]" />
         ) : mode === "table" ? (
-          <div className="h-full overflow-auto rounded-lg border border-[#EDF0F2] bg-white shadow-sm">
+          <div className="h-full overflow-auto rounded-lg border border-[var(--accent-blue)] bg-white shadow-sm">
             <table className="w-full min-w-[520px] text-left font-mono text-[11px]">
-              <thead className="sticky top-0 bg-gray-50 text-[#9A9FA5] border-b border-[#EDF0F2] z-10">
+              <thead className="sticky top-0 bg-gray-50 text-[var(--accent-blue)] border-b border-[var(--accent-blue)] z-10">
                 <tr>
                   <th className="px-4 py-3 font-bold uppercase tracking-wider">Strike</th>
                   <th className="px-4 py-3 font-bold uppercase tracking-wider">DTE</th>
@@ -164,26 +164,26 @@ export default function IVSurface3D({ data, spot, loading }: IVSurface3DProps) {
                   <th className="px-4 py-3 font-bold uppercase tracking-wider">Moneyness</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#EDF0F2]">
+              <tbody className="divide-y divide-[var(--accent-blue)]">
                 {rows.map((p, idx) => (
                   <tr
                     key={`${p.strike}-${p.dte}-${idx}`}
                     className="hover:bg-gray-50/50 transition-colors"
                   >
-                    <td className="px-4 py-2.5 font-bold text-[#1A1D1F]">
+                    <td className="px-4 py-2.5 font-bold text-[var(--accent-blue)]">
                       ${p.strike.toLocaleString()}
                     </td>
-                    <td className="px-4 py-2.5 text-[#6F767E]">
+                    <td className="px-4 py-2.5 text-[var(--accent-blue)]">
                       {p.dte}
                     </td>
-                    <td className="px-4 py-2.5 font-bold text-[#2F6BFF]">
+                    <td className="px-4 py-2.5 font-bold text-[var(--accent-blue)]">
                       {formatIV(p.iv)}
                     </td>
                     <td
                       className={`px-4 py-2.5 font-bold ${
                         p.strike >= (spot || 0)
-                          ? "text-[#2EB6D2]"
-                          : "text-[#E91E63]"
+                          ? "text-[var(--accent-blue)]"
+                          : "text-[var(--accent-blue)]"
                       }`}
                     >
                       {spot ? `${p.moneyness > 0 ? "+" : ""}${p.moneyness.toFixed(1)}%` : "—"}

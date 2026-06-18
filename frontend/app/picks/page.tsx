@@ -99,9 +99,9 @@ type PicksResponse = {
 const TYPE_META: Record<string, {
   label: string; cn: string; color: string; bg: string; border: string;
 }> = {
-  sell_put:    { label: "SELL PUT",    cn: "卖PUT",  color: "#f85149", bg: "rgba(248,81,73,0.1)",  border: "rgba(248,81,73,0.2)"  },
-  call_spread: { label: "CALL SPREAD", cn: "CALL价差", color: "#3fb950", bg: "rgba(63,185,80,0.1)", border: "rgba(63,185,80,0.2)" },
-  iron_condor: { label: "IRON CONDOR", cn: "铁鹰",   color: "#a371f7", bg: "rgba(163,113,247,0.1)", border: "rgba(163,113,247,0.2)" },
+  sell_put:    { label: "SELL PUT",    cn: "卖PUT",  color: "var(--accent-blue)", bg: "rgba(248,81,73,0.1)",  border: "rgba(248,81,73,0.2)"  },
+  call_spread: { label: "CALL SPREAD", cn: "CALL价差", color: "var(--accent-blue)", bg: "rgba(63,185,80,0.1)", border: "rgba(63,185,80,0.2)" },
+  iron_condor: { label: "IRON CONDOR", cn: "铁鹰",   color: "var(--accent-blue)", bg: "rgba(163,113,247,0.1)", border: "rgba(163,113,247,0.2)" },
 };
 
 /* ─── Fallback data ──────────────────────────────────────────── */
@@ -207,7 +207,7 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
     <article
       onClick={onSelect}
       className={`relative cursor-pointer rounded-lg border transition-all duration-300 overflow-hidden flex flex-col h-full group ${
-        isSelected ? 'ring-2 ring-inset ring-[#58a6ff]' : 'hover:border-[#58a6ff]/50 hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-blue-500/10'
+        isSelected ? 'ring-2 ring-inset ring-[var(--accent-blue)]' : 'hover:border-[var(--accent-blue)]/50 hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-blue-500/10'
       }`}
       style={{
         background: "var(--bg-surface)",
@@ -216,16 +216,16 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
       }}
     >
       {/* Selected Left Border Indicator */}
-      <div className={`absolute left-0 top-0 bottom-0 w-1 bg-[#58a6ff] z-10 transition-transform duration-300 ${isSelected ? 'scale-y-100' : 'scale-y-0'}`} />
+      <div className={`absolute left-0 top-0 bottom-0 w-1 bg-[var(--accent-blue)] z-10 transition-transform duration-300 ${isSelected ? 'scale-y-100' : 'scale-y-0'}`} />
 
       {/* Card Header */}
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-4">
-            <span className="flex items-center justify-center w-5 h-5 rounded bg-[#1c2128] text-[10px] font-mono font-bold text-[#6e7681] font-mono">
+            <span className="flex items-center justify-center w-5 h-5 rounded bg-[var(--bg-elevated)] text-[10px] font-mono font-bold text-[var(--accent-blue)] font-mono">
               {rank}
             </span>
-            <span className="text-lg font-bold font-mono tracking-tight text-[#e6edf3] font-mono">
+            <span className="text-lg font-bold font-mono tracking-tight text-[var(--accent-blue)] font-mono">
               {ticker}
             </span>
           </div>
@@ -246,7 +246,7 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
       </div>
 
       {/* Contract Code Bar */}
-      <div className="px-4 py-2 bg-[#1c2128] border-y border-[#30363d] font-mono font-bold text-xs tracking-wider text-[#e6edf3] font-mono">
+      <div className="px-4 py-2 bg-[var(--bg-elevated)] border-y border-[var(--border-default)] font-mono font-bold text-xs tracking-wider text-[var(--accent-blue)] font-mono">
         {legsSummary || pick.strategyName}
       </div>
 
@@ -259,7 +259,7 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
           { label: "PERIOD", value: pick.holdingPeriod || "--", color: "var(--text-secondary)" },
         ].map(s => (
           <div key={s.label}>
-            <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-1 font-mono">
+            <div className="text-[10px] font-bold text-[var(--accent-blue)] tracking-widest uppercase mb-1 font-mono">
               {s.label}
             </div>
             <div className="text-sm font-black font-mono tabular-nums leading-none font-mono" style={{ color: s.color }}>
@@ -278,7 +278,7 @@ const PrimaryButton = ({ children, onClick, disabled, loading, icon: Icon }: any
     type="button"
     onClick={onClick}
     disabled={disabled}
-    className="bg-[#1158c7] hover:bg-[#1f6feb] text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-4 transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
+    className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-4 transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
   >
     {Icon && <Icon size={16} className={loading ? "animate-spin" : ""} />}
     {children}
@@ -291,8 +291,8 @@ const GhostButton = ({ children, onClick, active }: any) => (
     onClick={onClick}
     className={`px-5 py-2 rounded-lg text-xs font-bold transition-all ${
       active
-        ? "bg-[#1158c7] text-white shadow-md"
-        : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#1c2128]"
+        ? "bg-[var(--accent-blue)] text-white shadow-md"
+        : "text-[var(--accent-blue)] hover:text-[var(--accent-blue)] hover:bg-[var(--bg-elevated)]"
     }`}
   >
     {children}
@@ -308,14 +308,14 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
 
   return (
     <div 
-      className="mb-6 rounded-2xl border border-[#30363d] overflow-hidden transition-all duration-300 animate-[slideDown_0.3s_ease-out_both] shadow-2xl"
-      style={{ background: "linear-gradient(180deg, #1c2128 0%, #161b22 100%)" }}
+      className="mb-6 rounded-2xl border border-[var(--border-default)] overflow-hidden transition-all duration-300 animate-[slideDown_0.3s_ease-out_both] shadow-2xl"
+      style={{ background: "linear-gradient(180deg, var(--accent-blue) 0%, var(--accent-blue) 100%)" }}
     >
       {/* Header Info */}
-      <div className="px-6 py-5 border-b border-[#30363d] flex items-center justify-between bg-gradient-to-r from-[#1c2128] to-transparent">
+      <div className="px-6 py-5 border-b border-[var(--border-default)] flex items-center justify-between bg-gradient-to-r from-[var(--accent-blue)] to-transparent">
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-black font-mono tracking-tighter text-[#e6edf3] font-sans">
-            {pick.ticker} <span className="text-[#6e7681] font-bold text-xs ml-2 tracking-widest uppercase font-mono">{pick.strategyName || meta.cn}</span>
+          <h2 className="text-2xl font-black font-mono tracking-tighter text-[var(--accent-blue)] font-sans">
+            {pick.ticker} <span className="text-[var(--accent-blue)] font-bold text-xs ml-2 tracking-widest uppercase font-mono">{pick.strategyName || meta.cn}</span>
           </h2>
           <div 
             className="px-2.5 py-1 rounded-lg text-[10px] font-black font-mono border"
@@ -326,12 +326,12 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
         </div>
         <div className="flex items-center gap-4">
           <div className="text-right">
-            <div className="text-[10px] text-[#6e7681] font-black tracking-[0.2em] uppercase mb-1">Target Price</div>
-            <div className="text-lg font-black font-mono text-[#3fb950] leading-none tabular-nums font-mono">{pick.target || "--"}</div>
+            <div className="text-[10px] text-[var(--accent-blue)] font-black tracking-[0.2em] uppercase mb-1">Target Price</div>
+            <div className="text-lg font-black font-mono text-[var(--accent-blue)] leading-none tabular-nums font-mono">{pick.target || "--"}</div>
           </div>
-          <div className="text-right border-l border-[#30363d] pl-8">
-            <div className="text-[10px] text-[#6e7681] font-black tracking-[0.2em] uppercase mb-1">Stop Loss</div>
-            <div className="text-lg font-black font-mono text-[#f85149] leading-none tabular-nums font-mono">{pick.stop || "--"}</div>
+          <div className="text-right border-l border-[var(--border-default)] pl-8">
+            <div className="text-[10px] text-[var(--accent-blue)] font-black tracking-[0.2em] uppercase mb-1">Stop Loss</div>
+            <div className="text-lg font-black font-mono text-[var(--accent-blue)] leading-none tabular-nums font-mono">{pick.stop || "--"}</div>
           </div>
         </div>
       </div>
@@ -345,18 +345,18 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
             { label: "Probability OTM", value: "82.4%", sub: "At Expiration", color: "var(--color-call)" },
             { label: "Capital Req.", value: pick.capitalText || "--", sub: "Margin Needed", color: "var(--text-primary)" },
           ].map(m => (
-            <div key={m.label} className="p-4 rounded-lg bg-[#0d1117] border border-[#30363d]">
-              <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-1 font-mono">{m.label}</div>
+            <div key={m.label} className="p-4 rounded-lg bg-[var(--bg-base)] border border-[var(--border-default)]">
+              <div className="text-[10px] font-bold text-[var(--accent-blue)] tracking-widest uppercase mb-1 font-mono">{m.label}</div>
               <div className="text-lg font-bold font-mono mb-1 font-mono" style={{ color: m.color }}>{m.value}</div>
-              <div className="text-[10px] text-[#484f58] font-mono">{m.sub}</div>
+              <div className="text-[10px] text-[var(--accent-blue)] font-mono">{m.sub}</div>
             </div>
           ))}
         </div>
 
         {/* Middle: Greeks 6-grid */}
         <div className="lg:col-span-3">
-          <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-3">Greeks Analysis</div>
-          <div className="grid grid-cols-2 gap-px bg-[#30363d] border border-[#30363d] rounded-lg overflow-hidden">
+          <div className="text-[10px] font-bold text-[var(--accent-blue)] tracking-widest uppercase mb-3">Greeks Analysis</div>
+          <div className="grid grid-cols-2 gap-px bg-[var(--accent-blue)] border border-[var(--border-default)] rounded-lg overflow-hidden">
             {[
               { label: "Delta", value: fmtNum(greeks.delta, 3) },
               { label: "Gamma", value: fmtNum(greeks.gamma, 4) },
@@ -365,9 +365,9 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
               { label: "IV", value: `${(greeks.iv ? greeks.iv * 100 : 0).toFixed(1)}%` },
               { label: "Rho", value: "0.002" },
             ].map(g => (
-              <div key={g.label} className="bg-[#161b22] p-4">
-                <div className="text-[9px] text-[#6e7681] uppercase font-bold mb-1 font-mono">{g.label}</div>
-                <div className="text-xs font-bold font-mono text-[#e6edf3] font-mono">{g.value}</div>
+              <div key={g.label} className="bg-[var(--bg-surface)] p-4">
+                <div className="text-[9px] text-[var(--accent-blue)] uppercase font-bold mb-1 font-mono">{g.label}</div>
+                <div className="text-xs font-bold font-mono text-[var(--accent-blue)] font-mono">{g.value}</div>
               </div>
             ))}
           </div>
@@ -375,13 +375,13 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
 
         {/* Right: Recommendation */}
         <div className="lg:col-span-4 flex flex-col">
-          <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-3">Recommendation Insight</div>
-          <div className="flex-1 p-4 rounded-lg bg-[#1c2128] border border-[#30363d] text-xs leading-relaxed text-[#8b949e]">
+          <div className="text-[10px] font-bold text-[var(--accent-blue)] tracking-widest uppercase mb-3">Recommendation Insight</div>
+          <div className="flex-1 p-4 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-default)] text-xs leading-relaxed text-[var(--accent-blue)]">
             <p className="mb-3">
-              <strong className="text-[#e6edf3] font-mono">Signal:</strong> {pick.signalText}
+              <strong className="text-[var(--accent-blue)] font-mono">Signal:</strong> {pick.signalText}
             </p>
             <p>
-              <strong className="text-[#e6edf3]">Scenario:</strong> High IV Rank suggests a premium-selling advantage. Maintain position until 50% profit or 21 days to expiration.
+              <strong className="text-[var(--accent-blue)]">Scenario:</strong> High IV Rank suggests a premium-selling advantage. Maintain position until 50% profit or 21 days to expiration.
             </p>
           </div>
         </div>
@@ -419,10 +419,10 @@ function ScannerSummaryCard({
     >
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h2 className="text-sm font-black text-[#e6edf3] uppercase tracking-wider font-sans">
+          <h2 className="text-sm font-black text-[var(--accent-blue)] uppercase tracking-wider font-sans">
             Market Scanner
           </h2>
-          <p className="text-[10px] font-bold text-[#6e7681] mt-0.5 font-mono">
+          <p className="text-[10px] font-bold text-[var(--accent-blue)] mt-0.5 font-mono">
             {weekStart && weekEnd ? `${fmtDate(weekStart)} → ${fmtDate(weekEnd)}` : "Live Ticker Analysis"}
           </p>
         </div>
@@ -440,16 +440,16 @@ function ScannerSummaryCard({
               className="flex flex-col items-center p-4 rounded-lg border text-center transition-all hover:scale-105"
               style={{
                 background: isSelected ? "rgba(88,166,255,0.08)" : "var(--bg-elevated)",
-                borderColor: isSelected ? "#58a6ff" : "var(--border-default)",
+                borderColor: isSelected ? "var(--accent-blue)" : "var(--border-default)",
               }}
             >
-              <span className="font-mono font-black text-xs text-[#e6edf3] mb-1 font-mono">{t}</span>
-              <span className="font-mono text-[9px] font-bold text-[#3fb950] tabular-nums font-mono">
+              <span className="font-mono font-black text-xs text-[var(--accent-blue)] mb-1 font-mono">{t}</span>
+              <span className="font-mono text-[9px] font-bold text-[var(--accent-blue)] tabular-nums font-mono">
                 {fmtNum(item.price, 1)}
               </span>
-              <div className="mt-2 w-full h-1 bg-[#0d1117] rounded-full overflow-hidden">
+              <div className="mt-2 w-full h-1 bg-[var(--bg-base)] rounded-full overflow-hidden">
                 <div 
-                  className="h-full bg-[#58a6ff]" 
+                  className="h-full bg-[var(--accent-blue)]" 
                   style={{ width: `${item.ivRank}%` }}
                 />
               </div>
@@ -473,7 +473,7 @@ function FilterBar({
   return (
     <div className="flex flex-wrap items-center gap-4 font-mono">
       {/* Strategy Type Pills */}
-      <div className="flex items-center p-1 rounded-lg bg-[#161b22] border border-[#30363d] shadow-inner overflow-x-auto">
+      <div className="flex items-center p-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)] shadow-inner overflow-x-auto">
         {STRATEGY_FILTERS.map(f => (
           <button
             key={f.value}
@@ -481,13 +481,13 @@ function FilterBar({
             onClick={() => setStrategyFilter(f.value)}
             className={`whitespace-nowrap px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-4 ${
               strategyFilter === f.value
-                ? "bg-[#1c2128] text-[#58a6ff] border border-[#484f58] shadow-sm"
-                : "text-[#6e7681] hover:text-[#e6edf3]"
+                ? "bg-[var(--bg-elevated)] text-[var(--accent-blue)] border border-[var(--accent-blue)] shadow-sm"
+                : "text-[var(--accent-blue)] hover:text-[var(--accent-blue)]"
             }`}
           >
             {f.label.toUpperCase()}
             {f.value !== "all" && (
-              <span className={`font-mono text-[10px] ${strategyFilter === f.value ? "text-[#58a6ff]" : "text-[#484f58]"}`}>
+              <span className={`font-mono text-[10px] ${strategyFilter === f.value ? "text-[var(--accent-blue)]" : "text-[var(--accent-blue)]"}`}>
                 {counts[f.value] ?? 0}
               </span>
             )}
@@ -496,7 +496,7 @@ function FilterBar({
       </div>
 
       {/* Risk Tag Pills */}
-      <div className="flex items-center p-1 rounded-lg bg-[#161b22] border border-[#30363d] shadow-inner">
+      <div className="flex items-center p-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)] shadow-inner">
         {TAGS.map(tag => (
           <button
             key={tag}
@@ -504,8 +504,8 @@ function FilterBar({
             onClick={() => setTagFilter(tag)}
             className={`px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
               tagFilter === tag
-                ? "bg-[#1c2128] text-[#3fb950] border border-[#484f58] shadow-sm"
-                : "text-[#6e7681] hover:text-[#e6edf3]"
+                ? "bg-[var(--bg-elevated)] text-[var(--accent-blue)] border border-[var(--accent-blue)] shadow-sm"
+                : "text-[var(--accent-blue)] hover:text-[var(--accent-blue)]"
             }`}
           >
             {tag.toUpperCase()}
@@ -518,12 +518,12 @@ function FilterBar({
         <select
           value={sortMode}
           onChange={e => setSortMode(e.target.value as "score" | "ticker")}
-          className="appearance-none bg-[#161b22] border border-[#30363d] rounded-lg px-4 py-2 pr-10 text-[11px] font-bold text-[#e6edf3] outline-none hover:border-[#484f58] transition-colors cursor-pointer shadow-sm"
+          className="appearance-none bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg px-4 py-2 pr-10 text-[11px] font-bold text-[var(--accent-blue)] outline-none hover:border-[var(--accent-blue)] transition-colors cursor-pointer shadow-sm"
         >
           <option value="score">SORT BY: SCORE</option>
           <option value="ticker">SORT BY: TICKER</option>
         </select>
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[#6e7681]">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--accent-blue)]">
           <SlidersHorizontal size={12} />
         </div>
       </div>
@@ -626,10 +626,10 @@ export default function PicksPage() {
     <div className="flex flex-col gap-4 pb-12 px-6 max-w-[1600px] mx-auto font-mono">
 
       {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 py-6 border-b border-[#30363d]">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 py-6 border-b border-[var(--border-default)]">
         <div>
           <div className="flex items-center gap-4 mb-2">
-            <h1 className="text-2xl font-black tracking-tight text-[#e6edf3] font-sans">
+            <h1 className="text-2xl font-black tracking-tight text-[var(--accent-blue)] font-sans">
               TOP PICKS
             </h1>
             <div className="flex flex-wrap gap-4.5">
@@ -639,8 +639,8 @@ export default function PicksPage() {
                   onClick={() => setSelectedTicker(prev => prev === t ? "" : t)}
                   className={`px-2 py-0.5 rounded border text-[10px] font-bold font-mono transition-all ${
                     selectedTicker === t
-                      ? "bg-[#58a6ff]/10 border-[#58a6ff] text-[#58a6ff] shadow-[0_0_10px_rgba(88,166,255,0.2)]"
-                      : "bg-[#1c2128] border-[#30363d] text-[#6e7681] hover:text-[#e6edf3] hover:border-[#484f58]"
+                      ? "bg-[var(--accent-blue)]/10 border-[var(--accent-blue)] text-[var(--accent-blue)] shadow-[0_0_10px_rgba(88,166,255,0.2)]"
+                      : "bg-[var(--bg-elevated)] border-[var(--border-default)] text-[var(--accent-blue)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)]"
                   }`}
                 >
                   {t}
@@ -648,7 +648,7 @@ export default function PicksPage() {
               ))}
             </div>
           </div>
-          <p className="text-sm text-[#6e7681] font-medium">
+          <p className="text-sm text-[var(--accent-blue)] font-medium">
             AI-driven option strategies based on real-time volatility surface analysis.
           </p>
         </div>
@@ -667,15 +667,15 @@ export default function PicksPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <div className="lg:col-span-4 space-y-4">
           <ScannerSummaryStats picks={picks} bullish={bullishCount} bearish={bearishCount} />
-          <div className="p-4 rounded-lg bg-[#0d1117] border border-[#30363d] flex items-center justify-between shadow-inner">
+          <div className="p-4 rounded-lg bg-[var(--bg-base)] border border-[var(--border-default)] flex items-center justify-between shadow-inner">
             <div className="flex items-center gap-4.5">
               <div className="relative flex">
-                <div className="w-2 h-2 rounded-full bg-[#3fb950] animate-ping absolute" />
-                <div className="w-2 h-2 rounded-full bg-[#3fb950] relative" />
+                <div className="w-2 h-2 rounded-full bg-[var(--accent-blue)] animate-ping absolute" />
+                <div className="w-2 h-2 rounded-full bg-[var(--accent-blue)] relative" />
               </div>
-              <span className="text-[11px] font-black text-[#e6edf3] uppercase tracking-[0.15em]">System Status: Optimal</span>
+              <span className="text-[11px] font-black text-[var(--accent-blue)] uppercase tracking-[0.15em]">System Status: Optimal</span>
             </div>
-            <span className="text-[9px] font-mono font-bold text-[#484f58] bg-[#161b22] px-2 py-0.5 rounded border border-[#30363d]">v2.4.1</span>
+            <span className="text-[9px] font-mono font-bold text-[var(--accent-blue)] bg-[var(--bg-surface)] px-2 py-0.5 rounded border border-[var(--border-default)]">v2.4.1</span>
           </div>
         </div>
         
@@ -696,7 +696,7 @@ export default function PicksPage() {
 
       {/* ── Navigation & Filters ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
-        <div className="flex items-center gap-4 p-1 rounded-lg bg-[#161b22] border border-[#30363d]">
+        <div className="flex items-center gap-4 p-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)]">
           {DIRECTION_TABS.map(tab => (
             <GhostButton
               key={tab.value}
@@ -722,14 +722,14 @@ export default function PicksPage() {
       {/* ── Grid Section ── */}
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-bold text-[#6e7681] uppercase tracking-[0.2em] font-sans">
+          <h3 className="text-xs font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] font-sans">
             Recommended Strategies ({displayPicks.length})
           </h3>
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-4.5 text-[10px] font-bold text-[#6e7681]">
+            <span className="flex items-center gap-4.5 text-[10px] font-bold text-[var(--accent-blue)]">
               <span className="w-2 h-2 rounded bg-var(--color-call)" /> BULLISH
             </span>
-            <span className="flex items-center gap-4.5 text-[10px] font-bold text-[#6e7681]">
+            <span className="flex items-center gap-4.5 text-[10px] font-bold text-[var(--accent-blue)]">
               <span className="w-2 h-2 rounded bg-var(--color-put)" /> BEARISH
             </span>
           </div>
@@ -740,20 +740,20 @@ export default function PicksPage() {
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="h-64 rounded-lg relative overflow-hidden bg-[#161b22] border border-[#30363d]"
+                className="h-64 rounded-lg relative overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-default)]"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1c2128] to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[var(--accent-blue)] to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
                 <div className="p-4 space-y-4">
                   <div className="flex justify-between items-center">
-                    <div className="w-1/2 h-6 bg-[#0d1117] rounded" />
-                    <div className="w-1/4 h-4 bg-[#0d1117] rounded" />
+                    <div className="w-1/2 h-6 bg-[var(--bg-base)] rounded" />
+                    <div className="w-1/4 h-4 bg-[var(--bg-base)] rounded" />
                   </div>
-                  <div className="w-full h-8 bg-[#0d1117] rounded" />
+                  <div className="w-full h-8 bg-[var(--bg-base)] rounded" />
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="h-10 bg-[#0d1117] rounded" />
-                    <div className="h-10 bg-[#0d1117] rounded" />
-                    <div className="h-10 bg-[#0d1117] rounded" />
-                    <div className="h-10 bg-[#0d1117] rounded" />
+                    <div className="h-10 bg-[var(--bg-base)] rounded" />
+                    <div className="h-10 bg-[var(--bg-base)] rounded" />
+                    <div className="h-10 bg-[var(--bg-base)] rounded" />
+                    <div className="h-10 bg-[var(--bg-base)] rounded" />
                   </div>
                 </div>
               </div>
@@ -776,19 +776,19 @@ export default function PicksPage() {
               </div>
             ))}
             {displayPicks.length === 0 && (
-              <div className="col-span-full py-32 flex flex-col items-center justify-center rounded-3xl border border-dashed border-[#30363d] bg-[#0d1117] relative overflow-hidden">
+              <div className="col-span-full py-32 flex flex-col items-center justify-center rounded-3xl border border-dashed border-[var(--border-default)] bg-[var(--bg-base)] relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-[100px]" />
                 <div className="relative z-10 flex flex-col items-center">
-                  <div className="w-20 h-20 rounded-2xl bg-[#161b22] border border-[#30363d] flex items-center justify-center mb-6 text-[#484f58] shadow-2xl">
+                  <div className="w-20 h-20 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] flex items-center justify-center mb-6 text-[var(--accent-blue)] shadow-2xl">
                     <SlidersHorizontal size={32} />
                   </div>
-                  <h3 className="text-lg font-black text-[#e6edf3] mb-2 tracking-tight font-sans">No Matching Strategies Found</h3>
-                  <p className="text-sm font-medium text-[#6e7681] text-center max-w-xs mb-8">
+                  <h3 className="text-lg font-black text-[var(--accent-blue)] mb-2 tracking-tight font-sans">No Matching Strategies Found</h3>
+                  <p className="text-sm font-medium text-[var(--accent-blue)] text-center max-w-xs mb-8">
                     Try broadening your search by adjusting filters or clearing ticker selection.
                   </p>
                   <button 
                     onClick={() => {setTagFilter("全部"); setStrategyFilter("all"); setDirectionTab("all"); setSelectedTicker("");}}
-                    className="px-6 py-2.5 rounded-lg bg-[#1c2128] border border-[#30363d] text-xs font-bold text-[#e6edf3] hover:bg-[#21262d] transition-all active:scale-95 shadow-lg"
+                    className="px-6 py-2.5 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-default)] text-xs font-bold text-[var(--accent-blue)] hover:bg-[var(--accent-blue)] transition-all active:scale-95 shadow-lg"
                   >
                     Clear All Active Filters
                   </button>
@@ -816,22 +816,22 @@ export default function PicksPage() {
 /* ─── Helper Components ─── */
 function ScannerSummaryStats({ picks, bullish, bearish }: { picks: any[], bullish: number, bearish: number }) {
   return (
-    <div className="p-4 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-xl relative overflow-hidden group font-mono">
+    <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] shadow-xl relative overflow-hidden group font-mono">
       {/* Background decoration */}
       <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors" />
       
       <div className="grid grid-cols-3 gap-4 relative z-10">
         <div className="text-center">
-          <div className="text-3xl font-black font-mono text-[#e6edf3] tracking-tighter font-mono">{picks.length}</div>
-          <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-[0.2em] mt-1">Total</div>
+          <div className="text-3xl font-black font-mono text-[var(--accent-blue)] tracking-tighter font-mono">{picks.length}</div>
+          <div className="text-[10px] font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] mt-1">Total</div>
         </div>
-        <div className="text-center border-x border-[#30363d]">
-          <div className="text-3xl font-black font-mono text-[#3fb950] tracking-tighter font-mono">{bullish}</div>
-          <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-[0.2em] mt-1">Bullish</div>
+        <div className="text-center border-x border-[var(--border-default)]">
+          <div className="text-3xl font-black font-mono text-[var(--accent-blue)] tracking-tighter font-mono">{bullish}</div>
+          <div className="text-[10px] font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] mt-1">Bullish</div>
         </div>
         <div className="text-center">
-          <div className="text-3xl font-black font-mono text-[#f85149] tracking-tighter font-mono">{bearish}</div>
-          <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-[0.2em] mt-1">Bearish</div>
+          <div className="text-3xl font-black font-mono text-[var(--accent-blue)] tracking-tighter font-mono">{bearish}</div>
+          <div className="text-[10px] font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] mt-1">Bearish</div>
         </div>
       </div>
     </div>

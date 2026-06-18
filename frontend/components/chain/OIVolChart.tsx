@@ -10,8 +10,8 @@ type Mode = "bars" | "heatmap";
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/95 backdrop-blur-md border border-[#EDF0F2] rounded-lg p-4 shadow-xl">
-        <p className="text-xs font-bold text-[#1A1D1F] mb-3 border-b border-[#EDF0F2] pb-2 font-mono">
+      <div className="bg-white/95 backdrop-blur-md border border-[var(--accent-blue)] rounded-lg p-4 shadow-xl">
+        <p className="text-xs font-bold text-[var(--accent-blue)] mb-3 border-b border-[var(--accent-blue)] pb-2 font-mono">
           Strike: ${label.toLocaleString()}
         </p>
         <div className="space-y-4">
@@ -19,9 +19,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
             <div key={index} className="flex items-center justify-between gap-4 text-[11px]">
               <div className="flex items-center gap-4">
                 <div className="w-2.5 h-2.5 rounded-lg" style={{ backgroundColor: entry.fill }} />
-                <span className="text-[#6F767E] font-medium">{entry.name}</span>
+                <span className="text-[var(--accent-blue)] font-medium">{entry.name}</span>
               </div>
-              <span className="font-bold font-mono text-[#1A1D1F]">
+              <span className="font-bold font-mono text-[var(--accent-blue)]">
                 {entry.value.toLocaleString()}
               </span>
             </div>
@@ -70,15 +70,15 @@ export default function OIVolChart({ chain, loading }: OIVolChartProps) {
     <div className="flex flex-col gap-4">
       {/* Mode toggle */}
       <div className="flex justify-end">
-        <div className="flex rounded-lg bg-gray-50 border border-[#EDF0F2] p-1 shadow-inner">
+        <div className="flex rounded-lg bg-gray-50 border border-[var(--accent-blue)] p-1 shadow-inner">
           {(["bars", "heatmap"] as Mode[]).map((m) => (
             <button
               key={m}
               onClick={() => setMode(m)}
               className={`rounded-lg px-4 py-1.5 text-[11px] font-bold transition-all duration-200 ${
                 mode === m 
-                  ? "bg-white text-[#2F6BFF] shadow-sm ring-1 ring-[#EDF0F2]" 
-                  : "text-[#9A9FA5] hover:text-[#6F767E]"
+                  ? "bg-white text-[var(--accent-blue)] shadow-sm ring-1 ring-[var(--accent-blue)]" 
+                  : "text-[var(--accent-blue)] hover:text-[var(--accent-blue)]"
               }`}
             >
               {m === "bars" ? "Chart" : "Heatmap"}
@@ -90,28 +90,28 @@ export default function OIVolChart({ chain, loading }: OIVolChartProps) {
       {/* Chart area */}
       <div className="h-[340px] w-full">
         {loading ? (
-          <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[#EDF0F2]" />
+          <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[var(--accent-blue)]" />
         ) : mode === "heatmap" ? (
-          <div className="grid h-full content-start gap-4 overflow-auto rounded-lg border border-[#EDF0F2] bg-white p-4 shadow-sm">
+          <div className="grid h-full content-start gap-4 overflow-auto rounded-lg border border-[var(--accent-blue)] bg-white p-4 shadow-sm">
             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
               {rows.map((r) => {
                 const intensity = Math.max(r.callOi, r.putOi, r.callVol, r.putVol) / maxValue;
                 return (
                   <div
                     key={r.strike}
-                    className="rounded-lg border border-[#EDF0F2] p-4 font-mono text-[10px] transition-all hover:scale-[1.02] hover:shadow-md"
+                    className="rounded-lg border border-[var(--accent-blue)] p-4 font-mono text-[10px] transition-all hover:scale-[1.02] hover:shadow-md"
                     style={{
                       backgroundColor: `rgba(47, 107, 255, ${0.02 + intensity * 0.15})`,
                     }}
                   >
-                    <div className="mb-1.5 font-black text-[#1A1D1F] border-b border-[#EDF0F2] pb-1">
+                    <div className="mb-1.5 font-black text-[var(--accent-blue)] border-b border-[var(--accent-blue)] pb-1">
                       ${r.strike}
                     </div>
-                    <div className="flex justify-between text-[#2EB6D2] font-bold">
+                    <div className="flex justify-between text-[var(--accent-blue)] font-bold">
                       <span>C OI</span>
                       <span>{Math.round(r.callOi / 1000)}k</span>
                     </div>
-                    <div className="flex justify-between text-[#E91E63] font-bold">
+                    <div className="flex justify-between text-[var(--accent-blue)] font-bold">
                       <span>P OI</span>
                       <span>{Math.round(r.putOi / 1000)}k</span>
                     </div>
@@ -123,34 +123,34 @@ export default function OIVolChart({ chain, loading }: OIVolChartProps) {
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={rows} margin={{ top: 10, right: 0, bottom: 0, left: 0 }} barGap={2}>
-              <CartesianGrid stroke="#F0F2F5" vertical={false} />
+              <CartesianGrid stroke="var(--accent-blue)" vertical={false} />
               <XAxis
                 dataKey="strike"
-                tick={{ fill: "#9A9FA5", fontSize: 10, fontWeight: 500 }}
+                tick={{ fill: "var(--accent-blue)", fontSize: 10, fontWeight: 500 }}
                 axisLine={false}
                 tickLine={false}
                 interval="preserveStartEnd"
                 dy={10}
               />
               <YAxis
-                tick={{ fill: "#9A9FA5", fontSize: 10, fontWeight: 500 }}
+                tick={{ fill: "var(--accent-blue)", fontSize: 10, fontWeight: 500 }}
                 axisLine={false}
                 tickLine={false}
                 tickFormatter={(v: number) => `${Math.round(Number(v) / 1000)}k`}
                 dx={-10}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "#F5F7FA", radius: 4 }} />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--accent-blue)", radius: 4 }} />
               <Legend 
                 verticalAlign="top" 
                 align="left" 
                 iconType="rect" 
                 iconSize={10}
-                wrapperStyle={{ paddingBottom: 20, fontSize: 11, fontWeight: 600, color: "#6F767E" }}
+                wrapperStyle={{ paddingBottom: 20, fontSize: 11, fontWeight: 600, color: "var(--accent-blue)" }}
               />
-              <Bar dataKey="callOi" name="Call OI" fill="#2EB6D2" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="putOi" name="Put OI" fill="#E91E63" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="callVol" name="Call Vol" fill="#7B61FF" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="putVol" name="Put Vol" fill="#F5A623" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="callOi" name="Call OI" fill="var(--accent-blue)" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="putOi" name="Put OI" fill="var(--accent-blue)" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="callVol" name="Call Vol" fill="var(--accent-blue)" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="putVol" name="Put Vol" fill="var(--accent-blue)" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}

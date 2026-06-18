@@ -39,10 +39,10 @@ const ReportPage = () => {
   if (!data) return <div className="p-8 text-yellow-500 font-mono">NO_DATA_RETURNED</div>;
 
   return (
-    <div className="flex h-screen bg-black text-green-400 font-mono overflow-hidden">
+    <div className="flex h-screen bg-[var(--bg-base)] text-[var(--accent-green)] font-mono overflow-hidden">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden border-l border-green-900/30">
-        <div className="p-4 border-b border-green-900/30 flex justify-between items-center bg-green-900/5">
+      <div className="flex-1 flex flex-col overflow-hidden border-l border-[var(--border-default)]">
+        <div className="p-4 border-b border-[var(--border-default)] flex justify-between items-center bg-[var(--bg-surface)]">
           <div className="flex items-center gap-4">
             <h1 className="text-2xl font-bold">[{data?.ticker}] {data?.summary?.name}</h1>
             <span className="text-xl">${data?.summary?.price}</span>
@@ -53,7 +53,7 @@ const ReportPage = () => {
           </div>
         </div>
 
-        <div className="flex gap-4 p-4 bg-black border-b border-green-900/30">
+        <div className="flex gap-4 p-4 bg-[var(--bg-base)] border-b border-[var(--border-default)]">
           {['概览', '期权链', 'Greeks', '情景测试', 'AI分析'].map(tab => (
             <button
               key={tab}
@@ -79,8 +79,8 @@ const ReportPage = () => {
 
 const Overview = ({ data }: { data: any }) => (
   <div className="grid grid-cols-2 gap-4">
-    <div className="border border-green-900/30 p-4 bg-green-900/5">
-      <h3 className="text-lg border-b border-green-900/30 mb-2 pb-1">MARKET_INDICATORS</h3>
+    <div className="border border-[var(--border-default)] p-4 bg-[var(--bg-surface)]">
+      <h3 className="text-lg border-b border-[var(--border-default)] mb-2 pb-1">MARKET_INDICATORS</h3>
       <div className="space-y-4">
         <div className="flex justify-between">
           <span>IV Rank:</span>
@@ -96,8 +96,8 @@ const Overview = ({ data }: { data: any }) => (
         </div>
       </div>
     </div>
-    <div className="border border-green-900/30 p-4 bg-green-900/5">
-      <h3 className="text-lg border-b border-green-900/30 mb-2 pb-1">MACRO_CONTEXT</h3>
+    <div className="border border-[var(--border-default)] p-4 bg-[var(--bg-surface)]">
+      <h3 className="text-lg border-b border-[var(--border-default)] mb-2 pb-1">MACRO_CONTEXT</h3>
       <div className="space-y-4">
         <div className="flex justify-between">
           <span>VIX Level:</span>
@@ -109,19 +109,19 @@ const Overview = ({ data }: { data: any }) => (
         </div>
       </div>
     </div>
-    <div className="col-span-2 border border-green-900/30 p-4 bg-green-900/5">
-      <h3 className="text-lg border-b border-green-900/30 mb-2 pb-1">FAIR_VALUE_SUMMARY (BSM vs Market)</h3>
+    <div className="col-span-2 border border-[var(--border-default)] p-4 bg-[var(--bg-surface)]">
+      <h3 className="text-lg border-b border-[var(--border-default)] mb-2 pb-1">FAIR_VALUE_SUMMARY (BSM vs Market)</h3>
       <div className="text-sm text-gray-400">
         System analysis shows that current premiums are slightly <span className="text-orange-400">EXPENSIVE</span> on the Put side.
-        Call premiums are trading near <span className="text-green-400">FAIR</span> value.
+        Call premiums are trading near <span className="text-[var(--accent-green)]">FAIR</span> value.
       </div>
     </div>
   </div>
 );
 
 const Chain = ({ ticker }: { ticker: string }) => (
-  <div className="h-full border border-green-900/30">
-     <div className="p-4 bg-green-900/5 h-full flex items-center justify-center text-gray-500">
+  <div className="h-full border border-[var(--border-default)]">
+     <div className="p-4 bg-[var(--bg-surface)] h-full flex items-center justify-center text-gray-500">
         [Existing Options Chain Terminal Integration Placeholder]
      </div>
   </div>
@@ -135,31 +135,31 @@ const Greeks = ({ ticker }: { ticker: string }) => {
         <input 
           value={position}
           onChange={(e) => setPosition(e.target.value)}
-          className="bg-black border border-green-500 p-4 flex-1 text-green-500 focus:outline-none"
+          className="bg-[var(--bg-base)] border border-green-500 p-4 flex-1 text-green-500 focus:outline-none"
         />
         <button className="bg-green-500 text-black px-4 font-bold hover:bg-green-400">[CALC]</button>
       </div>
-      <table className="w-full border-collapse border border-green-900/30 text-sm">
+      <table className="w-full border-collapse border border-[var(--border-default)] text-sm">
         <thead>
           <tr className="bg-green-900/20">
-            <th className="border border-green-900/30 p-4">Position</th>
-            <th className="border border-green-900/30 p-4 text-blue-400">Delta</th>
-            <th className="border border-green-900/30 p-4 text-purple-400">Gamma</th>
-            <th className="border border-green-900/30 p-4 text-yellow-400">Theta</th>
-            <th className="border border-green-900/30 p-4 text-red-400">Vega</th>
+            <th className="border border-[var(--border-default)] p-4">Position</th>
+            <th className="border border-[var(--border-default)] p-4 text-blue-400">Delta</th>
+            <th className="border border-[var(--border-default)] p-4 text-purple-400">Gamma</th>
+            <th className="border border-[var(--border-default)] p-4 text-yellow-400">Theta</th>
+            <th className="border border-[var(--border-default)] p-4 text-[var(--accent-red)]">Vega</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td className="border border-green-900/30 p-4">{position}</td>
-            <td className="border border-green-900/30 p-4 text-blue-400">0.342</td>
-            <td className="border border-green-900/30 p-4 text-purple-400">0.0012</td>
-            <td className="border border-green-900/30 p-4 text-yellow-400">-4.52</td>
-            <td className="border border-green-900/30 p-4 text-red-400">12.5</td>
+            <td className="border border-[var(--border-default)] p-4">{position}</td>
+            <td className="border border-[var(--border-default)] p-4 text-blue-400">0.342</td>
+            <td className="border border-[var(--border-default)] p-4 text-purple-400">0.0012</td>
+            <td className="border border-[var(--border-default)] p-4 text-yellow-400">-4.52</td>
+            <td className="border border-[var(--border-default)] p-4 text-[var(--accent-red)]">12.5</td>
           </tr>
         </tbody>
       </table>
-      <div className="h-48 border border-green-900/30 bg-green-900/5 flex items-center justify-center text-xs text-gray-500">
+      <div className="h-48 border border-[var(--border-default)] bg-[var(--bg-surface)] flex items-center justify-center text-xs text-gray-500">
         [Greeks Heatmap: Strike vs DTE vs Gamma]
       </div>
     </div>
@@ -189,13 +189,13 @@ const Scenarios = ({ data }: { data: any }) => {
   return (
     <div className="flex gap-4 h-full">
       {/* Sidebar: Scenario Selection */}
-      <div className="w-1/3 space-y-4 border-r border-green-900/30 pr-4">
+      <div className="w-1/3 space-y-4 border-r border-[var(--border-default)] pr-4">
         <div className="text-xs text-gray-500 mb-4 uppercase">Scenario Library</div>
         {scenarios.map((sc: any, i: number) => (
           <div 
             key={i}
             onClick={() => { setSelected(sc); setIsCustom(false); }}
-            className={`p-4 border cursor-pointer transition-all ${!isCustom && selected?.name === sc.name ? 'border-green-500 bg-green-500/10' : 'border-green-900/30 hover:border-green-700'}`}
+            className={`p-4 border cursor-pointer transition-all ${!isCustom && selected?.name === sc.name ? 'border-green-500 bg-green-500/10' : 'border-[var(--border-default)] hover:border-green-700'}`}
           >
             <div className="flex justify-between items-center">
               <span className="font-bold">{sc.name}</span>
@@ -211,7 +211,7 @@ const Scenarios = ({ data }: { data: any }) => {
         
         <div 
           onClick={() => { setIsCustom(true); handleCustomChange('ds', customParams.ds); }}
-          className={`p-4 border cursor-pointer ${isCustom ? 'border-green-500 bg-green-500/10' : 'border-green-900/30'}`}
+          className={`p-4 border cursor-pointer ${isCustom ? 'border-green-500 bg-green-500/10' : 'border-[var(--border-default)]'}`}
         >
           <div className="font-bold mb-3">自定义情景 (Custom)</div>
           <div className="space-y-4 text-xs">
@@ -239,7 +239,7 @@ const Scenarios = ({ data }: { data: any }) => {
 
       {/* Main Panel: Results */}
       <div className="flex-1 space-y-4">
-        <div className="bg-green-900/5 border border-green-900/30 p-4 rounded">
+        <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] p-4 rounded">
           <div className="flex justify-between items-start mb-6">
              <div>
                 <div className="text-gray-500 text-xs mb-1">RESULT_PANEL // {isCustom ? 'CUSTOM_SIMULATION' : current.name}</div>
@@ -271,7 +271,7 @@ const Scenarios = ({ data }: { data: any }) => {
                 return (
                   <div key={idx} className="space-y-4">
                     <div className="flex justify-between text-xs">
-                      <span>{item.label}: <span className={item.val >= 0 ? 'text-green-400' : 'text-red-400'}>{item.val >= 0 ? '+' : ''}${item.val}</span></span>
+                      <span>{item.label}: <span className={item.val >= 0 ? 'text-[var(--accent-green)]' : 'text-[var(--accent-red)]'}>{item.val >= 0 ? '+' : ''}${item.val}</span></span>
                       {current.dominant_risk.toLowerCase().includes(item.label.slice(0, 4).toLowerCase()) && <span className="text-orange-500 text-[10px]">← 主要风险因子</span>}
                     </div>
                     <div className="h-2 bg-green-900/10 rounded-full overflow-hidden">
@@ -282,12 +282,12 @@ const Scenarios = ({ data }: { data: any }) => {
              })}
           </div>
 
-          <div className="mt-8 pt-6 border-t border-green-900/30">
+          <div className="mt-8 pt-6 border-t border-[var(--border-default)]">
              <div className="text-xs text-gray-500 mb-3 uppercase"> 对冲建议 (Hedge Recommendations) </div>
              <div className="grid grid-cols-2 gap-4">
                 {current.hedges?.map((h: any, i: number) => (
-                  <div key={i} className="p-4 border border-green-900/30 bg-black/40 rounded">
-                     <div className="text-sm font-bold text-green-400 mb-1">{h.hedge}</div>
+                  <div key={i} className="p-4 border border-[var(--border-default)] bg-[var(--bg-base)]/40 rounded">
+                     <div className="text-sm font-bold text-[var(--accent-green)] mb-1">{h.hedge}</div>
                      <div className="flex justify-between text-[10px] text-gray-500">
                         <span>Cost: {h.cost_estimate}</span>
                         <span className="text-blue-400">Effect: {h.effectiveness}</span>
@@ -322,8 +322,8 @@ const AIAnalysis = ({ ticker }: { ticker: string }) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-4 p-4 border border-green-900/30 bg-green-900/5">
-         <select className="bg-black border border-green-900/50 p-4 text-green-500">
+      <div className="flex gap-4 p-4 border border-[var(--border-default)] bg-[var(--bg-surface)]">
+         <select className="bg-[var(--bg-base)] border border-green-900/50 p-4 text-green-500">
             <option>Sell Put</option>
             <option>Buy Call</option>
             <option>Iron Condor</option>
@@ -339,13 +339,13 @@ const AIAnalysis = ({ ticker }: { ticker: string }) => {
       {loading && <div className="animate-pulse text-green-500">AI_THINKING...</div>}
 
       {analysis && (
-        <div className="border border-green-500 p-4 bg-black space-y-4 relative overflow-hidden">
+        <div className="border border-green-500 p-4 bg-[var(--bg-base)] space-y-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 text-[8px] opacity-20">SYSTEM_AI_STRAT_v4.2</div>
-          <div className="text-green-400">{analysis.validity}</div>
+          <div className="text-[var(--accent-green)]">{analysis.validity}</div>
           <div className="text-orange-400">{analysis.risks}</div>
           <div className="text-blue-400">{analysis.market_exp}</div>
           <div className="text-yellow-400">{analysis.key_levels}</div>
-          <div className="text-red-400">{analysis.hedging}</div>
+          <div className="text-[var(--accent-red)]">{analysis.hedging}</div>
           <div className="mt-4 pt-4 border-t border-green-900/50 font-bold">
             {analysis.conclusion}
           </div>
