@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from typing import Dict, List, Any
 from ..services.indicator_refresh import IndicatorRefreshService
 from ..core.cache import get_redis
+from ..core.errors import not_found_error, upstream_unavailable
 
 router = APIRouter()
 
@@ -42,7 +43,7 @@ async def get_indicator_detail(id: str, service: IndicatorRefreshService = Depen
     try:
         return await service.get_indicator_value(id)
     except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        raise not_found_error(f"Indicator '{id}' not found")
 
 @router.get("/composite")
 async def get_real_composite_score(service: IndicatorRefreshService = Depends(get_refresh_service)):

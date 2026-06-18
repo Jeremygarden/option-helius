@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from ..services.strategy_scorer import scan_ticker
 from ..services.options_scanner import get_direction, get_iv_environment
+from ..core.errors import upstream_unavailable, internal_error
 
 router = APIRouter(prefix="/api/scanner", tags=["scanner"])
 
@@ -12,8 +13,10 @@ async def scan(ticker: str):
     try:
         result = scan_ticker(ticker)
         return result
+    except ConnectionError as e:
+        raise upstream_unavailable("yfinance", str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise internal_error(f"Scanner failed for {ticker}: {e}")
 
 
 @router.get("/{ticker}/direction")
@@ -35,5 +38,7 @@ async def direction_only(ticker: str):
             "near_resistance": d.near_resistance,
             "signals": d.signals_detail,
         }
+    except ConnectionError as e:
+        raise upstream_unavailable("yfinance", str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise internal_error(f"Direction analysis failed for {ticker}: {e}")
