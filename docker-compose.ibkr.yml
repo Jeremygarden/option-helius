@@ -15,7 +15,7 @@ services:
       - IBKR_ACCOUNT_TYPE=${IBKR_ACCOUNT_TYPE:-paper}
     depends_on:
       ibgateway:
-        condition: service_started
+        condition: service_healthy
 
   ibgateway:
     build:
