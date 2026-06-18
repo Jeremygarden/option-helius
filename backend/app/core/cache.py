@@ -10,18 +10,28 @@ logger = logging.getLogger(__name__)
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 redis_client: Optional[redis.Redis] = None
 
-# TTL in seconds
+# TTL tiers (seconds) — standardized across all services
+# Real-time: data that changes intraday (prices, chains, GEX)
+# Computed: derived data that's expensive to calculate
+# Reference: slow-changing reference data (IV history, macro monthly)
+CACHE_TTL_REALTIME = 60      # 1 minute
+CACHE_TTL_COMPUTED = 300     # 5 minutes
+CACHE_TTL_REFERENCE = 3600   # 1 hour
+
 CACHE_TTL = {
-    "options_chain": 300,      # 5 minutes
-    "summary": 300,            # 5 minutes
-    "gex": 300,                # 5 minutes
-    "iv_surface": 600,         # 10 minutes (slower-changing)
-    "iv_history": 3600,        # 1 hour
-    "macro": 900,              # 15 minutes
-    "ai_analysis": 300,        # 5 minutes
-    "bsm_calculation": 300,    # 5 minutes
-    "scanner": 180,            # 3 minutes
-    "picks": 300,              # 5 minutes
+    # Real-time tier (60s)
+    "options_chain": CACHE_TTL_REALTIME,
+    "summary": CACHE_TTL_REALTIME,
+    "gex": CACHE_TTL_REALTIME,
+    "scanner": CACHE_TTL_REALTIME,
+    # Computed tier (300s)
+    "iv_surface": CACHE_TTL_COMPUTED,
+    "ai_analysis": CACHE_TTL_COMPUTED,
+    "bsm_calculation": CACHE_TTL_COMPUTED,
+    "picks": CACHE_TTL_COMPUTED,
+    "macro": CACHE_TTL_COMPUTED,
+    # Reference tier (3600s)
+    "iv_history": CACHE_TTL_REFERENCE,
 }
 
 
