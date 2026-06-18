@@ -135,7 +135,7 @@ export default function ChainPage() {
       {/* ── Page header row ── */}
       <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
         <div className="flex items-center gap-4">
-          <div className="flex items-baseline gap-4">
+          <div className="flex items-center gap-4">
             <h1 className="text-3xl font-black tracking-tighter text-[var(--text-primary)] font-sans">
               {ticker}
             </h1>
@@ -209,7 +209,7 @@ export default function ChainPage() {
       </div>
 
       {/* ── KPI bar ── */}
-      <KPIBar summary={summary} loading={loading} error={error} />
+      <div className="mb-2"><KPIBar summary={summary} loading={loading} error={error} /></div>
 
       {/* ── Expiry tab bar ── */}
       <div className="flex flex-col gap-4">
