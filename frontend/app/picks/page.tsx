@@ -222,10 +222,10 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="flex items-center justify-center w-5 h-5 rounded bg-[#1c2128] text-[10px] font-mono font-bold text-[#6e7681]">
+            <span className="flex items-center justify-center w-5 h-5 rounded bg-[#1c2128] text-[10px] font-mono font-bold text-[#6e7681] font-mono">
               {rank}
             </span>
-            <span className="text-lg font-bold font-mono tracking-tight text-[#e6edf3]">
+            <span className="text-lg font-bold font-mono tracking-tight text-[#e6edf3] font-mono">
               {ticker}
             </span>
           </div>
@@ -238,7 +238,7 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
         </div>
 
         <div className="flex items-center justify-between">
-          <span className="text-sm font-semibold" style={{ color: meta.color }}>
+          <span className="text-sm font-semibold font-mono" style={{ color: meta.color }}>
             {pick.strategyName || meta.cn}
           </span>
           <DirIcon size={14} style={{ color: dirColor }} />
@@ -246,7 +246,7 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
       </div>
 
       {/* Contract Code Bar */}
-      <div className="px-4 py-2 bg-[#1c2128] border-y border-[#30363d] font-mono font-bold text-xs tracking-wider text-[#e6edf3]">
+      <div className="px-4 py-2 bg-[#1c2128] border-y border-[#30363d] font-mono font-bold text-xs tracking-wider text-[#e6edf3] font-mono">
         {legsSummary || pick.strategyName}
       </div>
 
@@ -259,10 +259,10 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
           { label: "PERIOD", value: pick.holdingPeriod || "--", color: "var(--text-secondary)" },
         ].map(s => (
           <div key={s.label}>
-            <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-1">
+            <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-1 font-mono">
               {s.label}
             </div>
-            <div className="text-sm font-black font-mono tabular-nums leading-none" style={{ color: s.color }}>
+            <div className="text-sm font-black font-mono tabular-nums leading-none font-mono" style={{ color: s.color }}>
               {s.value}
             </div>
           </div>
@@ -314,8 +314,8 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
       {/* Header Info */}
       <div className="px-6 py-5 border-b border-[#30363d] flex items-center justify-between bg-gradient-to-r from-[#1c2128] to-transparent">
         <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-black font-mono tracking-tighter text-[#e6edf3]">
-            {pick.ticker} <span className="text-[#6e7681] font-bold text-xs ml-2 tracking-widest uppercase">{pick.strategyName || meta.cn}</span>
+          <h2 className="text-2xl font-black font-mono tracking-tighter text-[#e6edf3] font-sans">
+            {pick.ticker} <span className="text-[#6e7681] font-bold text-xs ml-2 tracking-widest uppercase font-mono">{pick.strategyName || meta.cn}</span>
           </h2>
           <div 
             className="px-2.5 py-1 rounded-lg text-[10px] font-black font-mono border"
@@ -327,16 +327,16 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
         <div className="flex items-center gap-8">
           <div className="text-right">
             <div className="text-[10px] text-[#6e7681] font-black tracking-[0.2em] uppercase mb-1">Target Price</div>
-            <div className="text-lg font-black font-mono text-[#3fb950] leading-none tabular-nums">{pick.target || "--"}</div>
+            <div className="text-lg font-black font-mono text-[#3fb950] leading-none tabular-nums font-mono">{pick.target || "--"}</div>
           </div>
           <div className="text-right border-l border-[#30363d] pl-8">
             <div className="text-[10px] text-[#6e7681] font-black tracking-[0.2em] uppercase mb-1">Stop Loss</div>
-            <div className="text-lg font-black font-mono text-[#f85149] leading-none tabular-nums">{pick.stop || "--"}</div>
+            <div className="text-lg font-black font-mono text-[#f85149] leading-none tabular-nums font-mono">{pick.stop || "--"}</div>
           </div>
         </div>
       </div>
 
-      <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 font-mono">
         {/* Left: 4 Metrics Grid */}
         <div className="lg:col-span-5 grid grid-cols-2 gap-4">
           {[
@@ -346,9 +346,9 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
             { label: "Capital Req.", value: pick.capitalText || "--", sub: "Margin Needed", color: "var(--text-primary)" },
           ].map(m => (
             <div key={m.label} className="p-4 rounded-xl bg-[#0d1117] border border-[#30363d]">
-              <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-1">{m.label}</div>
-              <div className="text-lg font-bold font-mono mb-1" style={{ color: m.color }}>{m.value}</div>
-              <div className="text-[10px] text-[#484f58]">{m.sub}</div>
+              <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-1 font-mono">{m.label}</div>
+              <div className="text-lg font-bold font-mono mb-1 font-mono" style={{ color: m.color }}>{m.value}</div>
+              <div className="text-[10px] text-[#484f58] font-mono">{m.sub}</div>
             </div>
           ))}
         </div>
@@ -366,8 +366,8 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
               { label: "Rho", value: "0.002" },
             ].map(g => (
               <div key={g.label} className="bg-[#161b22] p-3">
-                <div className="text-[9px] text-[#6e7681] uppercase font-bold mb-1">{g.label}</div>
-                <div className="text-xs font-bold font-mono text-[#e6edf3]">{g.value}</div>
+                <div className="text-[9px] text-[#6e7681] uppercase font-bold mb-1 font-mono">{g.label}</div>
+                <div className="text-xs font-bold font-mono text-[#e6edf3] font-mono">{g.value}</div>
               </div>
             ))}
           </div>
@@ -378,7 +378,7 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
           <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-3">Recommendation Insight</div>
           <div className="flex-1 p-4 rounded-xl bg-[#1c2128] border border-[#30363d] text-xs leading-relaxed text-[#8b949e]">
             <p className="mb-3">
-              <strong className="text-[#e6edf3]">Signal:</strong> {pick.signalText}
+              <strong className="text-[#e6edf3] font-mono">Signal:</strong> {pick.signalText}
             </p>
             <p>
               <strong className="text-[#e6edf3]">Scenario:</strong> High IV Rank suggests a premium-selling advantage. Maintain position until 50% profit or 21 days to expiration.
@@ -419,10 +419,10 @@ function ScannerSummaryCard({
     >
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
-          <h2 className="text-sm font-black text-[#e6edf3] uppercase tracking-wider">
+          <h2 className="text-sm font-black text-[#e6edf3] uppercase tracking-wider font-sans">
             Market Scanner
           </h2>
-          <p className="text-[10px] font-bold text-[#6e7681] mt-0.5">
+          <p className="text-[10px] font-bold text-[#6e7681] mt-0.5 font-mono">
             {weekStart && weekEnd ? `${fmtDate(weekStart)} → ${fmtDate(weekEnd)}` : "Live Ticker Analysis"}
           </p>
         </div>
@@ -443,8 +443,8 @@ function ScannerSummaryCard({
                 borderColor: isSelected ? "#58a6ff" : "var(--border-default)",
               }}
             >
-              <span className="font-mono font-black text-xs text-[#e6edf3] mb-1">{t}</span>
-              <span className="font-mono text-[9px] font-bold text-[#3fb950] tabular-nums">
+              <span className="font-mono font-black text-xs text-[#e6edf3] mb-1 font-mono">{t}</span>
+              <span className="font-mono text-[9px] font-bold text-[#3fb950] tabular-nums font-mono">
                 {fmtNum(item.price, 1)}
               </span>
               <div className="mt-2 w-full h-1 bg-[#0d1117] rounded-full overflow-hidden">
@@ -471,7 +471,7 @@ function FilterBar({
   counts: Record<string, number>;
 }) {
   return (
-    <div className="flex flex-wrap items-center gap-4">
+    <div className="flex flex-wrap items-center gap-4 font-mono">
       {/* Strategy Type Pills */}
       <div className="flex items-center p-1 rounded-xl bg-[#161b22] border border-[#30363d] shadow-inner overflow-x-auto">
         {STRATEGY_FILTERS.map(f => (
@@ -623,13 +623,13 @@ export default function PicksPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 pb-12 px-6 max-w-[1600px] mx-auto">
+    <div className="flex flex-col gap-6 pb-12 px-6 max-w-[1600px] mx-auto font-mono">
 
       {/* ── Page Header ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 py-6 border-b border-[#30363d]">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-black tracking-tight text-[#e6edf3]">
+            <h1 className="text-2xl font-black tracking-tight text-[#e6edf3] font-sans">
               TOP PICKS
             </h1>
             <div className="flex flex-wrap gap-1.5">
@@ -722,7 +722,7 @@ export default function PicksPage() {
       {/* ── Grid Section ── */}
       <div className="space-y-4">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-xs font-bold text-[#6e7681] uppercase tracking-[0.2em]">
+          <h3 className="text-xs font-bold text-[#6e7681] uppercase tracking-[0.2em] font-sans">
             Recommended Strategies ({displayPicks.length})
           </h3>
           <div className="flex items-center gap-4">
@@ -736,7 +736,7 @@ export default function PicksPage() {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
@@ -782,7 +782,7 @@ export default function PicksPage() {
                   <div className="w-20 h-20 rounded-2xl bg-[#161b22] border border-[#30363d] flex items-center justify-center mb-6 text-[#484f58] shadow-2xl">
                     <SlidersHorizontal size={32} />
                   </div>
-                  <h3 className="text-lg font-black text-[#e6edf3] mb-2 tracking-tight">No Matching Strategies Found</h3>
+                  <h3 className="text-lg font-black text-[#e6edf3] mb-2 tracking-tight font-sans">No Matching Strategies Found</h3>
                   <p className="text-sm font-medium text-[#6e7681] text-center max-w-xs mb-8">
                     Try broadening your search by adjusting filters or clearing ticker selection.
                   </p>
@@ -816,21 +816,21 @@ export default function PicksPage() {
 /* ─── Helper Components ─── */
 function ScannerSummaryStats({ picks, bullish, bearish }: { picks: any[], bullish: number, bearish: number }) {
   return (
-    <div className="p-6 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-xl relative overflow-hidden group">
+    <div className="p-6 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-xl relative overflow-hidden group font-mono">
       {/* Background decoration */}
       <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors" />
       
       <div className="grid grid-cols-3 gap-4 relative z-10">
         <div className="text-center">
-          <div className="text-3xl font-black font-mono text-[#e6edf3] tracking-tighter">{picks.length}</div>
+          <div className="text-3xl font-black font-mono text-[#e6edf3] tracking-tighter font-mono">{picks.length}</div>
           <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-[0.2em] mt-1">Total</div>
         </div>
         <div className="text-center border-x border-[#30363d]">
-          <div className="text-3xl font-black font-mono text-[#3fb950] tracking-tighter">{bullish}</div>
+          <div className="text-3xl font-black font-mono text-[#3fb950] tracking-tighter font-mono">{bullish}</div>
           <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-[0.2em] mt-1">Bullish</div>
         </div>
         <div className="text-center">
-          <div className="text-3xl font-black font-mono text-[#f85149] tracking-tighter">{bearish}</div>
+          <div className="text-3xl font-black font-mono text-[#f85149] tracking-tighter font-mono">{bearish}</div>
           <div className="text-[10px] font-bold text-[#6e7681] uppercase tracking-[0.2em] mt-1">Bearish</div>
         </div>
       </div>

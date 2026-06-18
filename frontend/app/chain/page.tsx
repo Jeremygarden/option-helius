@@ -37,13 +37,13 @@ function ChartCard({
     <div className="card flex flex-col h-full overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-black/5">
       <div className="card-header border-b border-[var(--border-muted)] -mx-5 -mt-5 px-5 py-4 bg-[var(--bg-base)]/30">
         <div>
-          <h3 className="card-title text-sm font-bold tracking-tight text-[var(--text-primary)]">{title}</h3>
+          <h3 className="card-title text-sm font-bold tracking-tight text-[var(--text-primary)] font-sans">{title}</h3>
           {subtitle && (
-            <p className="text-[10px] font-medium text-[var(--text-secondary)] mt-0.5 uppercase tracking-wider">{subtitle}</p>
+            <p className="text-[10px] font-medium text-[var(--text-secondary)] mt-0.5 uppercase tracking-wider font-mono">{subtitle}</p>
           )}
         </div>
       </div>
-      <div className="flex-1 min-h-[320px] pt-4">{children}</div>
+      <div className="flex-1 min-h-[320px] pt-4 font-mono">{children}</div>
     </div>
   );
 }
@@ -130,13 +130,13 @@ export default function ChainPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-12 max-w-[1600px] mx-auto px-4 md:px-8">
+    <div className="flex flex-col gap-6 pb-12 max-w-[1600px] mx-auto px-4 md:px-8 font-mono">
 
       {/* ── Page header row ── */}
       <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
         <div className="flex items-center gap-6">
           <div className="flex items-baseline gap-2">
-            <h1 className="text-3xl font-black tracking-tighter text-[var(--text-primary)]">
+            <h1 className="text-3xl font-black tracking-tighter text-[var(--text-primary)] font-sans">
               {ticker}
             </h1>
             <span className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-widest">Options Terminal</span>
@@ -236,7 +236,7 @@ export default function ChainPage() {
                     : "bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--accent-blue)]"
                 }`}
               >
-                <span className="text-xs font-bold">{item.label}</span>
+                <span className="text-xs font-bold font-mono">{item.label}</span>
                 <span 
                   className={`text-[9px] font-black px-1.5 py-0.5 rounded-md ${
                     isActive ? "bg-white/20 text-white" : "bg-[var(--bg-base)]"

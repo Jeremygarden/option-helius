@@ -100,7 +100,7 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
       }}
     >
       {/* ── Top row: rank badge left, type badge right ── */}
-      <div className="flex items-center justify-between px-4 pt-4 pb-0">
+      <div className="flex items-center justify-between px-4 pt-4 pb-0 font-mono">
         {/* Rank badge */}
         <div
           className="flex items-center justify-center w-7 h-7 rounded-md text-xs font-mono font-bold"

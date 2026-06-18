@@ -38,10 +38,10 @@ const SectionHeader: React.FC<{ icon: string; title: string; subtitle: string; s
   return (
     <div className="flex items-center justify-between mb-4 border-b border-slate-700 pb-2">
       <div className="flex items-center gap-2">
-        <span className="text-xl">{icon}</span>
+        <span className="text-xl font-mono">{icon}</span>
         <div>
-          <h2 className="text-white font-bold">{title}</h2>
-          <p className="text-slate-400 text-[10px]">{subtitle}</p>
+          <h2 className="text-white font-bold font-sans">{title}</h2>
+          <p className="text-slate-400 text-[10px] font-mono">{subtitle}</p>
         </div>
       </div>
       <div className={`text-sm font-mono font-bold ${getScoreColor(score)}`}>
@@ -76,14 +76,14 @@ const IndicatorCard: React.FC<{ indicator: Indicator }> = ({ indicator }) => {
     <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 relative overflow-hidden flex flex-col justify-between">
       <div className="flex justify-between items-start mb-1">
         <div>
-          <h3 className="text-slate-200 text-xs font-bold">{indicator.name}</h3>
-          <p className="text-slate-500 text-[9px] font-mono">{indicator.name_en}</p>
+          <h3 className="text-slate-200 text-xs font-bold font-sans">{indicator.name}</h3>
+          <p className="text-slate-500 text-[9px] font-mono font-mono">{indicator.name_en}</p>
         </div>
         <span title="数据新鲜度">{staleness.label}</span>
       </div>
       
       <div className="my-2">
-        <div className="text-xl font-bold text-white leading-none">
+        <div className="text-xl font-bold text-white leading-none font-mono">
           {indicator.value_display}
         </div>
       </div>

@@ -83,7 +83,7 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
             }`}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.1em] truncate">
+              <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.1em] truncate font-mono">
                 {kpi.label}
               </span>
               {kpi.trend && (
@@ -101,7 +101,7 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
               </span>
             )}
 
-            <span className="text-[11px] font-semibold text-[var(--text-secondary)] truncate mt-0.5 opacity-80">
+            <span className="text-[11px] font-semibold text-[var(--text-secondary)] truncate mt-0.5 opacity-80 font-mono">
               {loading ? "..." : kpi.sub}
             </span>
           </div>
