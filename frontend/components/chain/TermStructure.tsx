@@ -6,21 +6,31 @@ import { IVSurfacePoint, SummaryResponse, formatMoney } from "@/lib/chainData";
 
 type TermStructureProps = { surface: IVSurfacePoint[]; summary?: SummaryResponse | null; loading?: boolean };
 
+const COLOR_IV = "#58a6ff";       // accent-blue
+const COLOR_MOVE = "#bc8cff";     // accent-purple
+const COLOR_GRID = "#21262d";     // border-muted
+const COLOR_AXIS = "#8b949e";     // text-secondary
+
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/95 backdrop-blur-md border border-[var(--accent-blue)] rounded-lg p-4 shadow-xl">
-        <p className="text-xs font-bold text-[var(--accent-blue)] mb-3 border-b border-[var(--accent-blue)] pb-2 font-mono">
-          Term: {label}
+      <div className="surface-elevated px-3 py-2.5 min-w-[200px] font-mono">
+        <p className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-2 pb-1.5 border-b border-[var(--border-muted)]">
+          Term {label}
         </p>
-        <div className="space-y-4">
+        <div className="flex flex-col gap-1.5">
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-4 text-[11px]">
-              <div className="flex items-center gap-4">
-                <div className="w-2.5 h-2.5 rounded-lg" style={{ backgroundColor: entry.stroke }} />
-                <span className="text-[var(--accent-blue)] font-medium">{entry.name}</span>
+            <div key={index} className="flex items-center justify-between gap-3 text-[11px]">
+              <div className="flex items-center gap-1.5">
+                <div
+                  className="w-2 h-2 rounded-sm shrink-0"
+                  style={{ backgroundColor: entry.stroke }}
+                />
+                <span className="text-[var(--text-secondary)]">{entry.name}</span>
               </div>
-              <span className="font-bold font-mono text-[var(--accent-blue)]">
+              <span
+                className="font-bold tabular-nums text-[var(--text-primary)]"
+              >
                 {entry.name === "Expected Move" ? formatMoney(entry.value) : `${entry.value}%`}
               </span>
             </div>
@@ -57,69 +67,76 @@ export default function TermStructure({ surface, summary, loading }: TermStructu
   return (
     <div className="h-[340px] w-full">
       {loading ? (
-        <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[var(--accent-blue)]" />
+        <div className="h-full rounded-lg surface-skeleton animate-pulse" />
       ) : (
         <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart data={data} margin={{ top: 10, right: 0, bottom: 0, left: 0 }}>
+          <ComposedChart data={data} margin={{ top: 10, right: 8, bottom: 0, left: 0 }}>
             <defs>
               <linearGradient id="ivFill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="var(--accent-blue)" stopOpacity={0.15} />
-                <stop offset="100%" stopColor="var(--accent-blue)" stopOpacity={0} />
+                <stop offset="0%" stopColor={COLOR_IV} stopOpacity={0.18} />
+                <stop offset="100%" stopColor={COLOR_IV} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid stroke="var(--accent-blue)" vertical={false} />
+            <CartesianGrid stroke={COLOR_GRID} vertical={false} />
             <XAxis
               dataKey="label"
-              tick={{ fill: "var(--accent-blue)", fontSize: 10, fontWeight: 500 }}
+              tick={{ fill: COLOR_AXIS, fontSize: 10, fontWeight: 500 }}
               axisLine={false}
               tickLine={false}
-              dy={10}
+              dy={8}
             />
             <YAxis
               yAxisId="iv"
-              tick={{ fill: "var(--accent-blue)", fontSize: 10, fontWeight: 500 }}
+              tick={{ fill: COLOR_IV, fontSize: 10, fontWeight: 500 }}
               axisLine={false}
               tickLine={false}
               unit="%"
-              dx={-10}
+              dx={-6}
             />
             <YAxis
               yAxisId="move"
               orientation="right"
-              tick={{ fill: "var(--accent-blue)", fontSize: 10, fontWeight: 500 }}
+              tick={{ fill: COLOR_MOVE, fontSize: 10, fontWeight: 500 }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(v) => `$${v}`}
-              dx={10}
+              dx={6}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Legend 
-              verticalAlign="top" 
-              align="left" 
-              iconType="circle" 
+            <Legend
+              verticalAlign="top"
+              align="left"
+              iconType="circle"
               iconSize={8}
-              wrapperStyle={{ paddingBottom: 20, fontSize: 11, fontWeight: 600, color: "var(--accent-blue)" }}
+              wrapperStyle={{
+                paddingBottom: 12,
+                fontSize: 10,
+                fontWeight: 600,
+                color: COLOR_AXIS,
+                letterSpacing: "0.04em",
+              }}
             />
             <Area
               yAxisId="iv"
               type="monotone"
               dataKey="atmIv"
               name="ATM IV"
-              stroke="var(--accent-blue)"
+              stroke={COLOR_IV}
               fill="url(#ivFill)"
-              strokeWidth={3}
-              dot={{ r: 4, fill: "var(--accent-blue)", stroke: "var(--accent-blue)", strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: "var(--accent-blue)" }}
+              strokeWidth={2.5}
+              dot={{ r: 3, fill: COLOR_IV, stroke: COLOR_IV, strokeWidth: 1.5 }}
+              activeDot={{ r: 5, fill: COLOR_IV }}
             />
             <Line
               yAxisId="move"
               type="monotone"
               dataKey="expectedMove"
               name="Expected Move"
-              stroke="var(--accent-blue)"
-              strokeWidth={3}
-              dot={{ r: 4, fill: "var(--accent-blue)", stroke: "var(--accent-blue)", strokeWidth: 2 }}
-              activeDot={{ r: 6, fill: "var(--accent-blue)" }}
+              stroke={COLOR_MOVE}
+              strokeWidth={2.5}
+              strokeDasharray="6 3"
+              dot={{ r: 3, fill: COLOR_MOVE, stroke: COLOR_MOVE, strokeWidth: 1.5 }}
+              activeDot={{ r: 5, fill: COLOR_MOVE }}
             />
           </ComposedChart>
         </ResponsiveContainer>

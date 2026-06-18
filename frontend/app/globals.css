@@ -170,3 +170,27 @@ body {
   background: var(--border-default);
   border-radius: 3px;
 }
+
+/* ─── Utility: hide native scrollbar on horizontal scroll regions ─── */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none;    /* Firefox */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;            /* Chromium/Safari */
+}
+
+/* ─── Surface helpers for dark-theme floating panels (tooltips, popovers) ─── */
+.surface-elevated {
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+}
+
+.surface-skeleton {
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-muted);
+  border-radius: var(--radius-md);
+}
