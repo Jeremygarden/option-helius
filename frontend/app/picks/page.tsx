@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { RefreshCw, SlidersHorizontal, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -533,15 +534,28 @@ function FilterBar({
 
 /* ─── Main page ──────────────────────────────────────────────── */
 export default function PicksPage() {
+  return (
+    <Suspense fallback={<div className="flex h-64 items-center justify-center text-xs font-mono" style={{ color: "var(--text-muted)" }}>Loading picks…</div>}>
+      <PicksPageInner />
+    </Suspense>
+  );
+}
+
+function PicksPageInner() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [payload, setPayload] = useState<PicksResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedTicker, setSelectedTicker] = useState<string>("");
+  // Initialize filter state from URL params
+  const [selectedTicker, setSelectedTicker] = useState<string>(searchParams.get("ticker") || "");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [tagFilter, setTagFilter] = useState<string>("全部");
-  const [strategyFilter, setStrategyFilter] = useState<string>("all");
-  const [sortMode, setSortMode] = useState<"score" | "ticker">("score");
-  const [directionTab, setDirectionTab] = useState<string>("all");
+  const [tagFilter, setTagFilter] = useState<string>(searchParams.get("tag") || "全部");
+  const [strategyFilter, setStrategyFilter] = useState<string>(searchParams.get("strategy") || "all");
+  const [sortMode, setSortMode] = useState<"score" | "ticker">(searchParams.get("sort") === "ticker" ? "ticker" : "score");
+  const [directionTab, setDirectionTab] = useState<string>(searchParams.get("dir") || "all");
 
   const fetchPicks = useCallback(async () => {
     setLoading(true);
@@ -564,6 +578,18 @@ export default function PicksPage() {
   }, []);
 
   useEffect(() => { fetchPicks(); }, [fetchPicks]);
+
+  // Sync filter state to URL params for deep-link and browser back/forward support
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (selectedTicker) params.set("ticker", selectedTicker);
+    if (tagFilter !== "全部") params.set("tag", tagFilter);
+    if (strategyFilter !== "all") params.set("strategy", strategyFilter);
+    if (directionTab !== "all") params.set("dir", directionTab);
+    if (sortMode !== "score") params.set("sort", sortMode);
+    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+    router.replace(newUrl, { scroll: false });
+  }, [selectedTicker, tagFilter, strategyFilter, directionTab, sortMode, pathname, router]);
 
   const picks = payload?.picks?.length ? payload.picks : buildFallbackPicks();
   const scanner = payload?.scanner?.length ? payload.scanner : SCANNER_FALLBACK;

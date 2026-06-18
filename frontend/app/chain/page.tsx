@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
+import { FormEvent, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
 import { RefreshCw, Zap, Search } from "lucide-react";
 import KPIBar from "@/components/chain/KPIBar";
@@ -66,9 +67,25 @@ function dteBadgeColor(dte: number): string {
 
 /* ─── Main page ──────────────────────────────────────────────── */
 export default function ChainPage() {
-  const [ticker, setTicker] = useState("NVDA");
-  const [draftTicker, setDraftTicker] = useState("NVDA");
-  const [expiry, setExpiry] = useState<string | null>(null);
+  return (
+    <Suspense fallback={<div className="flex h-full min-h-[320px] items-center justify-center text-xs font-mono" style={{ color: "var(--text-muted)" }}>Loading options terminal…</div>}>
+      <ChainPageInner />
+    </Suspense>
+  );
+}
+
+function ChainPageInner() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Initialize ticker from URL param (default: NVDA)
+  const initialTicker = normalizeTicker(searchParams.get("ticker") || "NVDA");
+  const initialExpiry = searchParams.get("expiry") || null;
+
+  const [ticker, setTicker] = useState(initialTicker);
+  const [draftTicker, setDraftTicker] = useState(initialTicker);
+  const [expiry, setExpiry] = useState<string | null>(initialExpiry);
   const [expirations, setExpirations] = useState<string[]>([]);
   const [chain, setChain] = useState<ChainResponse | null>(null);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
@@ -159,6 +176,16 @@ export default function ChainPage() {
 
   const expiryItems = useMemo(() => expirations.map(toExpirationItem), [expirations]);
   const netGex = useMemo(() => gex.reduce((sum, p) => sum + p.gex * 1_000_000, 0), [gex]);
+
+  // Sync URL params whenever ticker or expiry changes
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (ticker !== "NVDA") params.set("ticker", ticker);
+    if (expiry) params.set("expiry", expiry);
+    const newUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
+    // Replace state rather than push so navigation history stays clean
+    router.replace(newUrl, { scroll: false });
+  }, [ticker, expiry, pathname, router]);
 
   const submitTicker = useCallback((event: FormEvent) => {
     event.preventDefault();
