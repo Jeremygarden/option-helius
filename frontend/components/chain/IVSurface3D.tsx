@@ -132,7 +132,7 @@ export default function IVSurface3D({ data, spot, loading }: IVSurface3DProps) {
     <div className="flex flex-col gap-4">
       {/* Mode toggle */}
       <div className="flex justify-end">
-        <div className="flex rounded-xl bg-gray-50 border border-[#EDF0F2] p-1 shadow-inner">
+        <div className="flex rounded-lg bg-gray-50 border border-[#EDF0F2] p-1 shadow-inner">
           {(["3d", "money", "table"] as Mode[]).map((item) => (
             <button
               key={item}
@@ -154,7 +154,7 @@ export default function IVSurface3D({ data, spot, loading }: IVSurface3DProps) {
         {loading ? (
           <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[#EDF0F2]" />
         ) : mode === "table" ? (
-          <div className="h-full overflow-auto rounded-xl border border-[#EDF0F2] bg-white shadow-sm">
+          <div className="h-full overflow-auto rounded-lg border border-[#EDF0F2] bg-white shadow-sm">
             <table className="w-full min-w-[520px] text-left font-mono text-[11px]">
               <thead className="sticky top-0 bg-gray-50 text-[#9A9FA5] border-b border-[#EDF0F2] z-10">
                 <tr>

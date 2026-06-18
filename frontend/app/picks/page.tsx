@@ -206,7 +206,7 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
   return (
     <article
       onClick={onSelect}
-      className={`relative cursor-pointer rounded-xl border transition-all duration-300 overflow-hidden flex flex-col h-full group ${
+      className={`relative cursor-pointer rounded-lg border transition-all duration-300 overflow-hidden flex flex-col h-full group ${
         isSelected ? 'ring-2 ring-inset ring-[#58a6ff]' : 'hover:border-[#58a6ff]/50 hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-blue-500/10'
       }`}
       style={{
@@ -221,7 +221,7 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
       {/* Card Header */}
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <span className="flex items-center justify-center w-5 h-5 rounded bg-[#1c2128] text-[10px] font-mono font-bold text-[#6e7681] font-mono">
               {rank}
             </span>
@@ -278,7 +278,7 @@ const PrimaryButton = ({ children, onClick, disabled, loading, icon: Icon }: any
     type="button"
     onClick={onClick}
     disabled={disabled}
-    className="bg-[#1158c7] hover:bg-[#1f6feb] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
+    className="bg-[#1158c7] hover:bg-[#1f6feb] text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-4 transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
   >
     {Icon && <Icon size={16} className={loading ? "animate-spin" : ""} />}
     {children}
@@ -324,7 +324,7 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
             {meta.label}
           </div>
         </div>
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-4">
           <div className="text-right">
             <div className="text-[10px] text-[#6e7681] font-black tracking-[0.2em] uppercase mb-1">Target Price</div>
             <div className="text-lg font-black font-mono text-[#3fb950] leading-none tabular-nums font-mono">{pick.target || "--"}</div>
@@ -336,7 +336,7 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
         </div>
       </div>
 
-      <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 font-mono">
+      <div className="p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 font-mono">
         {/* Left: 4 Metrics Grid */}
         <div className="lg:col-span-5 grid grid-cols-2 gap-4">
           {[
@@ -345,7 +345,7 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
             { label: "Probability OTM", value: "82.4%", sub: "At Expiration", color: "var(--color-call)" },
             { label: "Capital Req.", value: pick.capitalText || "--", sub: "Margin Needed", color: "var(--text-primary)" },
           ].map(m => (
-            <div key={m.label} className="p-4 rounded-xl bg-[#0d1117] border border-[#30363d]">
+            <div key={m.label} className="p-4 rounded-lg bg-[#0d1117] border border-[#30363d]">
               <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-1 font-mono">{m.label}</div>
               <div className="text-lg font-bold font-mono mb-1 font-mono" style={{ color: m.color }}>{m.value}</div>
               <div className="text-[10px] text-[#484f58] font-mono">{m.sub}</div>
@@ -365,7 +365,7 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
               { label: "IV", value: `${(greeks.iv ? greeks.iv * 100 : 0).toFixed(1)}%` },
               { label: "Rho", value: "0.002" },
             ].map(g => (
-              <div key={g.label} className="bg-[#161b22] p-3">
+              <div key={g.label} className="bg-[#161b22] p-4">
                 <div className="text-[9px] text-[#6e7681] uppercase font-bold mb-1 font-mono">{g.label}</div>
                 <div className="text-xs font-bold font-mono text-[#e6edf3] font-mono">{g.value}</div>
               </div>
@@ -376,7 +376,7 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
         {/* Right: Recommendation */}
         <div className="lg:col-span-4 flex flex-col">
           <div className="text-[10px] font-bold text-[#6e7681] tracking-widest uppercase mb-3">Recommendation Insight</div>
-          <div className="flex-1 p-4 rounded-xl bg-[#1c2128] border border-[#30363d] text-xs leading-relaxed text-[#8b949e]">
+          <div className="flex-1 p-4 rounded-lg bg-[#1c2128] border border-[#30363d] text-xs leading-relaxed text-[#8b949e]">
             <p className="mb-3">
               <strong className="text-[#e6edf3] font-mono">Signal:</strong> {pick.signalText}
             </p>
@@ -414,10 +414,10 @@ function ScannerSummaryCard({
 }) {
   return (
     <div
-      className="rounded-2xl border p-5 h-full flex flex-col justify-between"
+      className="rounded-2xl border p-4 h-full flex flex-col justify-between"
       style={{ background: "var(--bg-surface)", borderColor: "var(--border-default)" }}
     >
-      <div className="flex items-start justify-between gap-3 mb-4">
+      <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <h2 className="text-sm font-black text-[#e6edf3] uppercase tracking-wider font-sans">
             Market Scanner
@@ -428,7 +428,7 @@ function ScannerSummaryCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
         {scanner.map(item => {
           const t = (item.ticker || "").toUpperCase();
           const isSelected = t === selected;
@@ -437,7 +437,7 @@ function ScannerSummaryCard({
               key={t}
               type="button"
               onClick={() => onSelect(t)}
-              className="flex flex-col items-center p-3 rounded-xl border text-center transition-all hover:scale-105"
+              className="flex flex-col items-center p-4 rounded-lg border text-center transition-all hover:scale-105"
               style={{
                 background: isSelected ? "rgba(88,166,255,0.08)" : "var(--bg-elevated)",
                 borderColor: isSelected ? "#58a6ff" : "var(--border-default)",
@@ -473,13 +473,13 @@ function FilterBar({
   return (
     <div className="flex flex-wrap items-center gap-4 font-mono">
       {/* Strategy Type Pills */}
-      <div className="flex items-center p-1 rounded-xl bg-[#161b22] border border-[#30363d] shadow-inner overflow-x-auto">
+      <div className="flex items-center p-1 rounded-lg bg-[#161b22] border border-[#30363d] shadow-inner overflow-x-auto">
         {STRATEGY_FILTERS.map(f => (
           <button
             key={f.value}
             type="button"
             onClick={() => setStrategyFilter(f.value)}
-            className={`whitespace-nowrap px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-2 ${
+            className={`whitespace-nowrap px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-4 ${
               strategyFilter === f.value
                 ? "bg-[#1c2128] text-[#58a6ff] border border-[#484f58] shadow-sm"
                 : "text-[#6e7681] hover:text-[#e6edf3]"
@@ -496,7 +496,7 @@ function FilterBar({
       </div>
 
       {/* Risk Tag Pills */}
-      <div className="flex items-center p-1 rounded-xl bg-[#161b22] border border-[#30363d] shadow-inner">
+      <div className="flex items-center p-1 rounded-lg bg-[#161b22] border border-[#30363d] shadow-inner">
         {TAGS.map(tag => (
           <button
             key={tag}
@@ -518,7 +518,7 @@ function FilterBar({
         <select
           value={sortMode}
           onChange={e => setSortMode(e.target.value as "score" | "ticker")}
-          className="appearance-none bg-[#161b22] border border-[#30363d] rounded-xl px-4 py-2 pr-10 text-[11px] font-bold text-[#e6edf3] outline-none hover:border-[#484f58] transition-colors cursor-pointer shadow-sm"
+          className="appearance-none bg-[#161b22] border border-[#30363d] rounded-lg px-4 py-2 pr-10 text-[11px] font-bold text-[#e6edf3] outline-none hover:border-[#484f58] transition-colors cursor-pointer shadow-sm"
         >
           <option value="score">SORT BY: SCORE</option>
           <option value="ticker">SORT BY: TICKER</option>
@@ -623,16 +623,16 @@ export default function PicksPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 pb-12 px-6 max-w-[1600px] mx-auto font-mono">
+    <div className="flex flex-col gap-4 pb-12 px-6 max-w-[1600px] mx-auto font-mono">
 
       {/* ── Page Header ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 py-6 border-b border-[#30363d]">
         <div>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="flex items-center gap-4 mb-2">
             <h1 className="text-2xl font-black tracking-tight text-[#e6edf3] font-sans">
               TOP PICKS
             </h1>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-4.5">
               {WATCHLIST.map(t => (
                 <button
                   key={t}
@@ -664,11 +664,11 @@ export default function PicksPage() {
       </div>
 
       {/* ── Scanner Summary Section ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         <div className="lg:col-span-4 space-y-4">
           <ScannerSummaryStats picks={picks} bullish={bullishCount} bearish={bearishCount} />
-          <div className="p-4 rounded-xl bg-[#0d1117] border border-[#30363d] flex items-center justify-between shadow-inner">
-            <div className="flex items-center gap-2.5">
+          <div className="p-4 rounded-lg bg-[#0d1117] border border-[#30363d] flex items-center justify-between shadow-inner">
+            <div className="flex items-center gap-4.5">
               <div className="relative flex">
                 <div className="w-2 h-2 rounded-full bg-[#3fb950] animate-ping absolute" />
                 <div className="w-2 h-2 rounded-full bg-[#3fb950] relative" />
@@ -696,7 +696,7 @@ export default function PicksPage() {
 
       {/* ── Navigation & Filters ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
-        <div className="flex items-center gap-2 p-1 rounded-xl bg-[#161b22] border border-[#30363d]">
+        <div className="flex items-center gap-4 p-1 rounded-lg bg-[#161b22] border border-[#30363d]">
           {DIRECTION_TABS.map(tab => (
             <GhostButton
               key={tab.value}
@@ -726,10 +726,10 @@ export default function PicksPage() {
             Recommended Strategies ({displayPicks.length})
           </h3>
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-[10px] font-bold text-[#6e7681]">
+            <span className="flex items-center gap-4.5 text-[10px] font-bold text-[#6e7681]">
               <span className="w-2 h-2 rounded bg-var(--color-call)" /> BULLISH
             </span>
-            <span className="flex items-center gap-1.5 text-[10px] font-bold text-[#6e7681]">
+            <span className="flex items-center gap-4.5 text-[10px] font-bold text-[#6e7681]">
               <span className="w-2 h-2 rounded bg-var(--color-put)" /> BEARISH
             </span>
           </div>
@@ -740,7 +740,7 @@ export default function PicksPage() {
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="h-64 rounded-xl relative overflow-hidden bg-[#161b22] border border-[#30363d]"
+                className="h-64 rounded-lg relative overflow-hidden bg-[#161b22] border border-[#30363d]"
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#1c2128] to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
                 <div className="p-4 space-y-4">
@@ -788,7 +788,7 @@ export default function PicksPage() {
                   </p>
                   <button 
                     onClick={() => {setTagFilter("全部"); setStrategyFilter("all"); setDirectionTab("all"); setSelectedTicker("");}}
-                    className="px-6 py-2.5 rounded-xl bg-[#1c2128] border border-[#30363d] text-xs font-bold text-[#e6edf3] hover:bg-[#21262d] transition-all active:scale-95 shadow-lg"
+                    className="px-6 py-2.5 rounded-lg bg-[#1c2128] border border-[#30363d] text-xs font-bold text-[#e6edf3] hover:bg-[#21262d] transition-all active:scale-95 shadow-lg"
                   >
                     Clear All Active Filters
                   </button>
@@ -816,7 +816,7 @@ export default function PicksPage() {
 /* ─── Helper Components ─── */
 function ScannerSummaryStats({ picks, bullish, bearish }: { picks: any[], bullish: number, bearish: number }) {
   return (
-    <div className="p-6 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-xl relative overflow-hidden group font-mono">
+    <div className="p-4 rounded-2xl bg-[#161b22] border border-[#30363d] shadow-xl relative overflow-hidden group font-mono">
       {/* Background decoration */}
       <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors" />
       

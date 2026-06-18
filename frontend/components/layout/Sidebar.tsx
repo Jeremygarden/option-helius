@@ -46,7 +46,7 @@ export default function Sidebar() {
       <Link
         href={href}
         className={clsx(
-          "flex items-center gap-3 px-4 py-2.5 rounded-lg mx-2 transition-all duration-150 group",
+          "flex items-center gap-4 px-4 py-2.5 rounded-lg mx-2 transition-all duration-150 group",
           isActive
             ? "bg-[#1158c7] text-white"
             : "text-[#8b949e] hover:text-[#e6edf3] hover:bg-[#1c2128]"
@@ -81,9 +81,9 @@ export default function Sidebar() {
       style={{ background: "var(--bg-base)" }}
     >
       {/* ─── Logo ─── */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-[#21262d]">
+      <div className="flex items-center gap-4 px-5 py-5 border-b border-[#21262d]">
         <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 font-mono font-bold text-[15px]"
+          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 font-mono font-bold text-[15px]"
           style={{
             background: "linear-gradient(135deg, #1158c7 0%, #58a6ff 100%)",
             boxShadow: "0 0 16px rgba(88,166,255,0.35)",
@@ -126,7 +126,7 @@ export default function Sidebar() {
 
       {/* ─── Status footer ─── */}
       <div className="px-5 py-4 border-t border-[#21262d]">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <span className="w-1.5 h-1.5 rounded-full bg-[#3fb950] animate-pulse" />
           <span className="text-[11px] text-[#6e7681]">Market Open</span>
         </div>

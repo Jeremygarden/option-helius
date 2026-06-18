@@ -9,15 +9,15 @@ type TermStructureProps = { surface: IVSurfacePoint[]; summary?: SummaryResponse
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/95 backdrop-blur-md border border-[#EDF0F2] rounded-xl p-4 shadow-xl">
+      <div className="bg-white/95 backdrop-blur-md border border-[#EDF0F2] rounded-lg p-4 shadow-xl">
         <p className="text-xs font-bold text-[#1A1D1F] mb-3 border-b border-[#EDF0F2] pb-2 font-mono">
           Term: {label}
         </p>
-        <div className="space-y-2">
+        <div className="space-y-4">
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-6 text-[11px]">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: entry.stroke }} />
+            <div key={index} className="flex items-center justify-between gap-4 text-[11px]">
+              <div className="flex items-center gap-4">
+                <div className="w-2.5 h-2.5 rounded-lg" style={{ backgroundColor: entry.stroke }} />
                 <span className="text-[#6F767E] font-medium">{entry.name}</span>
               </div>
               <span className="font-bold font-mono text-[#1A1D1F]">

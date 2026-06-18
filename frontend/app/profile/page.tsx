@@ -39,10 +39,10 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#0d1117] text-[#c9d1d9] p-6 overflow-y-auto">
+    <div className="flex flex-col h-full bg-[#0d1117] text-[#c9d1d9] p-4 overflow-y-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+          <h1 className="text-3xl font-bold text-white flex items-center gap-4">
             <User className="text-[#58a6ff]" size={32} />
             个人中心
           </h1>
@@ -51,7 +51,7 @@ export default function ProfilePage() {
         <button 
           onClick={saveAll}
           disabled={isSaving}
-          className="flex items-center gap-2 bg-[#238636] hover:bg-[#2ea043] text-white px-6 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
+          className="flex items-center gap-4 bg-[#238636] hover:bg-[#2ea043] text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
         >
           {isSaving ? <RefreshCw className="animate-spin" size={18} /> : <Save size={18} />}
           保存所有设置
@@ -63,7 +63,7 @@ export default function ProfilePage() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors border-b-2 ${
+            className={`flex items-center gap-4 px-6 py-4 font-medium transition-colors border-b-2 ${
               activeTab === tab.id 
                 ? 'border-[#f78166] text-white' 
                 : 'border-transparent text-[#8b949e] hover:text-[#c9d1d9] hover:border-[#8b949e]'
@@ -112,24 +112,24 @@ function WatchlistTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div className="lg:col-span-1 bg-[#161b22] border border-[#30363d] rounded-lg p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="lg:col-span-1 bg-[#161b22] border border-[#30363d] rounded-lg p-4">
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-4">
           <Plus size={20} className="text-[#3fb950]" />
           添加标的
         </h3>
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           <input 
             type="text" 
             value={newTicker}
             onChange={(e) => setNewTicker(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && addTicker()}
             placeholder="输入代码 (如: NVDA)"
-            className="flex-1 bg-[#0d1117] border border-[#30363d] rounded-md px-4 py-2 focus:border-[#58a6ff] outline-none text-white"
+            className="flex-1 bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-2 focus:border-[#58a6ff] outline-none text-white"
           />
           <button 
             onClick={addTicker}
-            className="bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] px-4 py-2 rounded-md font-medium"
+            className="bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] px-4 py-2 rounded-lg font-medium"
           >
             添加
           </button>
@@ -142,7 +142,7 @@ function WatchlistTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
       <div className="lg:col-span-2">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {prefs.watchlist.map((item: WatchlistItem) => (
-            <div key={item.ticker} className="group relative bg-[#161b22] border border-[#30363d] hover:border-[#8b949e] rounded-lg p-5 transition-all">
+            <div key={item.ticker} className="group relative bg-[#161b22] border border-[#30363d] hover:border-[#8b949e] rounded-lg p-4 transition-all">
               <button 
                 onClick={() => removeTicker(item.ticker)}
                 className="absolute top-4 right-4 text-[#8b949e] hover:text-[#f85149] opacity-0 group-hover:opacity-100 transition-opacity"
@@ -158,17 +158,17 @@ function WatchlistTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
               </div>
               
               <div className="flex items-center gap-4 text-sm mb-4">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-4">
                   <span className="text-[#8b949e]">IV Rank:</span>
                   <span className="text-[#f78166] font-semibold">78 🔥</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-4">
                   <span className="text-[#8b949e]">Trend:</span>
                   <span className="text-[#3fb950] font-semibold">▲ +8.2%</span>
                 </div>
               </div>
               
-              <div className="bg-[#0d1117] rounded p-2 text-xs flex justify-between items-center">
+              <div className="bg-[#0d1117] rounded p-4 text-xs flex justify-between items-center">
                 <span className="text-[#8b949e]">策略推荐: <span className="text-[#58a6ff]">铁鹰 (87分)</span></span>
                 <ExternalLink size={14} className="text-[#8b949e]" />
               </div>
@@ -207,12 +207,12 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-semibold text-white">当前持仓</h3>
         <button 
           onClick={() => setShowForm(!showForm)}
-          className="bg-[#238636] hover:bg-[#2ea043] text-white px-4 py-2 rounded-md font-medium flex items-center gap-2"
+          className="bg-[#238636] hover:bg-[#2ea043] text-white px-4 py-2 rounded-lg font-medium flex items-center gap-4"
         >
           <Plus size={18} />
           添加持仓
@@ -220,7 +220,7 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
       </div>
 
       {showForm && (
-        <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-6 shadow-xl">
+        <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 shadow-xl">
           <div className="flex justify-between items-center mb-6">
             <h4 className="text-lg font-medium text-white">添加手动持仓</h4>
             <button onClick={() => setShowForm(false)} className="text-[#8b949e] hover:text-white">
@@ -234,13 +234,13 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
               <input 
                 type="text" 
                 placeholder="NVDA"
-                className="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-4 py-2 focus:border-[#58a6ff] outline-none text-white"
+                className="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-2 focus:border-[#58a6ff] outline-none text-white"
                 onChange={(e) => setNewPos({...newPos, ticker: e.target.value})}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-[#8b949e] mb-2">交易策略</label>
-              <select className="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-4 py-2 focus:border-[#58a6ff] outline-none text-white">
+              <select className="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-2 focus:border-[#58a6ff] outline-none text-white">
                 <option value="sell_put">Sell Put (卖出看跌)</option>
                 <option value="iron_condor">Iron Condor (铁鹰)</option>
                 <option value="bull_put">Bull Put Spread (牛市看跌价差)</option>
@@ -250,30 +250,30 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
 
           <div className="space-y-4 mb-6">
             <h5 className="text-sm font-medium text-[#8b949e] border-b border-[#30363d] pb-2">腿部明细 (Legs)</h5>
-            <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
-              <select className="bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-2 text-sm text-white">
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+              <select className="bg-[#0d1117] border border-[#30363d] rounded-lg px-2 py-2 text-sm text-white">
                 <option>Put</option>
                 <option>Call</option>
               </select>
-              <select className="bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-2 text-sm text-white">
+              <select className="bg-[#0d1117] border border-[#30363d] rounded-lg px-2 py-2 text-sm text-white">
                 <option>Sell</option>
                 <option>Buy</option>
               </select>
-              <input type="number" placeholder="行权价" className="bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-2 text-sm text-white" />
-              <input type="date" className="bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-2 text-sm text-white" />
-              <input type="number" placeholder="数量" className="bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-2 text-sm text-white" />
-              <input type="number" placeholder="权利金" className="bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-2 text-sm text-white" />
+              <input type="number" placeholder="行权价" className="bg-[#0d1117] border border-[#30363d] rounded-lg px-2 py-2 text-sm text-white" />
+              <input type="date" className="bg-[#0d1117] border border-[#30363d] rounded-lg px-2 py-2 text-sm text-white" />
+              <input type="number" placeholder="数量" className="bg-[#0d1117] border border-[#30363d] rounded-lg px-2 py-2 text-sm text-white" />
+              <input type="number" placeholder="权利金" className="bg-[#0d1117] border border-[#30363d] rounded-lg px-2 py-2 text-sm text-white" />
             </div>
-            <button className="text-[#58a6ff] hover:underline text-sm flex items-center gap-1">
+            <button className="text-[#58a6ff] hover:underline text-sm flex items-center gap-4">
               <Plus size={14} /> 添加另一腿
             </button>
           </div>
 
-          <div className="flex justify-end gap-3">
-            <button onClick={() => setShowForm(false)} className="bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] px-6 py-2 rounded-md font-medium">
+          <div className="flex justify-end gap-4">
+            <button onClick={() => setShowForm(false)} className="bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] px-6 py-2 rounded-lg font-medium">
               取消
             </button>
-            <button onClick={savePosition} className="bg-[#238636] hover:bg-[#2ea043] text-white px-6 py-2 rounded-md font-medium">
+            <button onClick={savePosition} className="bg-[#238636] hover:bg-[#2ea043] text-white px-6 py-2 rounded-lg font-medium">
               保存持仓
             </button>
           </div>
@@ -287,23 +287,23 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
           </div>
         ) : (
           prefs.positions.map((pos: Position) => (
-            <div key={pos.id} className="bg-[#161b22] border border-[#30363d] rounded-lg p-6">
+            <div key={pos.id} className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
                <div className="flex justify-between items-start mb-4">
                  <div>
-                   <div className="flex items-center gap-3">
+                   <div className="flex items-center gap-4">
                      <span className="text-2xl font-bold text-white">{pos.ticker}</span>
                      <span className="bg-[#1f6feb] text-white text-[10px] px-2 py-0.5 rounded uppercase font-bold">{pos.strategy.replace('_', ' ')}</span>
                    </div>
                    <p className="text-sm text-[#8b949e] mt-1">已持有: 12天</p>
                  </div>
-                 <div className="flex gap-2">
-                   <button className="p-2 text-[#8b949e] hover:text-[#58a6ff]"><LayoutGrid size={18} /></button>
-                   <button className="p-2 text-[#8b949e] hover:text-[#f85149]"><Trash2 size={18} /></button>
+                 <div className="flex gap-4">
+                   <button className="p-4 text-[#8b949e] hover:text-[#58a6ff]"><LayoutGrid size={18} /></button>
+                   <button className="p-4 text-[#8b949e] hover:text-[#f85149]"><Trash2 size={18} /></button>
                  </div>
                </div>
                
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-[#30363d] pt-4">
-                 <div className="space-y-1">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-[#30363d] pt-4">
+                 <div className="space-y-4">
                    {pos.legs.map((leg, idx) => (
                      <p key={idx} className="text-sm text-[#c9d1d9]">
                        {leg.action.toUpperCase()} {leg.quantity} {pos.ticker} {leg.expiry} {leg.strike}{leg.type.toUpperCase()} @ ${leg.premium}
@@ -327,11 +327,11 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
       </div>
 
       <div className="bg-[#0d1117] border border-[#30363d] border-dashed rounded-lg p-8 text-center opacity-70">
-        <h4 className="text-white font-semibold flex items-center justify-center gap-2 mb-2">
+        <h4 className="text-white font-semibold flex items-center justify-center gap-4 mb-2">
           🔌 连接 IBKR 导入真实持仓
         </h4>
         <p className="text-sm text-[#8b949e] mb-6">Phase 2 功能 — 需要配置 IBKR Gateway (即将在之后更新中开放)</p>
-        <button disabled className="bg-[#21262d] text-[#484f58] border border-[#30363d] px-6 py-2 rounded-md font-medium cursor-not-allowed">
+        <button disabled className="bg-[#21262d] text-[#484f58] border border-[#30363d] px-6 py-2 rounded-lg font-medium cursor-not-allowed">
           配置 IBKR (即将开放)
         </button>
       </div>
@@ -353,8 +353,8 @@ const INDICATORS = [
 
 function ThresholdsTab({ prefs, updateAlertThreshold }: { prefs: any, updateAlertThreshold: any }) {
   return (
-    <div className="space-y-6">
-      <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-6 mb-6">
+    <div className="space-y-4">
+      <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 mb-6">
         <p className="text-[#8b949e] text-sm leading-relaxed">
           您可以根据您的风险偏好自定义 8 个宏观指标的警报阈值。
           当指标数值达到橙色或红色阈值时，系统将在仪表盘中显示警告，并根据您的推送设置发送提醒。
@@ -368,7 +368,7 @@ function ThresholdsTab({ prefs, updateAlertThreshold }: { prefs: any, updateAler
           const red = userVals.user_red ?? ind.default_red;
 
           return (
-            <div key={ind.id} className="bg-[#161b22] border border-[#30363d] rounded-lg p-6">
+            <div key={ind.id} className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
               <div className="flex justify-between items-center mb-6">
                 <h4 className="text-white font-medium">{ind.name}</h4>
                 <div className="text-xs text-[#8b949e]">
@@ -376,7 +376,7 @@ function ThresholdsTab({ prefs, updateAlertThreshold }: { prefs: any, updateAler
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-42">
                 <div className="space-y-4">
                   <div className="flex justify-between text-xs mb-2">
                     <span className="text-[#d29922]">橙色触发: {orange}{ind.unit}</span>
@@ -399,7 +399,7 @@ function ThresholdsTab({ prefs, updateAlertThreshold }: { prefs: any, updateAler
                       type="number" 
                       value={orange}
                       onChange={(e) => updateAlertThreshold(ind.id, { user_orange: parseFloat(e.target.value) })}
-                      className="w-20 bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-1 text-xs text-white"
+                      className="w-20 bg-[#0d1117] border border-[#30363d] rounded-lg px-2 py-1 text-xs text-white"
                     />
                   </div>
                 </div>
@@ -426,7 +426,7 @@ function ThresholdsTab({ prefs, updateAlertThreshold }: { prefs: any, updateAler
                       type="number" 
                       value={red}
                       onChange={(e) => updateAlertThreshold(ind.id, { user_red: parseFloat(e.target.value) })}
-                      className="w-20 bg-[#0d1117] border border-[#30363d] rounded-md px-2 py-1 text-xs text-white"
+                      className="w-20 bg-[#0d1117] border border-[#30363d] rounded-lg px-2 py-1 text-xs text-white"
                     />
                   </div>
                 </div>
@@ -464,10 +464,10 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
   };
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <div className="max-w-4xl space-y-4">
       {/* Discord Section */}
-      <section className="bg-[#161b22] border border-[#30363d] rounded-lg p-6">
-        <h3 className="text-lg font-semibold text-white flex items-center gap-2 mb-6">
+      <section className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
+        <h3 className="text-lg font-semibold text-white flex items-center gap-4 mb-6">
           <Bell size={20} className="text-[#58a6ff]" />
           Discord 推送设置
         </h3>
@@ -479,7 +479,7 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
               type="text" 
               value={prefs.notifications.discord_user_id}
               onChange={(e) => updateNotificationSettings({ discord_user_id: e.target.value })}
-              className="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-4 py-2 focus:border-[#58a6ff] outline-none text-white"
+              className="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-2 focus:border-[#58a6ff] outline-none text-white"
               placeholder="1073496464485003355"
             />
           </div>
@@ -489,14 +489,14 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
               type="text" 
               value={prefs.notifications.discord_webhook || ''}
               onChange={(e) => updateNotificationSettings({ discord_webhook: e.target.value })}
-              className="w-full bg-[#0d1117] border border-[#30363d] rounded-md px-4 py-2 focus:border-[#58a6ff] outline-none text-white"
+              className="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-2 focus:border-[#58a6ff] outline-none text-white"
               placeholder="https://discord.com/api/webhooks/..."
             />
           </div>
           <button 
             onClick={testPush}
             disabled={!prefs.notifications.discord_webhook || testing}
-            className="bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] px-6 py-2 rounded-md font-medium transition-colors disabled:opacity-50"
+            className="bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
           >
             {testing ? '发送中...' : '测试推送'}
           </button>
@@ -504,7 +504,7 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
       </section>
 
       {/* Weekly Picks Section */}
-      <section className="bg-[#161b22] border border-[#30363d] rounded-lg p-6">
+      <section className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-white">每周精选推送</h3>
           <input 
@@ -519,9 +519,9 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
           <div className="flex gap-4">
             <div className="flex-1">
               <label className="block text-sm font-medium text-[#8b949e] mb-2">推送时间</label>
-              <div className="flex gap-2">
+              <div className="flex gap-4">
                 <select 
-                  className="bg-[#0d1117] border border-[#30363d] rounded-md px-4 py-2 text-white flex-1"
+                  className="bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-2 text-white flex-1"
                   value={prefs.notifications.weekly_picks_day}
                   onChange={(e) => updateNotificationSettings({ weekly_picks_day: e.target.value as any })}
                 >
@@ -532,7 +532,7 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
                   type="time" 
                   value={prefs.notifications.weekly_picks_time}
                   onChange={(e) => updateNotificationSettings({ weekly_picks_time: e.target.value })}
-                  className="bg-[#0d1117] border border-[#30363d] rounded-md px-4 py-2 text-white"
+                  className="bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-2 text-white"
                 />
               </div>
             </div>
@@ -547,10 +547,10 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
       </section>
 
       {/* Macro Alerts Section */}
-      <section className="bg-[#161b22] border border-[#30363d] rounded-lg p-6">
+      <section className="bg-[#161b22] border border-[#30363d] rounded-lg p-4">
         <h3 className="text-lg font-semibold text-white mb-6">宏观预警推送</h3>
         <div className="space-y-4">
-          <label className="flex items-center gap-3 cursor-pointer group">
+          <label className="flex items-center gap-4 cursor-pointer group">
             <input 
               type="checkbox" 
               checked={prefs.notifications.macro_alert_enabled}
@@ -567,7 +567,7 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
             </span>
           </label>
           
-          <label className="flex items-center gap-3 cursor-pointer group">
+          <label className="flex items-center gap-4 cursor-pointer group">
             <input 
               type="checkbox" 
               checked={prefs.notifications.macro_alert_on_red}

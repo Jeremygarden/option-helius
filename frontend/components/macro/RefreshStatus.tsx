@@ -28,7 +28,7 @@ const RefreshStatus: React.FC<RefreshStatusProps> = ({ status, onRefreshDaily, o
         <span className="text-xs font-normal text-slate-500">综合指数: 每周刷新 | 下次刷新: 周一 09:00</span>
       </div>
       
-      <div className="space-y-2 mb-4">
+      <div className="space-y-4 mb-4">
         <div className="flex justify-between items-center">
           <span>日频指标:</span>
           <span className={allDailyUpdated ? "text-green-400" : "text-yellow-400"}>
@@ -45,7 +45,7 @@ const RefreshStatus: React.FC<RefreshStatusProps> = ({ status, onRefreshDaily, o
         </div>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-4">
         <button 
           onClick={onRefreshDaily}
           className="flex-1 py-1.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs transition-colors"

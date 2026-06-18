@@ -103,7 +103,7 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
       <div className="flex items-center justify-between px-4 pt-4 pb-0 font-mono">
         {/* Rank badge */}
         <div
-          className="flex items-center justify-center w-7 h-7 rounded-md text-xs font-mono font-bold"
+          className="flex items-center justify-center w-7 h-7 rounded-lg text-xs font-mono font-bold"
           style={{
             background: isTop ? "rgba(63,185,80,0.15)" : "var(--bg-elevated)",
             color: isTop ? "#3fb950" : "var(--text-muted)",
@@ -124,7 +124,7 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
 
       {/* ── Strategy name + signal badge ── */}
       <div className="px-4 pt-3 pb-0">
-        <div className="flex items-baseline gap-2 flex-wrap">
+        <div className="flex items-baseline gap-4 flex-wrap">
           <h3
             className="text-sm font-semibold leading-tight"
             style={{ color: "var(--text-primary)" }}
@@ -193,7 +193,7 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
 
       {/* ── Risk tags ── */}
       {strategy.risks.length > 0 && (
-        <div className="px-4 pt-3 pb-0 flex flex-wrap gap-1.5">
+        <div className="px-4 pt-3 pb-0 flex flex-wrap gap-4.5">
           {strategy.risks.map((risk, idx) => (
             <span
               key={idx}
@@ -212,11 +212,11 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
 
       {/* ── Footer notes ── */}
       <div
-        className="px-4 pt-3 pb-4 mt-2 border-t space-y-1"
+        className="px-4 pt-3 pb-4 mt-2 border-t space-y-4"
         style={{ borderColor: "var(--border-muted)" }}
       >
         <p
-          className="text-[11px] font-mono flex items-center gap-1.5"
+          className="text-[11px] font-mono flex items-center gap-4.5"
           style={{ color: "var(--text-muted)" }}
         >
           <span
@@ -226,7 +226,7 @@ export const StrategyCard = ({ strategy }: { strategy: Strategy }) => {
           {strategy.gex_note}
         </p>
         <p
-          className="text-[11px] font-mono flex items-center gap-1.5"
+          className="text-[11px] font-mono flex items-center gap-4.5"
           style={{ color: "var(--text-muted)" }}
         >
           <span

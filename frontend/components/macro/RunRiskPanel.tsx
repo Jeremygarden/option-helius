@@ -186,7 +186,7 @@ function IndicatorCard({ ind }: { ind: IndicatorCard }) {
   const trendColor = ind.trend === "up" ? "text-red-400" : ind.trend === "down" ? "text-green-400" : "text-gray-400";
   
   return (
-    <div className={`flex-shrink-0 w-36 rounded-xl border ${colors.border} ${colors.bg} p-3 flex flex-col gap-1.5`}>
+    <div className={`flex-shrink-0 w-36 rounded-lg border ${colors.border} ${colors.bg} p-4 flex flex-col gap-4.5`}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <span className="text-[10px] text-gray-500 font-mono">{ind.category}</span>
@@ -239,7 +239,7 @@ function CategoryFilteredCards({ indicators }: { indicators: IndicatorCard[] }) 
   return (
     <div>
       {/* Category tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mb-3">
+      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide mb-3">
         {categories.map(cat => (
           <button
             key={cat}
@@ -255,21 +255,21 @@ function CategoryFilteredCards({ indicators }: { indicators: IndicatorCard[] }) 
       </div>
 
       {/* Scrollable cards */}
-      <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
+      <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-hide">
         {filtered.map(ind => (
           <IndicatorCard key={ind.id} ind={ind} />
         ))}
       </div>
       
       {/* Summary stats bar */}
-      <div className="mt-3 grid grid-cols-4 gap-2">
+      <div className="mt-3 grid grid-cols-4 gap-4">
         {[
           { label: "🔴 极高危", count: indicators.filter(i => i.status_level === 4).length, color: "text-red-400" },
           { label: "🟠 偏高", count: indicators.filter(i => i.status_level === 3).length, color: "text-orange-400" },
           { label: "🟡 中等", count: indicators.filter(i => i.status_level === 2).length, color: "text-yellow-400" },
           { label: "🟢 正常", count: indicators.filter(i => i.status_level === 1).length, color: "text-green-400" },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-lg p-2 text-center">
+          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-lg p-4 text-center">
             <div className={`text-xl font-bold ${s.color}`}>{s.count}</div>
             <div className="text-[10px] text-gray-500 font-mono">{s.label}</div>
           </div>
@@ -297,7 +297,7 @@ function SentinelCard({ s }: { s: SentinelIndicator }) {
     : "bg-green-500";
 
   return (
-    <div className={`rounded-xl border-2 p-4 transition-all duration-500 ${cardClass} ${s.triggered ? "animate-pulse" : ""}`}>
+    <div className={`rounded-lg border-2 p-4 transition-all duration-500 ${cardClass} ${s.triggered ? "animate-pulse" : ""}`}>
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div>
@@ -305,7 +305,7 @@ function SentinelCard({ s }: { s: SentinelIndicator }) {
           <div className="text-sm font-bold text-gray-200 mt-0.5 font-mono">{s.title}</div>
           <div className="text-[11px] text-gray-500 font-mono">{s.subtitle}</div>
         </div>
-        <div className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full border
+        <div className={`flex items-center gap-4.5 text-xs px-2 py-1 rounded-full border
           ${s.triggered
             ? "border-red-500 text-red-300 bg-red-950"
             : isNearThreshold
@@ -362,11 +362,11 @@ function SentinelSection({ sentinels }: { sentinels: SentinelIndicator[] }) {
   const nuclearAlert = triggeredCount >= 2;
   
   return (
-    <div className="space-y-3 font-mono">
+    <div className="space-y-4 font-mono">
       {/* Nuclear alert banner — only shows when 2+ triggered */}
       {nuclearAlert && (
-        <div className="rounded-xl border-2 border-red-500 bg-red-950/80 p-4 animate-pulse">
-          <div className="flex items-center gap-2 text-red-300 font-bold text-sm">
+        <div className="rounded-lg border-2 border-red-500 bg-red-950/80 p-4 animate-pulse">
+          <div className="flex items-center gap-4 text-red-300 font-bold text-sm">
             <span className="text-xl">🚨</span>
             <span>最高警戒 — {triggeredCount}/3 哨兵触发 · 综合分已失效 · 立即行动</span>
           </div>
@@ -381,7 +381,7 @@ function SentinelSection({ sentinels }: { sentinels: SentinelIndicator[] }) {
       
       {/* Section header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <span className="text-sm font-bold text-gray-200">⚡ 三大哨兵指标</span>
           <span className="text-[11px] text-gray-500">任意两个触发 → 立即升级警戒（不管综合分）</span>
         </div>
@@ -394,7 +394,7 @@ function SentinelSection({ sentinels }: { sentinels: SentinelIndicator[] }) {
       </div>
 
       {/* Three sentinel cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono">
         {sentinels.map(s => <SentinelCard key={s.id} s={s} />)}
       </div>
 
@@ -500,8 +500,8 @@ export default function RunRiskPanel() {
     <div className="space-y-4 p-4 bg-[#0d1117] min-h-screen text-white font-mono">
       {/* Nuclear Alert at the very top if triggered */}
       {nuclearAlert && (
-        <div className="rounded-2xl border-2 border-red-500 bg-red-950/80 p-6 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)] mb-4">
-          <div className="flex items-center gap-3 text-red-300 font-black text-xl">
+        <div className="rounded-2xl border-2 border-red-500 bg-red-950/80 p-4 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)] mb-4">
+          <div className="flex items-center gap-4 text-red-300 font-black text-xl">
             <span className="text-3xl">🚨</span>
             <span>最高警戒 — {sentinels.filter(s => s.triggered).length}/3 哨兵触发 · 综合分已失效 · 立即行动</span>
           </div>
@@ -514,7 +514,7 @@ export default function RunRiskPanel() {
         </div>
       )}
       {/* Section Title */}
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-4 mb-2">
         <span className="text-lg font-bold text-gray-100">📊 逃顶危险指数</span>
         <span className={`text-xs px-2 py-0.5 rounded-full border ${sc.border} ${sc.text} ${sc.bg}`}>
           实时监控
@@ -525,7 +525,7 @@ export default function RunRiskPanel() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 font-mono">
 
         {/* LEFT: Score Panel */}
-        <div className={`rounded-2xl border ${sc.border} ${sc.bg} p-5 flex flex-col items-center`}>
+        <div className={`rounded-2xl border ${sc.border} ${sc.bg} p-4 flex flex-col items-center`}>
           <SemiCircleGauge score={data.score} level={data.signal_level} />
           
           {/* Score number */}
@@ -546,7 +546,7 @@ export default function RunRiskPanel() {
           </div>
 
           {/* Dynamic score */}
-          <div className="mt-4 w-full rounded-xl bg-black/30 border border-gray-800 p-3 space-y-1">
+          <div className="mt-4 w-full rounded-lg bg-black/30 border border-gray-800 p-4 space-y-4">
             <div className="flex justify-between text-xs">
               <span className="text-gray-400">当前市场环境</span>
               <span className={`font-semibold ${regimeColors[data.regime] || "text-gray-300"}`}>
@@ -572,7 +572,7 @@ export default function RunRiskPanel() {
           <div className="mt-3 w-full">
             <div className="text-[11px] text-gray-500 mb-1.5">主要风险来源</div>
             {data.top_risks.map((r, i) => (
-              <div key={i} className="flex items-start gap-1.5 text-[11px] text-gray-300 mb-1">
+              <div key={i} className="flex items-start gap-4.5 text-[11px] text-gray-300 mb-1">
                 <span className="text-red-400 mt-0.5">▸</span>
                 <span>{r}</span>
               </div>
@@ -581,13 +581,13 @@ export default function RunRiskPanel() {
         </div>
 
         {/* RIGHT: Action Checklist */}
-        <div className="rounded-2xl border border-gray-700 bg-gray-900/50 p-5 flex flex-col gap-4">
+        <div className="rounded-2xl border border-gray-700 bg-gray-900/50 p-4 flex flex-col gap-4">
           <div className="text-sm font-semibold text-gray-200 font-mono">⚡ 行动建议</div>
           
           {/* Regime evidence */}
-          <div className="rounded-xl bg-black/40 border border-gray-800 p-3">
+          <div className="rounded-lg bg-black/40 border border-gray-800 p-4">
             <div className="text-[11px] text-gray-500 mb-2">环境识别依据</div>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-4.5">
               {data.regime_evidence.map((e, i) => (
                 <span key={i} className="text-[10px] bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full border border-gray-700 font-mono">
                   {e}
@@ -597,12 +597,12 @@ export default function RunRiskPanel() {
           </div>
 
           {/* Checklist */}
-          <div className="space-y-2">
+          <div className="space-y-4">
             {data.action_checklist.map((item, i) => {
               const icon = item.type === "do" ? "✅" : item.type === "watch" ? "⚠️" : "❌";
               const textColor = item.type === "do" ? "text-green-300" : item.type === "watch" ? "text-yellow-300" : "text-red-300";
               return (
-                <div key={i} className="flex items-start gap-2 text-sm">
+                <div key={i} className="flex items-start gap-4 text-sm">
                   <span className="mt-0.5 flex-shrink-0 font-mono">{icon}</span>
                   <span className={textColor}>{item.text}</span>
                 </div>
@@ -613,7 +613,7 @@ export default function RunRiskPanel() {
           {/* Trip wires */}
           <div>
             <div className="text-[11px] text-gray-500 mb-2">🚨 升级触发条件（任一触发→立即提升警戒）</div>
-            <div className="space-y-1.5">
+            <div className="space-y-4.5">
               {data.trip_wires.map((tw, i) => (
                 <div key={i} className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs border
                   ${tw.triggered ? "bg-red-900/40 border-red-600 text-red-300" : "bg-gray-800/50 border-gray-700 text-gray-400"}`}>
@@ -632,7 +632,7 @@ export default function RunRiskPanel() {
       </div>
 
       {/* SENTINEL SECTION */}
-      <div className="rounded-2xl border border-gray-800 bg-gray-900/30 p-5">
+      <div className="rounded-2xl border border-gray-800 bg-gray-900/30 p-4">
         <SentinelSection sentinels={sentinels} />
       </div>
 

@@ -22,13 +22,13 @@ export default function SentimentPage() {
           {news.map((item) => (
             <div key={item.id} className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 flex gap-4 items-center transition-all">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-4 mb-1">
                   <span className="text-accent-blue font-bold text-xs font-mono">{item.ticker}</span>
                   <span className="text-[#7d8590] text-[10px]">2h ago</span>
                 </div>
                 <h4 className="font-medium text-sm">{item.headline}</h4>
               </div>
-              <div className="flex flex-col items-end gap-1">
+              <div className="flex flex-col items-end gap-4">
                 <div className={`${item.color} text-black text-[10px] font-bold px-2 py-0.5 rounded transition-colors`}>
                   {item.verdict}
                 </div>
@@ -39,7 +39,7 @@ export default function SentimentPage() {
 
           <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 mt-4">
              <h3 className="text-sm font-semibold mb-4 text-[#7d8590]">价格影响速度 / Price Impact Velocity</h3>
-             <div className="flex flex-col gap-3">
+             <div className="flex flex-col gap-4">
                {[1, 0.8, 0.4, 0.2].map((val, i) => (
                  <div key={i} className="flex items-center gap-4">
                    <span className="text-[10px] font-mono w-12 text-[#7d8590]">T-{i*15}m</span>
@@ -76,7 +76,7 @@ export default function SentimentPage() {
 
           <div className="bg-[#161b22] border border-[#30363d] rounded-lg p-4 flex-1">
             <h3 className="text-sm font-semibold mb-4 text-[#7d8590]">情绪波动 / Sentiment Velocity</h3>
-            <div className="h-40 flex items-end gap-1">
+            <div className="h-40 flex items-end gap-4">
                {Array.from({ length: 20 }).map((_, i) => {
                  const height = 20 + Math.random() * 80;
                  return (

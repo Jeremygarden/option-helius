@@ -10,15 +10,15 @@ type Mode = "bars" | "heatmap";
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white/95 backdrop-blur-md border border-[#EDF0F2] rounded-xl p-4 shadow-xl">
+      <div className="bg-white/95 backdrop-blur-md border border-[#EDF0F2] rounded-lg p-4 shadow-xl">
         <p className="text-xs font-bold text-[#1A1D1F] mb-3 border-b border-[#EDF0F2] pb-2 font-mono">
           Strike: ${label.toLocaleString()}
         </p>
-        <div className="space-y-2">
+        <div className="space-y-4">
           {payload.map((entry: any, index: number) => (
-            <div key={index} className="flex items-center justify-between gap-6 text-[11px]">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: entry.fill }} />
+            <div key={index} className="flex items-center justify-between gap-4 text-[11px]">
+              <div className="flex items-center gap-4">
+                <div className="w-2.5 h-2.5 rounded-lg" style={{ backgroundColor: entry.fill }} />
                 <span className="text-[#6F767E] font-medium">{entry.name}</span>
               </div>
               <span className="font-bold font-mono text-[#1A1D1F]">
@@ -70,7 +70,7 @@ export default function OIVolChart({ chain, loading }: OIVolChartProps) {
     <div className="flex flex-col gap-4">
       {/* Mode toggle */}
       <div className="flex justify-end">
-        <div className="flex rounded-xl bg-gray-50 border border-[#EDF0F2] p-1 shadow-inner">
+        <div className="flex rounded-lg bg-gray-50 border border-[#EDF0F2] p-1 shadow-inner">
           {(["bars", "heatmap"] as Mode[]).map((m) => (
             <button
               key={m}
@@ -92,14 +92,14 @@ export default function OIVolChart({ chain, loading }: OIVolChartProps) {
         {loading ? (
           <div className="h-full rounded-2xl bg-gray-50 animate-pulse border border-[#EDF0F2]" />
         ) : mode === "heatmap" ? (
-          <div className="grid h-full content-start gap-2 overflow-auto rounded-xl border border-[#EDF0F2] bg-white p-4 shadow-sm">
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+          <div className="grid h-full content-start gap-4 overflow-auto rounded-lg border border-[#EDF0F2] bg-white p-4 shadow-sm">
+            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
               {rows.map((r) => {
                 const intensity = Math.max(r.callOi, r.putOi, r.callVol, r.putVol) / maxValue;
                 return (
                   <div
                     key={r.strike}
-                    className="rounded-lg border border-[#EDF0F2] p-2 font-mono text-[10px] transition-all hover:scale-[1.02] hover:shadow-md"
+                    className="rounded-lg border border-[#EDF0F2] p-4 font-mono text-[10px] transition-all hover:scale-[1.02] hover:shadow-md"
                     style={{
                       backgroundColor: `rgba(47, 107, 255, ${0.02 + intensity * 0.15})`,
                     }}

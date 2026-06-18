@@ -28,7 +28,7 @@ export default function TopBar() {
       style={{ background: "var(--bg-base)" }}
     >
       {/* ── Left: page title ── */}
-      <div className="flex items-baseline gap-3 shrink-0">
+      <div className="flex items-baseline gap-4 shrink-0">
         <h1 className="text-xl font-bold leading-none tracking-tight" style={{ color: "var(--text-primary)" }}>
           {meta.cn}
         </h1>
@@ -38,15 +38,15 @@ export default function TopBar() {
       </div>
 
       {/* ── Right cluster ── */}
-      <div className="flex items-center gap-3 ml-auto">
+      <div className="flex items-center gap-4 ml-auto">
 
         {/* Ticker strip */}
         <div
-          className="hidden md:flex items-center gap-1 rounded-lg px-3 py-1.5 border border-[#21262d]"
+          className="hidden md:flex items-center gap-4 rounded-lg px-3 py-1.5 border border-[#21262d]"
           style={{ background: "var(--bg-surface)" }}
         >
           {TICKERS.map((t, i) => (
-            <div key={t.sym} className="flex items-center gap-1.5">
+            <div key={t.sym} className="flex items-center gap-4.5">
               {i > 0 && <div className="w-px h-3.5 bg-[#30363d]" />}
               <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
                 {t.sym}
@@ -88,7 +88,7 @@ export default function TopBar() {
         </div>
 
         {/* Action icon buttons */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-4">
           <button
             className="p-1.5 rounded-lg transition-colors"
             style={{ color: "var(--text-muted)" }}

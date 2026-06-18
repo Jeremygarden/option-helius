@@ -37,7 +37,7 @@ const SectionHeader: React.FC<{ icon: string; title: string; subtitle: string; s
 
   return (
     <div className="flex items-center justify-between mb-4 border-b border-slate-700 pb-2">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <span className="text-xl font-mono">{icon}</span>
         <div>
           <h2 className="text-white font-bold font-sans">{title}</h2>
@@ -73,7 +73,7 @@ const IndicatorCard: React.FC<{ indicator: Indicator }> = ({ indicator }) => {
   const staleness = getStalenessInfo(indicator.updated_at);
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-lg p-3 relative overflow-hidden flex flex-col justify-between">
+    <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 relative overflow-hidden flex flex-col justify-between">
       <div className="flex justify-between items-start mb-1">
         <div>
           <h3 className="text-slate-200 text-xs font-bold font-sans">{indicator.name}</h3>
@@ -116,7 +116,7 @@ export const WarningIndicators: React.FC<{ data: MacroData }> = ({ data }) => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {Object.entries(data.categories).map(([key, cat]) => (
         <div key={key}>
           <SectionHeader 
@@ -125,7 +125,7 @@ export const WarningIndicators: React.FC<{ data: MacroData }> = ({ data }) => {
             subtitle={categoryConfigs[key]?.subtitle || ""}
             score={cat.score}
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {cat.indicators.map(ind => (
               <IndicatorCard key={ind.id} indicator={ind} />
             ))}

@@ -53,7 +53,7 @@ const ReportPage = () => {
           </div>
         </div>
 
-        <div className="flex gap-2 p-2 bg-black border-b border-green-900/30">
+        <div className="flex gap-4 p-4 bg-black border-b border-green-900/30">
           {['概览', '期权链', 'Greeks', '情景测试', 'AI分析'].map(tab => (
             <button
               key={tab}
@@ -81,7 +81,7 @@ const Overview = ({ data }: { data: any }) => (
   <div className="grid grid-cols-2 gap-4">
     <div className="border border-green-900/30 p-4 bg-green-900/5">
       <h3 className="text-lg border-b border-green-900/30 mb-2 pb-1">MARKET_INDICATORS</h3>
-      <div className="space-y-2">
+      <div className="space-y-4">
         <div className="flex justify-between">
           <span>IV Rank:</span>
           <span className="text-orange-500 font-bold">{data?.summary?.iv_rank} 🔥 HIGH</span>
@@ -98,7 +98,7 @@ const Overview = ({ data }: { data: any }) => (
     </div>
     <div className="border border-green-900/30 p-4 bg-green-900/5">
       <h3 className="text-lg border-b border-green-900/30 mb-2 pb-1">MACRO_CONTEXT</h3>
-      <div className="space-y-2">
+      <div className="space-y-4">
         <div className="flex justify-between">
           <span>VIX Level:</span>
           <span>{data?.macro_context?.vix}</span>
@@ -131,31 +131,31 @@ const Greeks = ({ ticker }: { ticker: string }) => {
   const [position, setPosition] = useState('Sell 1 NVDA Aug 850P @ $12.50');
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
+      <div className="flex gap-4">
         <input 
           value={position}
           onChange={(e) => setPosition(e.target.value)}
-          className="bg-black border border-green-500 p-2 flex-1 text-green-500 focus:outline-none"
+          className="bg-black border border-green-500 p-4 flex-1 text-green-500 focus:outline-none"
         />
         <button className="bg-green-500 text-black px-4 font-bold hover:bg-green-400">[CALC]</button>
       </div>
       <table className="w-full border-collapse border border-green-900/30 text-sm">
         <thead>
           <tr className="bg-green-900/20">
-            <th className="border border-green-900/30 p-2">Position</th>
-            <th className="border border-green-900/30 p-2 text-blue-400">Delta</th>
-            <th className="border border-green-900/30 p-2 text-purple-400">Gamma</th>
-            <th className="border border-green-900/30 p-2 text-yellow-400">Theta</th>
-            <th className="border border-green-900/30 p-2 text-red-400">Vega</th>
+            <th className="border border-green-900/30 p-4">Position</th>
+            <th className="border border-green-900/30 p-4 text-blue-400">Delta</th>
+            <th className="border border-green-900/30 p-4 text-purple-400">Gamma</th>
+            <th className="border border-green-900/30 p-4 text-yellow-400">Theta</th>
+            <th className="border border-green-900/30 p-4 text-red-400">Vega</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td className="border border-green-900/30 p-2">{position}</td>
-            <td className="border border-green-900/30 p-2 text-blue-400">0.342</td>
-            <td className="border border-green-900/30 p-2 text-purple-400">0.0012</td>
-            <td className="border border-green-900/30 p-2 text-yellow-400">-4.52</td>
-            <td className="border border-green-900/30 p-2 text-red-400">12.5</td>
+            <td className="border border-green-900/30 p-4">{position}</td>
+            <td className="border border-green-900/30 p-4 text-blue-400">0.342</td>
+            <td className="border border-green-900/30 p-4 text-purple-400">0.0012</td>
+            <td className="border border-green-900/30 p-4 text-yellow-400">-4.52</td>
+            <td className="border border-green-900/30 p-4 text-red-400">12.5</td>
           </tr>
         </tbody>
       </table>
@@ -187,15 +187,15 @@ const Scenarios = ({ data }: { data: any }) => {
   const current = isCustom ? (customResult || data.scenarios[0]) : selected;
 
   return (
-    <div className="flex gap-6 h-full">
+    <div className="flex gap-4 h-full">
       {/* Sidebar: Scenario Selection */}
-      <div className="w-1/3 space-y-2 border-r border-green-900/30 pr-4">
+      <div className="w-1/3 space-y-4 border-r border-green-900/30 pr-4">
         <div className="text-xs text-gray-500 mb-4 uppercase">Scenario Library</div>
         {scenarios.map((sc: any, i: number) => (
           <div 
             key={i}
             onClick={() => { setSelected(sc); setIsCustom(false); }}
-            className={`p-3 border cursor-pointer transition-all ${!isCustom && selected?.name === sc.name ? 'border-green-500 bg-green-500/10' : 'border-green-900/30 hover:border-green-700'}`}
+            className={`p-4 border cursor-pointer transition-all ${!isCustom && selected?.name === sc.name ? 'border-green-500 bg-green-500/10' : 'border-green-900/30 hover:border-green-700'}`}
           >
             <div className="flex justify-between items-center">
               <span className="font-bold">{sc.name}</span>
@@ -211,7 +211,7 @@ const Scenarios = ({ data }: { data: any }) => {
         
         <div 
           onClick={() => { setIsCustom(true); handleCustomChange('ds', customParams.ds); }}
-          className={`p-3 border cursor-pointer ${isCustom ? 'border-green-500 bg-green-500/10' : 'border-green-900/30'}`}
+          className={`p-4 border cursor-pointer ${isCustom ? 'border-green-500 bg-green-500/10' : 'border-green-900/30'}`}
         >
           <div className="font-bold mb-3">自定义情景 (Custom)</div>
           <div className="space-y-4 text-xs">
@@ -238,12 +238,12 @@ const Scenarios = ({ data }: { data: any }) => {
       </div>
 
       {/* Main Panel: Results */}
-      <div className="flex-1 space-y-6">
-        <div className="bg-green-900/5 border border-green-900/30 p-6 rounded">
+      <div className="flex-1 space-y-4">
+        <div className="bg-green-900/5 border border-green-900/30 p-4 rounded">
           <div className="flex justify-between items-start mb-6">
              <div>
                 <div className="text-gray-500 text-xs mb-1">RESULT_PANEL // {isCustom ? 'CUSTOM_SIMULATION' : current.name}</div>
-                <div className="text-2xl font-bold flex items-baseline gap-2">
+                <div className="text-2xl font-bold flex items-baseline gap-4">
                   总P&L: <span className={current.total_pnl >= 0 ? 'text-green-500' : 'text-red-500'}>
                     {current.total_pnl >= 0 ? '+' : ''}${current.total_pnl.toLocaleString()}
                   </span>
@@ -269,7 +269,7 @@ const Scenarios = ({ data }: { data: any }) => {
                 const totalAbs = Object.values(current.breakdown).reduce((a: any, b: any) => Math.abs(a) + Math.abs(b), 0) as number;
                 const width = totalAbs > 0 ? (Math.abs(item.val) / totalAbs * 100) : 0;
                 return (
-                  <div key={idx} className="space-y-1">
+                  <div key={idx} className="space-y-4">
                     <div className="flex justify-between text-xs">
                       <span>{item.label}: <span className={item.val >= 0 ? 'text-green-400' : 'text-red-400'}>{item.val >= 0 ? '+' : ''}${item.val}</span></span>
                       {current.dominant_risk.toLowerCase().includes(item.label.slice(0, 4).toLowerCase()) && <span className="text-orange-500 text-[10px]">← 主要风险因子</span>}
@@ -286,7 +286,7 @@ const Scenarios = ({ data }: { data: any }) => {
              <div className="text-xs text-gray-500 mb-3 uppercase"> 对冲建议 (Hedge Recommendations) </div>
              <div className="grid grid-cols-2 gap-4">
                 {current.hedges?.map((h: any, i: number) => (
-                  <div key={i} className="p-3 border border-green-900/30 bg-black/40 rounded">
+                  <div key={i} className="p-4 border border-green-900/30 bg-black/40 rounded">
                      <div className="text-sm font-bold text-green-400 mb-1">{h.hedge}</div>
                      <div className="flex justify-between text-[10px] text-gray-500">
                         <span>Cost: {h.cost_estimate}</span>
@@ -323,7 +323,7 @@ const AIAnalysis = ({ ticker }: { ticker: string }) => {
   return (
     <div className="space-y-4">
       <div className="flex gap-4 p-4 border border-green-900/30 bg-green-900/5">
-         <select className="bg-black border border-green-900/50 p-2 text-green-500">
+         <select className="bg-black border border-green-900/50 p-4 text-green-500">
             <option>Sell Put</option>
             <option>Buy Call</option>
             <option>Iron Condor</option>
@@ -339,8 +339,8 @@ const AIAnalysis = ({ ticker }: { ticker: string }) => {
       {loading && <div className="animate-pulse text-green-500">AI_THINKING...</div>}
 
       {analysis && (
-        <div className="border border-green-500 p-6 bg-black space-y-3 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-2 text-[8px] opacity-20">SYSTEM_AI_STRAT_v4.2</div>
+        <div className="border border-green-500 p-4 bg-black space-y-4 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-4 text-[8px] opacity-20">SYSTEM_AI_STRAT_v4.2</div>
           <div className="text-green-400">{analysis.validity}</div>
           <div className="text-orange-400">{analysis.risks}</div>
           <div className="text-blue-400">{analysis.market_exp}</div>

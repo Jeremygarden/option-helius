@@ -68,7 +68,7 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
   return (
     <section className="mb-6">
       {error && (
-        <div className="mb-4 rounded-xl px-4 py-3 text-xs font-mono border bg-amber-50/50 border-amber-200/50 text-amber-700 flex items-center gap-2">
+        <div className="mb-4 rounded-lg px-4 py-3 text-xs font-mono border bg-amber-50/50 border-amber-200/50 text-amber-700 flex items-center gap-4">
           <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
           API fallback active: {error}
         </div>
@@ -78,11 +78,11 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
         {kpis.map((kpi, idx) => (
           <div
             key={kpi.label}
-            className={`flex flex-col gap-1.5 px-8 py-6 min-w-0 transition-colors hover:bg-[var(--bg-base)]/50 ${
+            className={`flex flex-col gap-4.5 px-8 py-6 min-w-0 transition-colors hover:bg-[var(--bg-base)]/50 ${
               idx < kpis.length - 1 ? "border-r border-[var(--border-default)]" : ""
             }`}
           >
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-4">
               <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.1em] truncate font-mono">
                 {kpi.label}
               </span>

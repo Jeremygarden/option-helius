@@ -130,12 +130,12 @@ export default function ChainPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6 pb-12 max-w-[1600px] mx-auto px-4 md:px-8 font-mono">
+    <div className="flex flex-col gap-4 pb-12 max-w-[1600px] mx-auto px-4 md:px-8 font-mono">
 
       {/* ── Page header row ── */}
       <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
-        <div className="flex items-center gap-6">
-          <div className="flex items-baseline gap-2">
+        <div className="flex items-center gap-4">
+          <div className="flex items-baseline gap-4">
             <h1 className="text-3xl font-black tracking-tighter text-[var(--text-primary)] font-sans">
               {ticker}
             </h1>
@@ -144,14 +144,14 @@ export default function ChainPage() {
 
           {/* Spot price pill */}
           {summary?.spot && (
-            <div className="flex items-center gap-2 rounded-xl px-4 py-2 border border-[var(--border-default)] bg-[var(--bg-surface)] font-mono text-base font-bold text-[var(--accent-teal)] shadow-sm">
+            <div className="flex items-center gap-4 rounded-lg px-4 py-2 border border-[var(--border-default)] bg-[var(--bg-surface)] font-mono text-base font-bold text-[var(--accent-teal)] shadow-sm">
               <Zap size={14} fill="currentColor" />
               {formatMoney(summary.spot)}
             </div>
           )}
 
           {/* Quick Stats */}
-          <div className="flex items-center gap-1.5 bg-[var(--bg-surface)] p-1 rounded-xl border border-[var(--border-default)] shadow-sm">
+          <div className="flex items-center gap-4.5 bg-[var(--bg-surface)] p-1 rounded-lg border border-[var(--border-default)] shadow-sm">
             {["SPY", "QQQ", "NVDA", "AAPL", "TSLA", "VIX"].map((t) => (
               <button
                 key={t}
@@ -173,25 +173,25 @@ export default function ChainPage() {
         </div>
 
         {/* Ticker form */}
-        <form onSubmit={submitTicker} className="flex items-center gap-3">
+        <form onSubmit={submitTicker} className="flex items-center gap-4">
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--accent-blue)] transition-colors" size={16} />
             <input
               value={draftTicker}
               onChange={(e) => setDraftTicker(e.target.value)}
-              className="h-10 w-44 rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] pl-10 pr-4 font-mono text-sm font-bold uppercase transition focus:outline-none focus:ring-4 focus:ring-[var(--accent-blue)]/10 focus:border-[var(--accent-blue)] shadow-sm"
+              className="h-10 w-44 rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] pl-10 pr-4 font-mono text-sm font-bold uppercase transition focus:outline-none focus:ring-4 focus:ring-[var(--accent-blue)]/10 focus:border-[var(--accent-blue)] shadow-sm"
               placeholder="ENTER TICKER..."
             />
           </div>
           <button
             type="submit"
-            className="h-10 rounded-xl bg-[var(--accent-blue)] px-6 text-xs font-black uppercase tracking-widest text-white transition hover:brightness-110 active:scale-95 shadow-lg shadow-blue-500/20"
+            className="h-10 rounded-lg bg-[var(--accent-blue)] px-6 text-xs font-black uppercase tracking-widest text-white transition hover:brightness-110 active:scale-95 shadow-lg shadow-blue-500/20"
           >
             Load
           </button>
           
-          <div className="flex items-center gap-2 ml-2">
-            <div className={`flex items-center gap-1.5 rounded-xl px-3 py-2 border text-[9px] font-black tracking-widest shadow-sm ${
+          <div className="flex items-center gap-4 ml-2">
+            <div className={`flex items-center gap-4.5 rounded-lg px-3 py-2 border text-[9px] font-black tracking-widest shadow-sm ${
               error ? "bg-amber-50 border-amber-200 text-amber-600" : "bg-emerald-50 border-emerald-200 text-emerald-600"
             }`}>
               <div className={`w-1.5 h-1.5 rounded-full ${error ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
@@ -200,7 +200,7 @@ export default function ChainPage() {
             <button
               type="button"
               onClick={() => setRefreshing((x) => x + 1)}
-              className="h-10 w-10 flex items-center justify-center rounded-xl border border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)] active:scale-95 shadow-sm"
+              className="h-10 w-10 flex items-center justify-center rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)] active:scale-95 shadow-sm"
             >
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
             </button>
@@ -212,7 +212,7 @@ export default function ChainPage() {
       <KPIBar summary={summary} loading={loading} error={error} />
 
       {/* ── Expiry tab bar ── */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between px-1">
           <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-[0.2em]">
             Select Expiration
@@ -223,14 +223,14 @@ export default function ChainPage() {
              </span>
           )}
         </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
+        <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
           {expiryItems.map((item) => {
             const isActive = item.date === expiry;
             return (
               <button
                 key={item.date}
                 onClick={() => setExpiry(item.date)}
-                className={`tab-pill shrink-0 flex items-center gap-2 px-4 py-2 border transition-all duration-200 ${
+                className={`tab-pill shrink-0 flex items-center gap-4 px-4 py-2 border transition-all duration-200 ${
                   isActive 
                     ? "bg-[var(--accent-blue)] border-[var(--accent-blue)] text-white shadow-lg shadow-blue-500/25 translate-y-[-1px]" 
                     : "bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--accent-blue)]"
@@ -238,7 +238,7 @@ export default function ChainPage() {
               >
                 <span className="text-xs font-bold font-mono">{item.label}</span>
                 <span 
-                  className={`text-[9px] font-black px-1.5 py-0.5 rounded-md ${
+                  className={`text-[9px] font-black px-1.5 py-0.5 rounded-lg ${
                     isActive ? "bg-white/20 text-white" : "bg-[var(--bg-base)]"
                   }`} 
                   style={{ color: isActive ? undefined : dteBadgeColor(item.dte) }}
@@ -255,7 +255,7 @@ export default function ChainPage() {
       </div>
 
       {/* ── Charts: 2-column grid ── */}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <div className="min-w-0">
           <ChartCard
             title="IV Surface 3D"
