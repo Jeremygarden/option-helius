@@ -591,8 +591,8 @@ export default function PicksPage() {
   }, [picks, directionTab]);
 
   // Bullish/bearish counts for scanner summary
-  const bullishCount = picks.filter(p => p.direction === "up").length;
-  const bearishCount = picks.filter(p => p.direction === "down").length;
+  const bullishCount = useMemo(() => picks.filter(p => p.direction === "up").length, [picks]);
+  const bearishCount = useMemo(() => picks.filter(p => p.direction === "down").length, [picks]);
 
   const filtered = useMemo(() => {
     return directionFilteredPicks
@@ -604,14 +604,35 @@ export default function PicksPage() {
         : (a.ticker || "").localeCompare(b.ticker || ""));
   }, [directionFilteredPicks, selectedTicker, tagFilter, strategyFilter, sortMode]);
 
+  // Detect if any filter is active (not default values)
+  const hasActiveFilter = useMemo(
+    () => directionTab !== "all" || selectedTicker !== "" || tagFilter !== "全部" || strategyFilter !== "all",
+    [directionTab, selectedTicker, tagFilter, strategyFilter]
+  );
+
   const displayPicks = useMemo(
-    () => filtered.length ? filtered : [...picks].sort((a, b) => clampScore(b.score) - clampScore(a.score)),
-    [filtered, picks]
+    () => {
+      // When filters are active but produce no results: return empty so empty state shows
+      if (hasActiveFilter && filtered.length === 0) {
+        return [];
+      }
+      return filtered.length ? filtered : [...picks].sort((a, b) => clampScore(b.score) - clampScore(a.score));
+    },
+    [filtered, picks, hasActiveFilter]
   );
-  const selectedPick = useMemo(
-    () => selectedId ? displayPicks.find(p => (p.id || p.ticker) === selectedId) ?? null : null,
-    [selectedId, displayPicks]
-  );
+
+  // When filters remove the selected pick from view, clear selection to avoid ghost highlight
+  const selectedPick = useMemo(() => {
+    if (!selectedId) return null;
+    return displayPicks.find(p => (p.id || p.ticker) === selectedId) ?? null;
+  }, [selectedId, displayPicks]);
+
+  // Side-effect: if selectedId no longer matches any visible pick, clear it
+  useEffect(() => {
+    if (selectedId && !displayPicks.find(p => (p.id || p.ticker) === selectedId)) {
+      setSelectedId(null);
+    }
+  }, [displayPicks, selectedId]);
 
   // Summary stats
   const highCount = useMemo(() => picks.filter(p => clampScore(p.score) >= 8).length, [picks]);

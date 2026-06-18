@@ -78,24 +78,47 @@ export default function ChainPage() {
   const [refreshing, setRefreshing] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
+  // Phase 1: fetch expirations when ticker changes (or refresh); set expiry to first date
   useEffect(() => {
     let cancelled = false;
-    async function load() {
-      setLoading(true);
-      setError(null);
+    async function loadExpirations() {
       try {
         const mockExp = createMockExpirations();
         const expResult = await fetchJson<{ ticker: string; expirations: string[] }>(
           `/api/options/expirations/${ticker}`,
           { ticker, expirations: mockExp },
         );
+        if (cancelled) return;
         const dates = expResult.data.expirations?.length ? expResult.data.expirations : mockExp;
-        const selected = expiry && dates.includes(expiry) ? expiry : dates[0];
-        const mockChain = createMockChain(ticker, selected);
+        setExpirations(dates);
+        // Only reset expiry when ticker changes (expiry is null) — don't clobber user selection
+        setExpiry((prev) => (prev && dates.includes(prev) ? prev : dates[0]));
+      } catch {
+        if (!cancelled) {
+          const mockExp = createMockExpirations();
+          setExpirations(mockExp);
+          setExpiry(mockExp[0]);
+        }
+      }
+    }
+    loadExpirations();
+    return () => { cancelled = true; };
+  }, [ticker, refreshing]);
+
+  // Phase 2: fetch chain data when ticker+expiry are both known
+  useEffect(() => {
+    if (!expiry) return; // wait for Phase 1 to set expiry
+    const selectedExpiry: string = expiry; // narrow type for async closure
+    let cancelled = false;
+    async function loadChain() {
+      setLoading(true);
+      setError(null);
+      try {
+        const mockChain = createMockChain(ticker, selectedExpiry);
         const [chainResult, summaryResult, gexResult, surfaceResult] = await Promise.all([
-          fetchJson<ChainResponse>(`/api/options/chain/${ticker}?expiry=${selected}`, mockChain),
+          fetchJson<ChainResponse>(`/api/options/chain/${ticker}?expiry=${selectedExpiry}`, mockChain),
           fetchJson<SummaryResponse>(`/api/options/summary/${ticker}`, summarizeChain(mockChain)),
-          fetchJson<GexPoint[]>(`/api/options/gex/${ticker}?expiry=${selected}`, createMockGex(mockChain)),
+          fetchJson<GexPoint[]>(`/api/options/gex/${ticker}?expiry=${selectedExpiry}`, createMockGex(mockChain)),
           fetchJson<IVSurfacePoint[]>(`/api/options/iv-surface/${ticker}`, createMockIVSurface(ticker)),
         ]);
         if (cancelled) return;
@@ -104,30 +127,23 @@ export default function ChainPage() {
         const nextSummary = {
           ...chainSummary,
           ...summaryResult.data,
-          expiry: selected,
+          expiry: selectedExpiry,
           call_oi: chainSummary.call_oi,
           put_oi: chainSummary.put_oi,
           net_gex: gexResult.data.reduce((sum, p) => sum + p.gex * 1_000_000, 0),
         };
-        setExpirations(dates);
-        setExpiry(selected);
         setChain(nextChain);
         setSummary(nextSummary);
         setGex(gexResult.data.length ? gexResult.data : createMockGex(nextChain));
         setSurface(surfaceResult.data.length ? surfaceResult.data : createMockIVSurface(ticker));
-        const errors = [expResult, chainResult, summaryResult, gexResult, surfaceResult]
+        const errors = [chainResult, summaryResult, gexResult, surfaceResult]
           .filter((r) => r.fallback && r.error)
           .map((r) => r.error);
         setError(errors.length ? Array.from(new Set(errors)).slice(0, 2).join("; ") : null);
       } catch (err) {
         if (!cancelled) {
           setError(err instanceof Error ? err.message : "Chain data load failed");
-          // Populate with mock data so the page is usable even if everything fails
-          const mockExp = createMockExpirations();
-          const selected = mockExp[0];
-          const mockChain = createMockChain(ticker, selected);
-          setExpirations(mockExp);
-          setExpiry(selected);
+          const mockChain = createMockChain(ticker, selectedExpiry);
           setChain(mockChain);
           setSummary(summarizeChain(mockChain));
           setGex(createMockGex(mockChain));
@@ -137,10 +153,8 @@ export default function ChainPage() {
         if (!cancelled) setLoading(false);
       }
     }
-    load();
-    return () => {
-      cancelled = true;
-    };
+    loadChain();
+    return () => { cancelled = true; };
   }, [ticker, expiry, refreshing]);
 
   const expiryItems = useMemo(() => expirations.map(toExpirationItem), [expirations]);
@@ -187,8 +201,9 @@ export default function ChainPage() {
               <button
                 key={t}
                 onClick={() => {
-                  setDraftTicker(t);
-                  setTicker(t);
+                  const normalized = normalizeTicker(t);
+                  setDraftTicker(normalized);
+                  setTicker(normalized);
                   setExpiry(null);
                 }}
                 className={`px-2.5 py-1 rounded-md text-[10px] font-black tracking-wider transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:outline-none ${
