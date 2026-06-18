@@ -74,6 +74,7 @@ class Settings:
     # Safety limits used by future IBKR fetcher/provider layers
     max_tickers: int = 100
     atm_strike_radius: int = 8
+    fred_api_key: str = ""
 
 
 @lru_cache(maxsize=1)
@@ -95,6 +96,7 @@ def get_settings() -> Settings:
         ibkr_readonly=_env_bool("IBKR_READONLY", True),
         max_tickers=_env_int("MAX_TICKERS", 100),
         atm_strike_radius=_env_int("ATM_STRIKE_RADIUS", 8),
+        fred_api_key=os.getenv("FRED_API_KEY", "").strip(),
     )
 
 
