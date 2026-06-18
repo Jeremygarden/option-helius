@@ -191,6 +191,33 @@ class IndicatorRefreshService:
         except Exception:
             pass
         return {"value": 0.0, "source": "error"}
+    async def fetch_move(self):
+        val = await fetch_yfinance("^MOVE")
+        return {"value": val or 0.0, "source": "yfinance"}
+
+    async def fetch_hy_oas(self):
+        val = await fetch_fred("BAMLH0A0HYM2")
+        return {"value": val or 0.0, "source": "FRED"}
+
+    async def fetch_gold_copper(self):
+        gold = await fetch_yfinance("GC=F")
+        copper = await fetch_yfinance("HG=F")
+        if gold and copper:
+            val = gold / copper
+            return {"value": round(val, 2), "source": "yfinance"}
+        return {"value": 0.0, "source": "error"}
+
+    async def fetch_dxy(self):
+        val = await fetch_yfinance("DX-Y.NYB")
+        return {"value": val or 0.0, "source": "yfinance"}
+
+    async def fetch_rsp_spy(self):
+        rsp = await fetch_yfinance("RSP")
+        spy = await fetch_yfinance("SPY")
+        if rsp and spy:
+            val = (rsp / spy - 1) * 100
+            return {"value": round(val, 2), "source": "yfinance"}
+        return {"value": 0.0, "source": "error"}
 
     async def fetch_erp(self):
         # Earnings Yield - 10Y Yield
@@ -212,6 +239,33 @@ class IndicatorRefreshService:
             return {"value": round(val, 2), "source": "computed"}
         except Exception:
             pass
+        return {"value": 0.0, "source": "error"}
+    async def fetch_move(self):
+        val = await fetch_yfinance("^MOVE")
+        return {"value": val or 0.0, "source": "yfinance"}
+
+    async def fetch_hy_oas(self):
+        val = await fetch_fred("BAMLH0A0HYM2")
+        return {"value": val or 0.0, "source": "FRED"}
+
+    async def fetch_gold_copper(self):
+        gold = await fetch_yfinance("GC=F")
+        copper = await fetch_yfinance("HG=F")
+        if gold and copper:
+            val = gold / copper
+            return {"value": round(val, 2), "source": "yfinance"}
+        return {"value": 0.0, "source": "error"}
+
+    async def fetch_dxy(self):
+        val = await fetch_yfinance("DX-Y.NYB")
+        return {"value": val or 0.0, "source": "yfinance"}
+
+    async def fetch_rsp_spy(self):
+        rsp = await fetch_yfinance("RSP")
+        spy = await fetch_yfinance("SPY")
+        if rsp and spy:
+            val = (rsp / spy - 1) * 100
+            return {"value": round(val, 2), "source": "yfinance"}
         return {"value": 0.0, "source": "error"}
 
     def _compute_indicator_score(self, indicator_id: str, value: float) -> float:
