@@ -81,7 +81,7 @@ export default function MacroPage() {
             <span className="text-[10px] text-[var(--accent-blue)] uppercase font-bold tracking-wide font-mono">{item.label}</span>
             <div className="flex items-baseline gap-4 mt-1">
               <span className="text-xl font-bold font-mono font-mono">{item.value}</span>
-              <span className={`text-xs font-bold font-mono transition-colors ${item.color}`}>{item.change}</span>
+              <span className={`text-xs font-bold font-mono transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none ${item.color}`}>{item.change}</span>
             </div>
           </div>
         ))}

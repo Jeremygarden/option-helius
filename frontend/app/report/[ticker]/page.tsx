@@ -137,7 +137,7 @@ const Greeks = ({ ticker }: { ticker: string }) => {
           onChange={(e) => setPosition(e.target.value)}
           className="bg-[var(--bg-base)] border border-green-500 p-4 flex-1 text-green-500 focus:outline-none"
         />
-        <button className="bg-green-500 text-black px-4 font-bold hover:bg-green-400">[CALC]</button>
+        <button className="bg-green-500 text-black px-4 font-bold hover:bg-green-400 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none hover:opacity-80 active:scale-95">[CALC]</button>
       </div>
       <table className="w-full border-collapse border border-[var(--border-default)] text-sm">
         <thead>

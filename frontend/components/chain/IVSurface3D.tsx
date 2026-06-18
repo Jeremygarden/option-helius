@@ -168,7 +168,7 @@ export default function IVSurface3D({ data, spot, loading }: IVSurface3DProps) {
                 {rows.map((p, idx) => (
                   <tr
                     key={`${p.strike}-${p.dte}-${idx}`}
-                    className="hover:bg-gray-50/50 transition-colors"
+                    className="hover:bg-gray-50/50 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
                   >
                     <td className="px-4 py-2.5 font-bold text-[var(--accent-blue)]">
                       ${p.strike.toLocaleString()}

@@ -175,7 +175,7 @@ export default function ChainPage() {
         {/* Ticker form */}
         <form onSubmit={submitTicker} className="flex items-center gap-4">
           <div className="relative group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--accent-blue)] transition-colors" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--accent-blue)] transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none" size={16} />
             <input
               value={draftTicker}
               onChange={(e) => setDraftTicker(e.target.value)}

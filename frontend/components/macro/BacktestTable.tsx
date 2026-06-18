@@ -67,7 +67,7 @@ const BacktestTable: React.FC<{ data?: BacktestEvent[] }> = ({ data = [] }) => {
         </div>
         <button 
           onClick={() => setShowFalsePositivesOnly(!showFalsePositivesOnly)}
-          className={`px-3 py-1 rounded text-xs transition-colors ${showFalsePositivesOnly ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+          className={`px-3 py-1 rounded text-xs transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none ${showFalsePositivesOnly ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
         >
           {showFalsePositivesOnly ? '显示全部事件' : '仅显示误报分析 (2011/2015)'}
         </button>
@@ -88,7 +88,7 @@ const BacktestTable: React.FC<{ data?: BacktestEvent[] }> = ({ data = [] }) => {
           </thead>
           <tbody className="divide-y divide-slate-800">
             {filteredData.map((row, idx) => (
-              <tr key={idx} className="hover:bg-slate-800/50 transition-colors">
+              <tr key={idx} className="hover:bg-slate-800/50 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none">
                 <td className="px-4 py-2 text-slate-400">{row.date}</td>
                 <td className="px-4 py-2 font-medium text-slate-200">{row.event}</td>
                 

@@ -90,7 +90,7 @@ export default function TopBar() {
         {/* Action icon buttons */}
         <div className="flex items-center gap-4">
           <button
-            className="p-1.5 rounded-lg transition-colors"
+            className="p-1.5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
             style={{ color: "var(--text-muted)" }}
             onMouseEnter={e => {
               (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
@@ -105,7 +105,7 @@ export default function TopBar() {
             <Bell size={16} />
           </button>
           <button
-            className="p-1.5 rounded-lg transition-colors"
+            className="p-1.5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
             style={{ color: "var(--text-muted)" }}
             onMouseEnter={e => {
               (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";

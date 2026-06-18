@@ -518,7 +518,7 @@ function FilterBar({
         <select
           value={sortMode}
           onChange={e => setSortMode(e.target.value as "score" | "ticker")}
-          className="appearance-none bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg px-4 py-2 pr-10 text-[11px] font-bold text-[var(--accent-blue)] outline-none hover:border-[var(--accent-blue)] transition-colors cursor-pointer shadow-sm"
+          className="appearance-none bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg px-4 py-2 pr-10 text-[11px] font-bold text-[var(--accent-blue)] outline-none hover:border-[var(--accent-blue)] transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none cursor-pointer shadow-sm"
         >
           <option value="score">SORT BY: SCORE</option>
           <option value="ticker">SORT BY: TICKER</option>
@@ -818,7 +818,7 @@ function ScannerSummaryStats({ picks, bullish, bearish }: { picks: any[], bullis
   return (
     <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] shadow-xl relative overflow-hidden group font-mono">
       {/* Background decoration */}
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors" />
+      <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none" />
       
       <div className="grid grid-cols-3 gap-4 relative z-10">
         <div className="text-center">

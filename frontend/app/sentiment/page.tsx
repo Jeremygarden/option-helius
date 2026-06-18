@@ -29,7 +29,7 @@ export default function SentimentPage() {
                 <h4 className="font-medium text-sm">{item.headline}</h4>
               </div>
               <div className="flex flex-col items-end gap-4">
-                <div className={`${item.color} text-black text-[10px] font-bold px-2 py-0.5 rounded transition-colors`}>
+                <div className={`${item.color} text-black text-[10px] font-bold px-2 py-0.5 rounded transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none`}>
                   {item.verdict}
                 </div>
                 <span className="text-[10px] text-[var(--accent-blue)] font-mono">Conf: {item.confidence}</span>

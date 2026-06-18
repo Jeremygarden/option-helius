@@ -48,13 +48,13 @@ const RefreshStatus: React.FC<RefreshStatusProps> = ({ status, onRefreshDaily, o
       <div className="flex gap-4">
         <button 
           onClick={onRefreshDaily}
-          className="flex-1 py-1.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs transition-colors"
+          className="flex-1 py-1.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
         >
           🔄 手动刷新日频指标
         </button>
         <button 
           onClick={onRefreshFull}
-          className="flex-1 py-1.5 px-3 bg-red-900/30 hover:bg-red-800/40 border border-red-700/50 text-[var(--accent-red)] rounded text-xs transition-colors"
+          className="flex-1 py-1.5 px-3 bg-red-900/30 hover:bg-red-800/40 border border-red-700/50 text-[var(--accent-red)] rounded text-xs transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
         >
           ⚡ 强制全量刷新 (管理员)
         </button>

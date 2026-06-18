@@ -51,7 +51,7 @@ export default function ProfilePage() {
         <button 
           onClick={saveAll}
           disabled={isSaving}
-          className="flex items-center gap-4 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] text-white px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+          className="flex items-center gap-4 bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] text-white px-6 py-2 rounded-lg font-medium transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none disabled:opacity-50"
         >
           {isSaving ? <RefreshCw className="animate-spin" size={18} /> : <Save size={18} />}
           保存所有设置
@@ -63,7 +63,7 @@ export default function ProfilePage() {
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-4 px-6 py-4 font-medium transition-colors border-b-2 ${
+            className={`flex items-center gap-4 px-6 py-4 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none border-b-2 ${
               activeTab === tab.id 
                 ? 'border-[var(--accent-blue)] text-white' 
                 : 'border-transparent text-[var(--accent-blue)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)]'
@@ -223,7 +223,7 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
         <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4 shadow-xl">
           <div className="flex justify-between items-center mb-6">
             <h4 className="text-lg font-medium text-white">添加手动持仓</h4>
-            <button onClick={() => setShowForm(false)} className="text-[var(--accent-blue)] hover:text-white">
+            <button onClick={() => setShowForm(false)} className="text-[var(--accent-blue)] hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none hover:opacity-80 active:scale-95">
               <X size={20} />
             </button>
           </div>
@@ -264,16 +264,16 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
               <input type="number" placeholder="数量" className="bg-[var(--bg-base)] border border-[var(--border-default)] rounded-lg px-2 py-2 text-sm text-white" />
               <input type="number" placeholder="权利金" className="bg-[var(--bg-base)] border border-[var(--border-default)] rounded-lg px-2 py-2 text-sm text-white" />
             </div>
-            <button className="text-[var(--accent-blue)] hover:underline text-sm flex items-center gap-4">
+            <button className="text-[var(--accent-blue)] hover:underline text-sm flex items-center gap-4 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none hover:opacity-80 active:scale-95">
               <Plus size={14} /> 添加另一腿
             </button>
           </div>
 
           <div className="flex justify-end gap-4">
-            <button onClick={() => setShowForm(false)} className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] border border-[var(--border-default)] text-[var(--accent-blue)] px-6 py-2 rounded-lg font-medium">
+            <button onClick={() => setShowForm(false)} className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] border border-[var(--border-default)] text-[var(--accent-blue)] px-6 py-2 rounded-lg font-medium transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none hover:opacity-80 active:scale-95">
               取消
             </button>
-            <button onClick={savePosition} className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] text-white px-6 py-2 rounded-lg font-medium">
+            <button onClick={savePosition} className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] text-white px-6 py-2 rounded-lg font-medium transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none hover:opacity-80 active:scale-95">
               保存持仓
             </button>
           </div>
@@ -297,8 +297,8 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
                    <p className="text-sm text-[var(--accent-blue)] mt-1">已持有: 12天</p>
                  </div>
                  <div className="flex gap-4">
-                   <button className="p-4 text-[var(--accent-blue)] hover:text-[var(--accent-blue)]"><LayoutGrid size={18} /></button>
-                   <button className="p-4 text-[var(--accent-blue)] hover:text-[var(--accent-blue)]"><Trash2 size={18} /></button>
+                   <button className="p-4 text-[var(--accent-blue)] hover:text-[var(--accent-blue)] transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none hover:opacity-80 active:scale-95"><LayoutGrid size={18} /></button>
+                   <button className="p-4 text-[var(--accent-blue)] hover:text-[var(--accent-blue)] transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none hover:opacity-80 active:scale-95"><Trash2 size={18} /></button>
                  </div>
                </div>
                
@@ -331,7 +331,7 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
           🔌 连接 IBKR 导入真实持仓
         </h4>
         <p className="text-sm text-[var(--accent-blue)] mb-6">Phase 2 功能 — 需要配置 IBKR Gateway (即将在之后更新中开放)</p>
-        <button disabled className="bg-[var(--accent-blue)] text-[var(--accent-blue)] border border-[var(--border-default)] px-6 py-2 rounded-lg font-medium cursor-not-allowed">
+        <button disabled className="bg-[var(--accent-blue)] text-[var(--accent-blue)] border border-[var(--border-default)] px-6 py-2 rounded-lg font-medium cursor-not-allowed transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none hover:opacity-80 active:scale-95">
           配置 IBKR (即将开放)
         </button>
       </div>
@@ -496,7 +496,7 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
           <button 
             onClick={testPush}
             disabled={!prefs.notifications.discord_webhook || testing}
-            className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] border border-[var(--border-default)] text-[var(--accent-blue)] px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+            className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] border border-[var(--border-default)] text-[var(--accent-blue)] px-6 py-2 rounded-lg font-medium transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none disabled:opacity-50"
           >
             {testing ? '发送中...' : '测试推送'}
           </button>
@@ -557,7 +557,7 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
               onChange={(e) => updateNotificationSettings({ macro_alert_enabled: e.target.checked })}
               className="accent-[var(--accent-blue)]"
             />
-            <span className="text-sm text-[var(--accent-blue)] group-hover:text-white transition-colors">
+            <span className="text-sm text-[var(--accent-blue)] group-hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none">
               当综合风险指数高于 <input 
                 type="number" 
                 value={prefs.notifications.macro_alert_composite}
@@ -574,7 +574,7 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
               onChange={(e) => updateNotificationSettings({ macro_alert_on_red: e.target.checked })}
               className="accent-[var(--accent-blue)]"
             />
-            <span className="text-sm text-[var(--accent-blue)] group-hover:text-white transition-colors">
+            <span className="text-sm text-[var(--accent-blue)] group-hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none">
               当任何指标进入红色区域时立即推送
             </span>
           </label>

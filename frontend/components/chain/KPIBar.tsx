@@ -78,7 +78,7 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
         {kpis.map((kpi, idx) => (
           <div
             key={kpi.label}
-            className={`flex flex-col gap-4.5 px-8 py-6 min-w-0 transition-colors hover:bg-[var(--bg-base)]/50 ${
+            className={`flex flex-col gap-4.5 px-8 py-6 min-w-0 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none hover:bg-[var(--bg-base)]/50 ${
               idx < kpis.length - 1 ? "border-r border-[var(--border-default)]" : ""
             }`}
           >
