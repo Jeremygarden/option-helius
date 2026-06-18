@@ -99,9 +99,9 @@ type PicksResponse = {
 const TYPE_META: Record<string, {
   label: string; cn: string; color: string; bg: string; border: string;
 }> = {
-  sell_put:    { label: "SELL PUT",    cn: "卖PUT",  color: "var(--accent-blue)", bg: "rgba(248,81,73,0.1)",  border: "rgba(248,81,73,0.2)"  },
-  call_spread: { label: "CALL SPREAD", cn: "CALL价差", color: "var(--accent-blue)", bg: "rgba(63,185,80,0.1)", border: "rgba(63,185,80,0.2)" },
-  iron_condor: { label: "IRON CONDOR", cn: "铁鹰",   color: "var(--accent-blue)", bg: "rgba(163,113,247,0.1)", border: "rgba(163,113,247,0.2)" },
+  sell_put:    { label: "SELL PUT",    cn: "卖PUT",  color: "var(--accent-red)", bg: "rgba(248,81,73,0.1)",  border: "rgba(248,81,73,0.2)"  },
+  call_spread: { label: "CALL SPREAD", cn: "CALL价差", color: "var(--accent-green)", bg: "rgba(63,185,80,0.1)", border: "rgba(63,185,80,0.2)" },
+  iron_condor: { label: "IRON CONDOR", cn: "铁鹰",   color: "var(--accent-purple)", bg: "rgba(163,113,247,0.1)", border: "rgba(163,113,247,0.2)" },
 };
 
 /* ─── Fallback data ──────────────────────────────────────────── */
@@ -428,7 +428,7 @@ function ScannerSummaryCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
         {scanner.map(item => {
           const t = (item.ticker || "").toUpperCase();
           const isSelected = t === selected;
