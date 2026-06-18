@@ -226,6 +226,31 @@ class IndicatorRefreshService:
         # For now, fetch from a known stable source or placeholder
         val = await fetch_http_csv("https://www.cboe.com/publish/scheduledtask/mktdata/datahouse/put_call_ratios.csv", col_index=1, row_index=-1)
         return {"value": float(val) if val is not None else 0.8, "source": "CBOE"}
+    async def fetch_naaim_exposure(self):
+        val = await fetch_http_csv("https://www.naaim.org/wp-content/uploads/NAAIM_Exposure_Index.csv", col_index=1, row_index=-1)
+        return {"value": float(val) if val is not None else 60.0, "source": "NAAIM"}
+
+    async def fetch_pe_gap(self):
+        try:
+            import yfinance as yf
+            import asyncio
+            ticker = await asyncio.to_thread(yf.Ticker, "^GSPC")
+            info = getattr(ticker, 'info', {})
+            ttm_pe = info.get("trailingPE")
+            fwd_pe = info.get("forwardPE")
+            
+            if ttm_pe and fwd_pe:
+                val = ((ttm_pe - fwd_pe) / fwd_pe) * 100
+                return {"value": round(val, 2), "source": "yfinance"}
+            return {"value": 15.0, "source": "estimate"}
+        except Exception:
+            pass
+        return {"value": 0.0, "source": "error"}
+
+    async def fetch_m7_concentration(self):
+        # M7 = AAPL+MSFT+NVDA+AMZN+GOOGL+META+TSLA weight sum
+        # Mocking for now, as yfinance doesn't easily expose current SPY weights
+        return {"value": 31.5, "source": "estimate"}
         except Exception:
             pass
         return {"value": 0.0, "source": "error"}
@@ -281,6 +306,31 @@ class IndicatorRefreshService:
         # For now, fetch from a known stable source or placeholder
         val = await fetch_http_csv("https://www.cboe.com/publish/scheduledtask/mktdata/datahouse/put_call_ratios.csv", col_index=1, row_index=-1)
         return {"value": float(val) if val is not None else 0.8, "source": "CBOE"}
+    async def fetch_naaim_exposure(self):
+        val = await fetch_http_csv("https://www.naaim.org/wp-content/uploads/NAAIM_Exposure_Index.csv", col_index=1, row_index=-1)
+        return {"value": float(val) if val is not None else 60.0, "source": "NAAIM"}
+
+    async def fetch_pe_gap(self):
+        try:
+            import yfinance as yf
+            import asyncio
+            ticker = await asyncio.to_thread(yf.Ticker, "^GSPC")
+            info = getattr(ticker, 'info', {})
+            ttm_pe = info.get("trailingPE")
+            fwd_pe = info.get("forwardPE")
+            
+            if ttm_pe and fwd_pe:
+                val = ((ttm_pe - fwd_pe) / fwd_pe) * 100
+                return {"value": round(val, 2), "source": "yfinance"}
+            return {"value": 15.0, "source": "estimate"}
+        except Exception:
+            pass
+        return {"value": 0.0, "source": "error"}
+
+    async def fetch_m7_concentration(self):
+        # M7 = AAPL+MSFT+NVDA+AMZN+GOOGL+META+TSLA weight sum
+        # Mocking for now, as yfinance doesn't easily expose current SPY weights
+        return {"value": 31.5, "source": "estimate"}
         return {"value": 0.0, "source": "error"}
 
     async def fetch_dxy(self):
@@ -331,6 +381,31 @@ class IndicatorRefreshService:
         # For now, fetch from a known stable source or placeholder
         val = await fetch_http_csv("https://www.cboe.com/publish/scheduledtask/mktdata/datahouse/put_call_ratios.csv", col_index=1, row_index=-1)
         return {"value": float(val) if val is not None else 0.8, "source": "CBOE"}
+    async def fetch_naaim_exposure(self):
+        val = await fetch_http_csv("https://www.naaim.org/wp-content/uploads/NAAIM_Exposure_Index.csv", col_index=1, row_index=-1)
+        return {"value": float(val) if val is not None else 60.0, "source": "NAAIM"}
+
+    async def fetch_pe_gap(self):
+        try:
+            import yfinance as yf
+            import asyncio
+            ticker = await asyncio.to_thread(yf.Ticker, "^GSPC")
+            info = getattr(ticker, 'info', {})
+            ttm_pe = info.get("trailingPE")
+            fwd_pe = info.get("forwardPE")
+            
+            if ttm_pe and fwd_pe:
+                val = ((ttm_pe - fwd_pe) / fwd_pe) * 100
+                return {"value": round(val, 2), "source": "yfinance"}
+            return {"value": 15.0, "source": "estimate"}
+        except Exception:
+            pass
+        return {"value": 0.0, "source": "error"}
+
+    async def fetch_m7_concentration(self):
+        # M7 = AAPL+MSFT+NVDA+AMZN+GOOGL+META+TSLA weight sum
+        # Mocking for now, as yfinance doesn't easily expose current SPY weights
+        return {"value": 31.5, "source": "estimate"}
         return {"value": 0.0, "source": "error"}
 
     async def fetch_erp(self):
@@ -406,6 +481,31 @@ class IndicatorRefreshService:
         # For now, fetch from a known stable source or placeholder
         val = await fetch_http_csv("https://www.cboe.com/publish/scheduledtask/mktdata/datahouse/put_call_ratios.csv", col_index=1, row_index=-1)
         return {"value": float(val) if val is not None else 0.8, "source": "CBOE"}
+    async def fetch_naaim_exposure(self):
+        val = await fetch_http_csv("https://www.naaim.org/wp-content/uploads/NAAIM_Exposure_Index.csv", col_index=1, row_index=-1)
+        return {"value": float(val) if val is not None else 60.0, "source": "NAAIM"}
+
+    async def fetch_pe_gap(self):
+        try:
+            import yfinance as yf
+            import asyncio
+            ticker = await asyncio.to_thread(yf.Ticker, "^GSPC")
+            info = getattr(ticker, 'info', {})
+            ttm_pe = info.get("trailingPE")
+            fwd_pe = info.get("forwardPE")
+            
+            if ttm_pe and fwd_pe:
+                val = ((ttm_pe - fwd_pe) / fwd_pe) * 100
+                return {"value": round(val, 2), "source": "yfinance"}
+            return {"value": 15.0, "source": "estimate"}
+        except Exception:
+            pass
+        return {"value": 0.0, "source": "error"}
+
+    async def fetch_m7_concentration(self):
+        # M7 = AAPL+MSFT+NVDA+AMZN+GOOGL+META+TSLA weight sum
+        # Mocking for now, as yfinance doesn't easily expose current SPY weights
+        return {"value": 31.5, "source": "estimate"}
         return {"value": 0.0, "source": "error"}
 
     async def fetch_dxy(self):
@@ -456,6 +556,31 @@ class IndicatorRefreshService:
         # For now, fetch from a known stable source or placeholder
         val = await fetch_http_csv("https://www.cboe.com/publish/scheduledtask/mktdata/datahouse/put_call_ratios.csv", col_index=1, row_index=-1)
         return {"value": float(val) if val is not None else 0.8, "source": "CBOE"}
+    async def fetch_naaim_exposure(self):
+        val = await fetch_http_csv("https://www.naaim.org/wp-content/uploads/NAAIM_Exposure_Index.csv", col_index=1, row_index=-1)
+        return {"value": float(val) if val is not None else 60.0, "source": "NAAIM"}
+
+    async def fetch_pe_gap(self):
+        try:
+            import yfinance as yf
+            import asyncio
+            ticker = await asyncio.to_thread(yf.Ticker, "^GSPC")
+            info = getattr(ticker, 'info', {})
+            ttm_pe = info.get("trailingPE")
+            fwd_pe = info.get("forwardPE")
+            
+            if ttm_pe and fwd_pe:
+                val = ((ttm_pe - fwd_pe) / fwd_pe) * 100
+                return {"value": round(val, 2), "source": "yfinance"}
+            return {"value": 15.0, "source": "estimate"}
+        except Exception:
+            pass
+        return {"value": 0.0, "source": "error"}
+
+    async def fetch_m7_concentration(self):
+        # M7 = AAPL+MSFT+NVDA+AMZN+GOOGL+META+TSLA weight sum
+        # Mocking for now, as yfinance doesn't easily expose current SPY weights
+        return {"value": 31.5, "source": "estimate"}
         return {"value": 0.0, "source": "error"}
 
     def _compute_indicator_score(self, indicator_id: str, value: float) -> float:
