@@ -199,13 +199,22 @@ async def get_options_summary(ticker: str):
     """
     Summary: spot, max pain, PCR, expected move, ATM IV, IV Rank, IV Percentile, GEX.
     """
-    return await async_get_summary(ticker.upper())
+    try:
+        return await async_get_summary(ticker.upper())
+    except Exception as exc:
+        logger.exception("Summary fetch failed for %s", ticker)
+        from ..core.errors import internal_error
+        raise internal_error(f"Summary unavailable for {ticker.upper()}: {exc}")
 
 
 @router.get("/gex/{ticker}")
 async def get_gex_data(ticker: str, expiry: str = Query(None)):
     """Gamma Exposure by strike (in $M)."""
-    return await async_get_gex(ticker.upper(), expiry)
+    try:
+        return await async_get_gex(ticker.upper(), expiry)
+    except Exception as exc:
+        logger.exception("GEX fetch failed for %s/%s", ticker, expiry)
+        return []  # Return empty list so frontend can render gracefully
 
 
 @router.get("/iv-surface/{ticker}")

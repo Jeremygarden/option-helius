@@ -41,6 +41,7 @@ export default function MacroPage() {
       } catch (err) {
         console.error("Failed to fetch macro data", err);
         setError(err instanceof Error ? err.message : "API unavailable");
+        // Keep macroData null — RunRiskPanel has its own mock data and will still render
       } finally {
         setLoading(false);
       }

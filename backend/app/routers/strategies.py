@@ -20,15 +20,18 @@ async def get_strategies(ticker: str):
         trend_pct = 2.1
         days_to_earnings = 45
 
-    strategies = selector.select_strategies(
-        ticker=ticker,
-        iv_rank=iv_rank,
-        skew=skew,
-        net_gex=net_gex,
-        trend_pct=trend_pct,
-        days_to_earnings=days_to_earnings
-    )
-    return strategies
+    try:
+        strategies = selector.select_strategies(
+            ticker=ticker,
+            iv_rank=iv_rank,
+            skew=skew,
+            net_gex=net_gex,
+            trend_pct=trend_pct,
+            days_to_earnings=days_to_earnings
+        )
+        return strategies
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Strategy selection failed: {e}")
 
 @router.get("/{ticker}/detail/{strategy_id}")
 async def get_strategy_detail(ticker: str, strategy_id: str):

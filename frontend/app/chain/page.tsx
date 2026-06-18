@@ -83,42 +83,59 @@ export default function ChainPage() {
     async function load() {
       setLoading(true);
       setError(null);
-      const mockExp = createMockExpirations();
-      const expResult = await fetchJson<{ ticker: string; expirations: string[] }>(
-        `/api/options/expirations/${ticker}`,
-        { ticker, expirations: mockExp },
-      );
-      const dates = expResult.data.expirations?.length ? expResult.data.expirations : mockExp;
-      const selected = expiry && dates.includes(expiry) ? expiry : dates[0];
-      const mockChain = createMockChain(ticker, selected);
-      const [chainResult, summaryResult, gexResult, surfaceResult] = await Promise.all([
-        fetchJson<ChainResponse>(`/api/options/chain/${ticker}?expiry=${selected}`, mockChain),
-        fetchJson<SummaryResponse>(`/api/options/summary/${ticker}`, summarizeChain(mockChain)),
-        fetchJson<GexPoint[]>(`/api/options/gex/${ticker}?expiry=${selected}`, createMockGex(mockChain)),
-        fetchJson<IVSurfacePoint[]>(`/api/options/iv-surface/${ticker}`, createMockIVSurface(ticker)),
-      ]);
-      if (cancelled) return;
-      const nextChain = chainResult.data.options?.length ? chainResult.data : mockChain;
-      const chainSummary = summarizeChain(nextChain);
-      const nextSummary = {
-        ...chainSummary,
-        ...summaryResult.data,
-        expiry: selected,
-        call_oi: chainSummary.call_oi,
-        put_oi: chainSummary.put_oi,
-        net_gex: gexResult.data.reduce((sum, p) => sum + p.gex * 1_000_000, 0),
-      };
-      setExpirations(dates);
-      setExpiry(selected);
-      setChain(nextChain);
-      setSummary(nextSummary);
-      setGex(gexResult.data.length ? gexResult.data : createMockGex(nextChain));
-      setSurface(surfaceResult.data.length ? surfaceResult.data : createMockIVSurface(ticker));
-      const errors = [expResult, chainResult, summaryResult, gexResult, surfaceResult]
-        .filter((r) => r.fallback && r.error)
-        .map((r) => r.error);
-      setError(errors.length ? Array.from(new Set(errors)).slice(0, 2).join("; ") : null);
-      setLoading(false);
+      try {
+        const mockExp = createMockExpirations();
+        const expResult = await fetchJson<{ ticker: string; expirations: string[] }>(
+          `/api/options/expirations/${ticker}`,
+          { ticker, expirations: mockExp },
+        );
+        const dates = expResult.data.expirations?.length ? expResult.data.expirations : mockExp;
+        const selected = expiry && dates.includes(expiry) ? expiry : dates[0];
+        const mockChain = createMockChain(ticker, selected);
+        const [chainResult, summaryResult, gexResult, surfaceResult] = await Promise.all([
+          fetchJson<ChainResponse>(`/api/options/chain/${ticker}?expiry=${selected}`, mockChain),
+          fetchJson<SummaryResponse>(`/api/options/summary/${ticker}`, summarizeChain(mockChain)),
+          fetchJson<GexPoint[]>(`/api/options/gex/${ticker}?expiry=${selected}`, createMockGex(mockChain)),
+          fetchJson<IVSurfacePoint[]>(`/api/options/iv-surface/${ticker}`, createMockIVSurface(ticker)),
+        ]);
+        if (cancelled) return;
+        const nextChain = chainResult.data.options?.length ? chainResult.data : mockChain;
+        const chainSummary = summarizeChain(nextChain);
+        const nextSummary = {
+          ...chainSummary,
+          ...summaryResult.data,
+          expiry: selected,
+          call_oi: chainSummary.call_oi,
+          put_oi: chainSummary.put_oi,
+          net_gex: gexResult.data.reduce((sum, p) => sum + p.gex * 1_000_000, 0),
+        };
+        setExpirations(dates);
+        setExpiry(selected);
+        setChain(nextChain);
+        setSummary(nextSummary);
+        setGex(gexResult.data.length ? gexResult.data : createMockGex(nextChain));
+        setSurface(surfaceResult.data.length ? surfaceResult.data : createMockIVSurface(ticker));
+        const errors = [expResult, chainResult, summaryResult, gexResult, surfaceResult]
+          .filter((r) => r.fallback && r.error)
+          .map((r) => r.error);
+        setError(errors.length ? Array.from(new Set(errors)).slice(0, 2).join("; ") : null);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Chain data load failed");
+          // Populate with mock data so the page is usable even if everything fails
+          const mockExp = createMockExpirations();
+          const selected = mockExp[0];
+          const mockChain = createMockChain(ticker, selected);
+          setExpirations(mockExp);
+          setExpiry(selected);
+          setChain(mockChain);
+          setSummary(summarizeChain(mockChain));
+          setGex(createMockGex(mockChain));
+          setSurface(createMockIVSurface(ticker));
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
     load();
     return () => {
