@@ -223,7 +223,7 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
       {/* Card Header */}
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
             <span className="flex items-center justify-center w-5 h-5 rounded bg-[var(--bg-elevated)] text-[10px] font-mono font-bold text-[var(--accent-blue)] font-mono">
               {rank}
             </span>
@@ -280,7 +280,7 @@ const PrimaryButton = ({ children, onClick, disabled, loading, icon: Icon }: any
     type="button"
     onClick={onClick}
     disabled={disabled}
-    className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-4 transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
+    className="bg-[var(--accent-blue)] hover:bg-[var(--accent-blue)] text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-4 overflow-x-auto no-scrollbar transition-all shadow-lg shadow-blue-900/20 active:scale-95 disabled:opacity-50"
   >
     {Icon && <Icon size={16} className={loading ? "animate-spin" : ""} />}
     {children}
@@ -317,7 +317,7 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
     >
       {/* Header Info */}
       <div className="px-6 py-5 border-b border-[var(--border-default)] flex items-center justify-between bg-gradient-to-r from-[var(--accent-blue)] to-transparent">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
           <h2 className="text-2xl font-black font-mono tracking-tighter text-[var(--accent-blue)] font-sans">
             {pick.ticker} <span className="text-[var(--accent-blue)] font-bold text-xs ml-2 tracking-widest uppercase font-mono">{pick.strategyName || meta.cn}</span>
           </h2>
@@ -328,7 +328,7 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
             {meta.label}
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
           <div className="text-right">
             <div className="text-[10px] text-[var(--accent-blue)] font-black tracking-[0.2em] uppercase mb-1">Target Price</div>
             <div className="text-lg font-black font-mono text-[var(--accent-blue)] leading-none tabular-nums font-mono">{pick.target || "--"}</div>
@@ -340,7 +340,7 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
         </div>
       </div>
 
-      <div className="p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 font-mono">
+      <div className="p-4 grid grid-cols-1 lg:grid-cols-1 md:grid-cols-12 gap-4 font-mono">
         {/* Left: 4 Metrics Grid */}
         <div className="lg:col-span-5 grid grid-cols-2 gap-4">
           {[
@@ -434,7 +434,7 @@ function ScannerSummaryCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-1 md:grid-cols-4 lg:grid-cols-1 md:grid-cols-7 gap-2">
         {scanner.map(item => {
           const t = (item.ticker || "").toUpperCase();
           const isSelected = t === selected;
@@ -489,7 +489,7 @@ function FilterBar({
             key={f.value}
             type="button"
             onClick={() => setStrategyFilter(f.value)}
-            className={`whitespace-nowrap px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-4 ${
+            className={`whitespace-nowrap px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-4 overflow-x-auto no-scrollbar ${
               strategyFilter === f.value
                 ? "bg-[var(--bg-elevated)] text-[var(--accent-blue)] border border-[var(--accent-blue)] shadow-sm"
                 : "text-[var(--accent-blue)] hover:text-[var(--accent-blue)]"
@@ -640,7 +640,7 @@ export default function PicksPage() {
       {/* ── Page Header ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 py-6 border-b border-[var(--border-default)]">
         <div>
-          <div className="flex items-center gap-4 mb-2">
+          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar mb-2">
             <h1 className="text-2xl font-black tracking-tight text-[var(--accent-blue)] font-sans">
               TOP PICKS
             </h1>
@@ -676,11 +676,11 @@ export default function PicksPage() {
       </div>
 
       {/* ── Scanner Summary Section ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-1 md:grid-cols-12 gap-4">
         <div className="lg:col-span-4 space-y-4">
           <ScannerSummaryStats picks={picks} bullish={bullishCount} bearish={bearishCount} />
           <div className="p-4 rounded-lg bg-[var(--bg-base)] border border-[var(--border-default)] flex items-center justify-between shadow-inner">
-            <div className="flex items-center gap-4.5">
+            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar.5">
               <div className="relative flex">
                 <div className="w-2 h-2 rounded-full bg-[var(--accent-blue)] animate-ping absolute" />
                 <div className="w-2 h-2 rounded-full bg-[var(--accent-blue)] relative" />
@@ -708,7 +708,7 @@ export default function PicksPage() {
 
       {/* ── Navigation & Filters ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 py-2">
-        <div className="flex items-center gap-4 p-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)]">
+        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar p-1 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-default)]">
           {DIRECTION_TABS.map(tab => (
             <GhostButton
               key={tab.value}
@@ -737,18 +737,18 @@ export default function PicksPage() {
           <h3 className="text-xs font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] font-sans">
             Recommended Strategies ({displayPicks.length})
           </h3>
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-4.5 text-[10px] font-bold text-[var(--accent-blue)]">
+          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
+            <span className="flex items-center gap-4 overflow-x-auto no-scrollbar.5 text-[10px] font-bold text-[var(--accent-blue)]">
               <span className="w-2 h-2 rounded bg-var(--color-call)" /> BULLISH
             </span>
-            <span className="flex items-center gap-4.5 text-[10px] font-bold text-[var(--accent-blue)]">
+            <span className="flex items-center gap-4 overflow-x-auto no-scrollbar.5 text-[10px] font-bold text-[var(--accent-blue)]">
               <span className="w-2 h-2 rounded bg-var(--color-put)" /> BEARISH
             </span>
           </div>
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 font-mono">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 md:grid-cols-4 gap-4 font-mono">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
@@ -772,7 +772,7 @@ export default function PicksPage() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 md:grid-cols-4 gap-4">
             {displayPicks.map((pick, idx) => (
               <div
                 key={pick.id || `${pick.ticker}-${idx}`}
@@ -834,7 +834,7 @@ function ScannerSummaryStats({ picks, bullish, bearish }: { picks: any[], bullis
       {/* Background decoration */}
       <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none" />
       
-      <div className="grid grid-cols-3 gap-4 relative z-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
         <div className="text-center">
           <div className="text-3xl font-black font-mono text-[var(--accent-blue)] tracking-tighter font-mono">{picks.length}</div>
           <div className="text-[10px] font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] mt-1">Total</div>

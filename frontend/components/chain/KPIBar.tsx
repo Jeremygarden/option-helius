@@ -68,13 +68,13 @@ export default function KPIBar({ summary, loading, error }: KPIBarProps) {
   return (
     <section className="mb-6">
       {error && (
-        <div className="mb-4 rounded-lg px-4 py-3 text-xs font-mono border bg-amber-50/50 border-amber-200/50 text-amber-700 flex items-center gap-4">
+        <div className="mb-4 rounded-lg px-4 py-3 text-xs font-mono border bg-amber-50/50 border-amber-200/50 text-amber-700 flex items-center gap-4 overflow-x-auto no-scrollbar">
           <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
           API fallback active: {error}
         </div>
       )}
 
-      <div className="grid grid-cols-5 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
         {kpis.map((kpi, idx) => (
           <div
             key={kpi.label}

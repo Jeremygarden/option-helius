@@ -134,8 +134,8 @@ export default function ChainPage() {
 
       {/* ── Page header row ── */}
       <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
             <h1 className="text-3xl font-black tracking-tighter text-[var(--text-primary)] font-sans">
               {ticker}
             </h1>
@@ -144,14 +144,14 @@ export default function ChainPage() {
 
           {/* Spot price pill */}
           {summary?.spot && (
-            <div className="flex items-center gap-4 rounded-lg px-4 py-2 border border-[var(--border-default)] bg-[var(--bg-surface)] font-mono text-base font-bold text-[var(--accent-teal)] shadow-sm">
+            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar rounded-lg px-4 py-2 border border-[var(--border-default)] bg-[var(--bg-surface)] font-mono text-base font-bold text-[var(--accent-teal)] shadow-sm">
               <Zap size={14} fill="currentColor" />
               {formatMoney(summary.spot)}
             </div>
           )}
 
           {/* Quick Stats */}
-          <div className="flex items-center gap-4.5 bg-[var(--bg-surface)] p-1 rounded-lg border border-[var(--border-default)] shadow-sm">
+          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar.5 bg-[var(--bg-surface)] p-1 rounded-lg border border-[var(--border-default)] shadow-sm">
             {["SPY", "QQQ", "NVDA", "AAPL", "TSLA", "VIX"].map((t) => (
               <button
                 key={t}
@@ -173,7 +173,7 @@ export default function ChainPage() {
         </div>
 
         {/* Ticker form */}
-        <form onSubmit={submitTicker} className="flex items-center gap-4">
+        <form onSubmit={submitTicker} className="flex items-center gap-4 overflow-x-auto no-scrollbar">
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--accent-blue)] transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none" size={16} />
             <input
@@ -190,8 +190,8 @@ export default function ChainPage() {
             Load
           </button>
           
-          <div className="flex items-center gap-4 ml-2">
-            <div className={`flex items-center gap-4.5 rounded-lg px-3 py-2 border text-[9px] font-black tracking-widest shadow-sm ${
+          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar ml-2">
+            <div className={`flex items-center gap-4 overflow-x-auto no-scrollbar.5 rounded-lg px-3 py-2 border text-[9px] font-black tracking-widest shadow-sm ${
               error ? "bg-amber-50 border-amber-200 text-amber-600" : "bg-emerald-50 border-emerald-200 text-emerald-600"
             }`}>
               <div className={`w-1.5 h-1.5 rounded-full ${error ? "bg-amber-500 animate-pulse" : "bg-emerald-500"}`} />
@@ -223,14 +223,14 @@ export default function ChainPage() {
              </span>
           )}
         </div>
-        <div className="flex items-center gap-4 overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
+        <div className="flex items-center gap-4 overflow-x-auto no-scrollbar overflow-x-auto pb-4 no-scrollbar -mx-2 px-2">
           {expiryItems.map((item) => {
             const isActive = item.date === expiry;
             return (
               <button
                 key={item.date}
                 onClick={() => setExpiry(item.date)}
-                className={`tab-pill shrink-0 flex items-center gap-4 px-4 py-2 border transition-all duration-200 ${
+                className={`tab-pill shrink-0 flex items-center gap-4 overflow-x-auto no-scrollbar px-4 py-2 border transition-all duration-200 ${
                   isActive 
                     ? "bg-[var(--accent-blue)] border-[var(--accent-blue)] text-white shadow-lg shadow-blue-500/25 translate-y-[-1px]" 
                     : "bg-[var(--bg-surface)] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--accent-blue)]"

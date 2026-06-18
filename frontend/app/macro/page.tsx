@@ -57,7 +57,7 @@ export default function MacroPage() {
 
       <BacktestTable />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 md:grid-cols-4 gap-4">
         {[
           { label: "VIX INDEX", value: "14.50", change: "-2.1%", color: "text-accent-green" },
           { label: "US 10Y YIELD", value: "4.25%", change: "+0.5%", color: "text-accent-red" },
@@ -74,7 +74,7 @@ export default function MacroPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-1 md:grid-cols-3 gap-4">
         <div className="lg:col-span-2 card">
            <h3 className="text-sm font-semibold mb-4 font-sans">收益率曲线 / Yield Curve (1M - 30Y)</h3>
            <div className="h-64 border-l border-b border-[var(--border-default)] relative rounded">
