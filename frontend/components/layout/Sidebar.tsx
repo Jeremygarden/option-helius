@@ -85,9 +85,9 @@ export default function Sidebar() {
         <div
           className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 font-mono font-bold text-[15px]"
           style={{
-            background: "linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue) 100%)",
+            background: "var(--accent-blue)",
             boxShadow: "0 0 16px rgba(88,166,255,0.35)",
-            color: "var(--accent-blue)",
+            color: "white",
           }}
         >
           H
