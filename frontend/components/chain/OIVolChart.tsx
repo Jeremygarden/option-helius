@@ -147,10 +147,10 @@ export default function OIVolChart({ chain, loading }: OIVolChartProps) {
                 iconSize={10}
                 wrapperStyle={{ paddingBottom: 20, fontSize: 11, fontWeight: 600, color: "var(--accent-blue)" }}
               />
-              <Bar dataKey="callOi" name="Call OI" fill="var(--accent-blue)" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="putOi" name="Put OI" fill="var(--accent-blue)" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="callVol" name="Call Vol" fill="var(--accent-blue)" radius={[2, 2, 0, 0]} />
-              <Bar dataKey="putVol" name="Put Vol" fill="var(--accent-blue)" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="callOi" name="Call OI" fill="#3b82f6" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="putOi" name="Put OI" fill="#ef4444" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="callVol" name="Call Vol" fill="#60a5fa" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="putVol" name="Put Vol" fill="#f87171" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         )}

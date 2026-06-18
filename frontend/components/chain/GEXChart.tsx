@@ -105,7 +105,7 @@ export default function GEXChart({ data, summary, loading }: GEXChartProps) {
                 {rows.map((entry, idx) => (
                   <Cell
                     key={`cell-${idx}`}
-                    fill={entry.gex >= 0 ? "var(--accent-blue)" : "var(--accent-blue)"} // Following purple theme for positive GEX or magenta for negative
+                    fill={entry.gex >= 0 ? "#3b82f6" : "#ef4444"}
                   />
                 ))}
               </Bar>
