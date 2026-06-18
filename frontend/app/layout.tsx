@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/components/layout/Sidebar";
 import TopBar from "@/components/layout/TopBar";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 /**
  * JetBrains Mono — all numeric/data values (prices, greeks, percentages)
@@ -42,7 +43,9 @@ export default function RootLayout({
         <div className="flex-1 flex flex-col min-w-0">
           <TopBar />
           <main className="flex-1 overflow-auto p-4">
-            {children}
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
           </main>
         </div>
       </body>
