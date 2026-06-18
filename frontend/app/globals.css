@@ -27,6 +27,14 @@
   --accent-orange: #ffab70;
   --accent-green: #3fb950;
   --accent-red: #f85149;
+  --accent-yellow: #d29922;
+
+  /* Semantic option-direction aliases. Use these so swapping the palette
+     (e.g. CN red=up vs US green=up) is a one-line change. */
+  --color-call: var(--accent-green);    /* bullish, long call, OI buildup */
+  --color-put: var(--accent-red);       /* bearish, long put, sell signal  */
+  --color-flat: var(--accent-orange);   /* range-bound, iron condor, neutral spread */
+  --color-warning: var(--accent-yellow);/* risk / caution                  */
 
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
   --font-sans: "Inter", "Geist", -apple-system, sans-serif;
