@@ -16,6 +16,7 @@ async def get_all_indicators(service: IndicatorRefreshService = Depends(get_refr
     
     Uses a single batch fetch from Redis instead of N individual lookups.
     """
+    import asyncio
     from ..services.indicator_refresh import INDICATOR_CONFIG
     from ..core.cache import get_cached, set_cached
     
@@ -24,14 +25,16 @@ async def get_all_indicators(service: IndicatorRefreshService = Depends(get_refr
     if cached is not None:
         return cached
     
-    # Fetch all indicators concurrently
-    tasks = {id: service.get_indicator_value(id) for id in INDICATOR_CONFIG.keys()}
+    # Fetch all indicators concurrently with asyncio.gather
+    indicator_ids = list(INDICATOR_CONFIG.keys())
+    tasks = [service.get_indicator_value(id) for id in indicator_ids]
+    raw = await asyncio.gather(*tasks, return_exceptions=True)
     results = {}
-    for id, task in tasks.items():
-        try:
-            results[id] = await task
-        except Exception as e:
-            results[id] = {"error": str(e), "value": None}
+    for id, outcome in zip(indicator_ids, raw):
+        if isinstance(outcome, Exception):
+            results[id] = {"error": str(outcome), "value": None}
+        else:
+            results[id] = outcome
     
     # Cache the batch result (60s — real-time tier)
     await set_cached("macro:all_indicators:batch", results, 60)
