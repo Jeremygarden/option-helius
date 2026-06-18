@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 
 // ── Types ──────────────────────────────────────────────────────
 interface RunRiskData {
@@ -232,9 +232,17 @@ function CategoryFilteredCards({ indicators }: { indicators: IndicatorCard[] }) 
   const [activeCategory, setActiveCategory] = useState("全部");
   const categories = ["全部", "流动性", "市场结构", "情绪", "估值", "跨资产", "广度", "波动率"];
   
-  const filtered = activeCategory === "全部"
-    ? indicators
-    : indicators.filter(ind => ind.category === activeCategory);
+  const filtered = useMemo(
+    () => activeCategory === "全部" ? indicators : indicators.filter(ind => ind.category === activeCategory),
+    [indicators, activeCategory]
+  );
+
+  const statusCounts = useMemo(() => ({
+    level4: indicators.filter(i => i.status_level === 4).length,
+    level3: indicators.filter(i => i.status_level === 3).length,
+    level2: indicators.filter(i => i.status_level === 2).length,
+    level1: indicators.filter(i => i.status_level === 1).length,
+  }), [indicators]);
 
   return (
     <div>
@@ -264,10 +272,10 @@ function CategoryFilteredCards({ indicators }: { indicators: IndicatorCard[] }) 
       {/* Summary stats bar */}
       <div className="mt-3 grid grid-cols-4 gap-4">
         {[
-          { label: "🔴 极高危", count: indicators.filter(i => i.status_level === 4).length, color: "text-[var(--accent-red)]" },
-          { label: "🟠 偏高", count: indicators.filter(i => i.status_level === 3).length, color: "text-orange-400" },
-          { label: "🟡 中等", count: indicators.filter(i => i.status_level === 2).length, color: "text-yellow-400" },
-          { label: "🟢 正常", count: indicators.filter(i => i.status_level === 1).length, color: "text-[var(--accent-green)]" },
+          { label: "🔴 极高危", count: statusCounts.level4, color: "text-[var(--accent-red)]" },
+          { label: "🟠 偏高", count: statusCounts.level3, color: "text-orange-400" },
+          { label: "🟡 中等", count: statusCounts.level2, color: "text-yellow-400" },
+          { label: "🟢 正常", count: statusCounts.level1, color: "text-[var(--accent-green)]" },
         ].map(s => (
           <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-lg p-4 text-left">
             <div className={`text-xl font-bold ${s.color}`}>{s.count}</div>
@@ -436,7 +444,10 @@ export default function RunRiskPanel() {
   };
 
   // Sort indicators: most dangerous first (by weighted contribution)
-  const sortedIndicators = [...data.indicators].sort((a, b) => b.weighted_contribution - a.weighted_contribution);
+  const sortedIndicators = useMemo(
+    () => [...data.indicators].sort((a, b) => b.weighted_contribution - a.weighted_contribution),
+    [data.indicators]
+  );
 
   // Derived Sentinels
   const moveInd = data.indicators.find(i => i.id === "move")!;

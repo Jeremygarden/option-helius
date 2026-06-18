@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { RefreshCw, ShieldCheck, WifiOff, Zap, Search } from "lucide-react";
 import KPIBar from "@/components/chain/KPIBar";
@@ -144,15 +144,15 @@ export default function ChainPage() {
   }, [ticker, expiry, refreshing]);
 
   const expiryItems = useMemo(() => expirations.map(toExpirationItem), [expirations]);
-  const netGex = gex.reduce((sum, p) => sum + p.gex * 1_000_000, 0);
+  const netGex = useMemo(() => gex.reduce((sum, p) => sum + p.gex * 1_000_000, 0), [gex]);
 
-  function submitTicker(event: FormEvent) {
+  const submitTicker = useCallback((event: FormEvent) => {
     event.preventDefault();
     const next = normalizeTicker(draftTicker);
     setDraftTicker(next);
     setExpiry(null);
     setTicker(next);
-  }
+  }, [draftTicker]);
 
   return (
     <div className="flex flex-col gap-4 pb-12 max-w-[1600px] mx-auto px-4 md:px-8 font-mono">

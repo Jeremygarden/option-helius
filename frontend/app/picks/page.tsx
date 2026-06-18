@@ -604,15 +604,21 @@ export default function PicksPage() {
         : (a.ticker || "").localeCompare(b.ticker || ""));
   }, [directionFilteredPicks, selectedTicker, tagFilter, strategyFilter, sortMode]);
 
-  const displayPicks = filtered.length ? filtered : picks.sort((a, b) => clampScore(b.score) - clampScore(a.score));
-  const selectedPick = selectedId ? displayPicks.find(p => (p.id || p.ticker) === selectedId) ?? null : null;
+  const displayPicks = useMemo(
+    () => filtered.length ? filtered : [...picks].sort((a, b) => clampScore(b.score) - clampScore(a.score)),
+    [filtered, picks]
+  );
+  const selectedPick = useMemo(
+    () => selectedId ? displayPicks.find(p => (p.id || p.ticker) === selectedId) ?? null : null,
+    [selectedId, displayPicks]
+  );
 
   // Summary stats
-  const highCount = picks.filter(p => clampScore(p.score) >= 8).length;
-  const returnMin = Math.min(...picks.map(p => Number(p.returnLow || 0)).filter(Boolean), 0);
-  const returnMax = Math.max(...picks.map(p => Number(p.returnHigh || 0)).filter(Boolean), 0);
+  const highCount = useMemo(() => picks.filter(p => clampScore(p.score) >= 8).length, [picks]);
+  const returnMin = useMemo(() => Math.min(...picks.map(p => Number(p.returnLow || 0)).filter(Boolean), 0), [picks]);
+  const returnMax = useMemo(() => Math.max(...picks.map(p => Number(p.returnHigh || 0)).filter(Boolean), 0), [picks]);
 
-  const handleCardClick = (pick: StrategyPick) => {
+  const handleCardClick = useCallback((pick: StrategyPick) => {
     const id = pick.id || pick.ticker || null;
     if (selectedId === id) {
       setSelectedId(null);
@@ -621,7 +627,7 @@ export default function PicksPage() {
       // Smooth scroll to top when selecting a card
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
+  }, [selectedId]);
 
   if (loading) return (
     <div className="flex flex-col gap-4 pb-12 px-6 max-w-[1600px] mx-auto font-mono">
