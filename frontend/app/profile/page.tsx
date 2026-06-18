@@ -282,7 +282,7 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
 
       <div className="grid grid-cols-1 gap-4">
         {prefs.positions.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-[var(--border-default)] rounded-lg">
+          <div className="text-left py-12 border-2 border-dashed border-[var(--border-default)] rounded-lg">
             <p className="text-[var(--accent-blue)]">暂无持仓数据。手动添加或配置 IBKR 导入。</p>
           </div>
         ) : (
@@ -326,7 +326,7 @@ function PositionsTab({ prefs, updatePrefs }: { prefs: any, updatePrefs: any }) 
         )}
       </div>
 
-      <div className="bg-[var(--bg-base)] border border-[var(--border-default)] border-dashed rounded-lg p-8 text-center opacity-70">
+      <div className="bg-[var(--bg-base)] border border-[var(--border-default)] border-dashed rounded-lg p-8 text-left opacity-70">
         <h4 className="text-white font-semibold flex items-center justify-center gap-4 mb-2">
           🔌 连接 IBKR 导入真实持仓
         </h4>
@@ -562,7 +562,7 @@ function NotificationsTab({ prefs, updateNotificationSettings }: { prefs: any, u
                 type="number" 
                 value={prefs.notifications.macro_alert_composite}
                 onChange={(e) => updateNotificationSettings({ macro_alert_composite: parseInt(e.target.value) })}
-                className="w-12 bg-transparent border-b border-[var(--border-default)] text-center"
+                className="w-12 bg-transparent border-b border-[var(--border-default)] text-left"
               /> 时推送警报
             </span>
           </label>

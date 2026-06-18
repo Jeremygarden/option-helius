@@ -87,7 +87,7 @@ export default function MacroPage() {
            <h3 className="text-sm font-semibold mb-4 font-sans">当前市场状态 / Market Regime</h3>
            <div className="flex flex-col gap-4 mt-8">
               <div className="flex flex-col items-center">
-                 <div className="w-32 h-32 rounded-full border-4 border-accent-teal flex items-center justify-center text-accent-teal font-bold text-center p-4 transition-all">
+                 <div className="w-32 h-32 rounded-full border-4 border-accent-teal flex items-center justify-center text-accent-teal font-bold text-left p-4 transition-all">
                     Low Vol Expansion
                  </div>
                  <span className="mt-4 text-sm font-medium">Risk-On Mode</span>

@@ -445,7 +445,7 @@ function ScannerSummaryCard({
               key={t}
               type="button"
               onClick={() => onSelect(t)}
-              className="flex flex-col items-center p-4 rounded-lg border text-center transition-all hover:scale-105"
+              className="flex flex-col items-center p-4 rounded-lg border text-left transition-all hover:scale-105"
               style={{
                 background: isSelected ? "rgba(88,166,255,0.08)" : "var(--bg-elevated)",
                 borderColor: isSelected ? "var(--accent-blue)" : "var(--border-default)",
@@ -788,14 +788,14 @@ export default function PicksPage() {
               </div>
             ))}
             {displayPicks.length === 0 && (
-              <div className="col-span-full py-32 flex flex-col items-center justify-center rounded-3xl border border-dashed border-[var(--border-default)] bg-[var(--bg-base)] relative overflow-hidden">
+              <div className="col-span-full py-32 flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border-default)] bg-[var(--bg-base)] relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-[100px]" />
                 <div className="relative z-10 flex flex-col items-center">
                   <div className="w-20 h-20 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] flex items-center justify-center mb-6 text-[var(--accent-blue)] shadow-2xl">
                     <SlidersHorizontal size={32} />
                   </div>
                   <h3 className="text-lg font-black text-[var(--accent-blue)] mb-2 tracking-tight font-sans">No Matching Strategies Found</h3>
-                  <p className="text-sm font-medium text-[var(--accent-blue)] text-center max-w-xs mb-8">
+                  <p className="text-sm font-medium text-[var(--accent-blue)] text-left max-w-xs mb-8">
                     Try broadening your search by adjusting filters or clearing ticker selection.
                   </p>
                   <button 
@@ -835,15 +835,15 @@ function ScannerSummaryStats({ picks, bullish, bearish }: { picks: any[], bullis
       <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none" />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-        <div className="text-center">
+        <div className="text-left">
           <div className="text-3xl font-black font-mono text-[var(--accent-blue)] tracking-tighter font-mono">{picks.length}</div>
           <div className="text-[10px] font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] mt-1">Total</div>
         </div>
-        <div className="text-center border-x border-[var(--border-default)]">
+        <div className="text-left border-x border-[var(--border-default)]">
           <div className="text-3xl font-black font-mono text-[var(--accent-blue)] tracking-tighter font-mono">{bullish}</div>
           <div className="text-[10px] font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] mt-1">Bullish</div>
         </div>
-        <div className="text-center">
+        <div className="text-left">
           <div className="text-3xl font-black font-mono text-[var(--accent-blue)] tracking-tighter font-mono">{bearish}</div>
           <div className="text-[10px] font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] mt-1">Bearish</div>
         </div>

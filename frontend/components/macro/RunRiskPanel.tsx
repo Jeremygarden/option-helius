@@ -269,7 +269,7 @@ function CategoryFilteredCards({ indicators }: { indicators: IndicatorCard[] }) 
           { label: "🟡 中等", count: indicators.filter(i => i.status_level === 2).length, color: "text-yellow-400" },
           { label: "🟢 正常", count: indicators.filter(i => i.status_level === 1).length, color: "text-[var(--accent-green)]" },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-lg p-4 text-center">
+          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-lg p-4 text-left">
             <div className={`text-xl font-bold ${s.color}`}>{s.count}</div>
             <div className="text-[10px] text-gray-500 font-mono">{s.label}</div>
           </div>

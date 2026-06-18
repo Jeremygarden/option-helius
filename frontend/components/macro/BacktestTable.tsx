@@ -94,28 +94,28 @@ const BacktestTable: React.FC<{ data?: BacktestEvent[] }> = ({ data = [] }) => {
                 
                 {/* Model A */}
                 <td className="px-4 py-2">
-                  <div className={`px-2 py-0.5 rounded text-center text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_a, 70)}`}>
+                  <div className={`px-2 py-0.5 rounded text-left text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_a, 70)}`}>
                     {row.model_a.toFixed(1)} {isCorrect(row.model_a, row, 70) ? '✅' : '❌'}
                   </div>
                 </td>
 
                 {/* Model B */}
                 <td className="px-4 py-2">
-                  <div className={`px-2 py-0.5 rounded text-center text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_b, 70)}`}>
+                  <div className={`px-2 py-0.5 rounded text-left text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_b, 70)}`}>
                     {row.model_b.toFixed(1)} {isCorrect(row.model_b, row, 70) ? '✅' : '❌'}
                   </div>
                 </td>
 
                 {/* Model C */}
                 <td className="px-4 py-2">
-                  <div className={`px-2 py-0.5 rounded text-center text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_c, 70)}`}>
+                  <div className={`px-2 py-0.5 rounded text-left text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_c, 70)}`}>
                     {row.model_c.toFixed(1)} {isCorrect(row.model_c, row, 70) ? '✅' : '❌'}
                   </div>
                 </td>
 
                 {/* Model D */}
                 <td className="px-4 py-2">
-                  <div className={`px-2 py-0.5 rounded text-center text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_d, 65)}`}>
+                  <div className={`px-2 py-0.5 rounded text-left text-xs inline-block min-w-[60px] ${getScoreStyle(row.model_d, 65)}`}>
                     {row.model_d.toFixed(1)} {isCorrect(row.model_d, row, 65) ? '✅' : '❌'}
                   </div>
                 </td>
