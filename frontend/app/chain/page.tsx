@@ -1,12 +1,9 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { RefreshCw, ShieldCheck, WifiOff, Zap, Search } from "lucide-react";
 import KPIBar from "@/components/chain/KPIBar";
-import IVSurface3D from "@/components/chain/IVSurface3D";
-import TermStructure from "@/components/chain/TermStructure";
-import OIVolChart from "@/components/chain/OIVolChart";
-import GEXChart from "@/components/chain/GEXChart";
 import {
   ChainResponse,
   GexPoint,
@@ -22,6 +19,17 @@ import {
   summarizeChain,
   toExpirationItem,
 } from "@/lib/chainData";
+
+/* Dynamic imports for chart components — reduces initial bundle by ~400KB */
+const ChartLoadingFallback = () => (
+  <div className="flex h-full min-h-[320px] items-center justify-center text-xs font-mono" style={{ color: "var(--text-muted)" }}>
+    Loading chart…
+  </div>
+);
+const IVSurface3D = dynamic(() => import("@/components/chain/IVSurface3D"), { ssr: false, loading: ChartLoadingFallback });
+const TermStructure = dynamic(() => import("@/components/chain/TermStructure"), { ssr: false, loading: ChartLoadingFallback });
+const OIVolChart = dynamic(() => import("@/components/chain/OIVolChart"), { ssr: false, loading: ChartLoadingFallback });
+const GEXChart = dynamic(() => import("@/components/chain/GEXChart"), { ssr: false, loading: ChartLoadingFallback });
 
 /* ─── Chart card wrapper ─────────────────────────────────────── */
 function ChartCard({
