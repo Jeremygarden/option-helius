@@ -7,6 +7,10 @@ from datetime import datetime, date, timedelta
 import json
 from typing import Dict, Any, List, Optional
 import asyncio
+import logging
+logger = logging.getLogger(__name__)
+
+from .macro_fetchers import fetch_yfinance, fetch_fred, fetch_http_json, fetch_http_csv
 
 # Assuming redis connection will be provided via a dependency or global app state
 # For now, let's mock or use a placeholder if the actual redis instance isn't available
@@ -126,24 +130,89 @@ class IndicatorRefreshService:
 
     async def refresh_indicator(self, indicator_id: str) -> Dict:
         config = INDICATOR_CONFIG.get(indicator_id)
-        # Mocking fetch logic
-        value = 0.0 # Replace with actual fetch call
-        if indicator_id == "vix": value = 18.5
-        elif indicator_id == "cape": value = 32.4
+        fetch_fn_name = config.get("fetch_fn")
+        fetch_fn = getattr(self, fetch_fn_name, None)
         
-        result = {
-            "value": value,
-            "updated_at": datetime.now().isoformat(),
-            "status": "ok"
-        }
+        try:
+            if not fetch_fn:
+                logger.warning(f"No fetch function defined for {indicator_id}")
+                value = 0.0
+            else:
+                data = await fetch_fn()
+                value = data["value"]
+                
+            result = {
+                "value": value,
+                "updated_at": datetime.now().isoformat(),
+                "status": "ok",
+                "source": data.get("source", config["data_source"]) if fetch_fn else config["data_source"]
+            }
+        except Exception as exc:
+            logger.error(f"Failed to refresh indicator {indicator_id}: {exc}")
+            # Try to return last cached value
+            cached = await self._get_cached_data(f"indicator:{indicator_id}:value")
+            if cached:
+                return {**cached, "is_stale": True, "tier": config["tier"].value, "error": str(exc)}
+            return {"value": 0.0, "updated_at": datetime.now().isoformat(), "status": "error", "error": str(exc)}
         
         await self._set_cached_data(f"indicator:{indicator_id}:value", result, config["ttl_seconds"])
-        
-        # Also compute score for this indicator
         score = self._compute_indicator_score(indicator_id, value)
         await self._set_cached_data(f"indicator:{indicator_id}:score", {"score": score, "updated_at": result["updated_at"]}, config["ttl_seconds"])
         
         return {**result, "is_stale": False, "tier": config["tier"].value}
+
+    async def fetch_vix(self):
+        val = await fetch_yfinance("^VIX")
+        return {"value": val or 0.0, "source": "yfinance"}
+
+    async def fetch_yield_curve(self):
+        # T10Y2Y (FRED)
+        val = await fetch_fred("T10Y2Y")
+        if val is None:
+            # Fallback to ^TNX - ^IRX (10Y - 13W)
+            tnx = await fetch_yfinance("^TNX")
+            irx = await fetch_yfinance("^IRX")
+            if tnx and irx:
+                val = tnx - irx
+        return {"value": val or 0.0, "source": "FRED" if val else "yfinance fallback"}
+
+    async def fetch_trend(self):
+        # (SPX - 200MA) / 200MA
+        try:
+            import yfinance as yf
+            import asyncio
+            ticker = await asyncio.to_thread(yf.Ticker, "^GSPC")
+            hist = await asyncio.to_thread(ticker.history, period="250d")
+            if not hist.empty:
+                close = hist["Close"].iloc[-1]
+                ma200 = hist["Close"].rolling(200).mean().iloc[-1]
+                val = ((close - ma200) / ma200) * 100
+                return {"value": round(val, 2), "source": "yfinance"}
+        except Exception:
+            pass
+        return {"value": 0.0, "source": "error"}
+
+    async def fetch_erp(self):
+        # Earnings Yield - 10Y Yield
+        try:
+            # S&P 500 Earnings Yield approx (using trailing PE)
+            import yfinance as yf
+            import asyncio
+            ticker = await asyncio.to_thread(yf.Ticker, "^GSPC")
+            # This is a crude approximation; in real life you'd fetch from a data provider
+            # or Fred GS10
+            ten_year = await fetch_fred("GS10")
+            if ten_year is None:
+                ten_year = await fetch_yfinance("^TNX")
+            
+            # SPX trailing PE is around 25-30 -> Yield 3.3-4%
+            # For now, use a constant 4% if info is missing
+            ey = 4.0
+            val = ey - (ten_year or 4.0)
+            return {"value": round(val, 2), "source": "computed"}
+        except Exception:
+            pass
+        return {"value": 0.0, "source": "error"}
 
     def _compute_indicator_score(self, indicator_id: str, value: float) -> float:
         # Simplified scoring logic (0-100)
