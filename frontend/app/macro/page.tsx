@@ -9,9 +9,6 @@ export default function MacroPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // In a real app, this would be an API call
-    // For now, we'll use a local mock or the backend data if available
-      useEffect(() => {
     const fetchData = async () => {
       try {
         const [indicatorsResp, compositeResp] = await Promise.all([
@@ -39,22 +36,12 @@ export default function MacroPage() {
             }))
           }
         });
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch macro data", error);
-        setLoading(false);
-      }
-    };
-
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch macro data", error);
-        setLoading(false);
-      }
-    };
+        setLoading(false); } catch (error) { console.error("Failed to fetch macro data", error); setLoading(false); } };
 
     fetchData();
   }, []);
+
+  if (loading) return <div className="p-8 animate-pulse text-[var(--accent-blue)] font-mono">LOADING_DATA_STREAM...</div>;
 
   return (
     <div className="flex flex-col gap-4 pb-8">

@@ -203,6 +203,8 @@ function PickCard({ pick, rank, isSelected, onSelect }: {
   const dirColor = pick.direction === "down" ? "var(--color-put)" : pick.direction === "flat" ? "var(--accent-orange)" : "var(--color-call)";
   const DirIcon = pick.direction === "down" ? TrendingDown : pick.direction === "flat" ? Minus : TrendingUp;
 
+  if (loading) return <div className="p-8 animate-pulse text-[var(--accent-blue)] font-mono">LOADING_DATA_STREAM...</div>;
+
   return (
     <article
       onClick={onSelect}
@@ -305,6 +307,8 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
   const type = normalizeType(pick.strategyType);
   const meta = TYPE_META[type];
   const greeks = pick.greeks || {};
+
+  if (loading) return <div className="p-8 animate-pulse text-[var(--accent-blue)] font-mono">LOADING_DATA_STREAM...</div>;
 
   return (
     <div 
@@ -412,6 +416,8 @@ function ScannerSummaryCard({
   weekStart?: string;
   weekEnd?: string;
 }) {
+  if (loading) return <div className="p-8 animate-pulse text-[var(--accent-blue)] font-mono">LOADING_DATA_STREAM...</div>;
+
   return (
     <div
       className="rounded-2xl border p-4 h-full flex flex-col justify-between"
@@ -432,7 +438,9 @@ function ScannerSummaryCard({
         {scanner.map(item => {
           const t = (item.ticker || "").toUpperCase();
           const isSelected = t === selected;
-          return (
+          if (loading) return <div className="p-8 animate-pulse text-[var(--accent-blue)] font-mono">LOADING_DATA_STREAM...</div>;
+
+  return (
             <button
               key={t}
               type="button"
@@ -470,6 +478,8 @@ function FilterBar({
   sortMode: string; setSortMode: (v: "score" | "ticker") => void;
   counts: Record<string, number>;
 }) {
+  if (loading) return <div className="p-8 animate-pulse text-[var(--accent-blue)] font-mono">LOADING_DATA_STREAM...</div>;
+
   return (
     <div className="flex flex-wrap items-center gap-4 font-mono">
       {/* Strategy Type Pills */}
@@ -621,6 +631,8 @@ export default function PicksPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
+
+  if (loading) return <div className="p-8 animate-pulse text-[var(--accent-blue)] font-mono">LOADING_DATA_STREAM...</div>;
 
   return (
     <div className="flex flex-col gap-4 pb-12 px-6 max-w-[1600px] mx-auto font-mono">
@@ -815,6 +827,8 @@ export default function PicksPage() {
 
 /* ─── Helper Components ─── */
 function ScannerSummaryStats({ picks, bullish, bearish }: { picks: any[], bullish: number, bearish: number }) {
+  if (loading) return <div className="p-8 animate-pulse text-[var(--accent-blue)] font-mono">LOADING_DATA_STREAM...</div>;
+
   return (
     <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] shadow-xl relative overflow-hidden group font-mono">
       {/* Background decoration */}
