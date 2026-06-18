@@ -8,6 +8,34 @@ router = APIRouter()
 async def get_refresh_service(redis=Depends(get_redis)):
     return IndicatorRefreshService(redis_client=redis)
 
+
+@router.get("/indicators")
+async def get_all_indicators(service: IndicatorRefreshService = Depends(get_refresh_service)):
+    """Return all 18 indicators with real values + staleness info."""
+    from ..services.indicator_refresh import INDICATOR_CONFIG
+    results = {}
+    for id in INDICATOR_CONFIG.keys():
+        results[id] = await service.get_indicator_value(id)
+    return results
+
+@router.get("/indicator/{id}")
+async def get_indicator_detail(id: str, service: IndicatorRefreshService = Depends(get_refresh_service)):
+    """Single indicator detail."""
+    try:
+        return await service.get_indicator_value(id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+@router.get("/composite")
+async def get_real_composite_score(service: IndicatorRefreshService = Depends(get_refresh_service)):
+    """Weighted composite score from real data."""
+    latest = await service._get_cached_data("composite:score:latest")
+    if not latest:
+        latest = await service._get_cached_data("composite:score:partial")
+    if not latest:
+        return await service.compute_composite_score(use_cached=True)
+    return latest
+
 @router.get("/refresh/status")
 async def get_refresh_status(service: IndicatorRefreshService = Depends(get_refresh_service)):
     return await service.get_refresh_status()
