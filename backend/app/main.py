@@ -6,11 +6,13 @@ import logging
 from .routers import options, sentiment, macro, picks, report, analyze, strategies, notifications, scanner, health
 from .mock.options_chain import get_mock_chain
 from .core.config import get_settings, validate_ibkr_startup
+from .services.scheduler import MacroScheduler
 from .services.ibkr import IBKRDependencyError, OptionChainFetcher, create_client_from_settings
 
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Options Helius API")
+macro_scheduler = MacroScheduler()
 
 
 async def startup_ibkr_lifecycle(application: FastAPI) -> None:
@@ -78,6 +80,7 @@ async def validate_optional_ibkr_config() -> None:
     """Start optional IBKR provider lifecycle without breaking fallbacks."""
 
     await startup_ibkr_lifecycle(app)
+    macro_scheduler.start()
 
 
 @app.on_event("shutdown")
@@ -85,6 +88,7 @@ async def shutdown_optional_ibkr_client() -> None:
     """Disconnect optional IBKR provider lifecycle."""
 
     await shutdown_ibkr_lifecycle(app)
+    macro_scheduler.shutdown()
 
 
 app.add_middleware(

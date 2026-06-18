@@ -787,6 +787,17 @@ class IndicatorRefreshService:
         # Simplified scoring logic (0-100)
         return 50.0 
 
+
+    async def refresh_weekly_indicators(self) -> Dict:
+        weekly_indicators = [id for id, cfg in INDICATOR_CONFIG.items() if cfg["tier"] == RefreshTier.WEEKLY]
+        results = {}
+        for id in weekly_indicators:
+            results[id] = await self.refresh_indicator(id)
+        
+        status = {"last_run": datetime.now().isoformat(), "status": "ok", "refreshed": weekly_indicators}
+        if self.redis:
+            await self.redis.hset("refresh:status", "weekly", json.dumps(status))
+        return status
     async def refresh_daily_indicators(self) -> Dict:
         daily_indicators = [id for id, cfg in INDICATOR_CONFIG.items() if cfg["tier"] == RefreshTier.DAILY]
         results = {}
