@@ -249,6 +249,40 @@ class ReconnectManager:
                 logger.exception("IBKR reconnect callback failed")
 
 
+class CircuitBreaker:
+    """Simple circuit breaker: after N consecutive failures, open the circuit
+    for a cooldown period to avoid hammering a dead upstream."""
+
+    def __init__(self, failure_threshold: int = 3, cooldown_seconds: float = 60.0):
+        self._failure_threshold = failure_threshold
+        self._cooldown = cooldown_seconds
+        self._consecutive_failures = 0
+        self._last_failure_time: Optional[float] = None
+        self._state = "closed"  # closed | open | half-open
+
+    @property
+    def state(self) -> str:
+        if self._state == "open":
+            elapsed = time.time() - (self._last_failure_time or 0)
+            if elapsed >= self._cooldown:
+                self._state = "half-open"
+        return self._state
+
+    def record_success(self) -> None:
+        self._consecutive_failures = 0
+        self._state = "closed"
+
+    def record_failure(self) -> None:
+        self._consecutive_failures += 1
+        self._last_failure_time = time.time()
+        if self._consecutive_failures >= self._failure_threshold:
+            self._state = "open"
+            logger.warning("IBKR circuit breaker OPEN after %d consecutive failures", self._consecutive_failures)
+
+    def allow_request(self) -> bool:
+        return self.state != "open"
+
+
 class IBKRClient:
     """Production-oriented async IBKR client wrapper."""
 
@@ -265,6 +299,8 @@ class IBKRClient:
         self._connected_at: Optional[float] = None
         self._reconnect_count = 0
         self._account: Optional[str] = None
+        self._circuit_breaker = CircuitBreaker(failure_threshold=3, cooldown_seconds=60.0)
+        self._health_check_task: Optional[asyncio.Task] = None
         self._reconnect_mgr.on_reconnect(self._on_reconnect)
         self._setup_error_handler()
 
@@ -297,11 +333,44 @@ class IBKRClient:
         await self._reconnect_mgr.start()
         self._connected_at = time.time()
         self._refresh_account()
+        self._circuit_breaker.record_success()
+        # Start periodic health check (every 30s)
+        if self._health_check_task is None or self._health_check_task.done():
+            self._health_check_task = asyncio.create_task(self._periodic_health_check())
 
     async def disconnect(self) -> None:
         logger.info("Disconnecting from IBKR Gateway")
+        if self._health_check_task and not self._health_check_task.done():
+            self._health_check_task.cancel()
+            try:
+                await self._health_check_task
+            except asyncio.CancelledError:
+                pass
         await self._reconnect_mgr.stop()
         self._connected_at = None
+
+    async def _periodic_health_check(self) -> None:
+        """Background task that checks connection health and triggers reconnect if stale."""
+        while True:
+            try:
+                await asyncio.sleep(30)
+                if not self.is_connected:
+                    logger.warning("IBKR health check: connection lost, triggering reconnect")
+                    self._circuit_breaker.record_failure()
+                    if self._circuit_breaker.allow_request():
+                        try:
+                            await self._reconnect_mgr.start()
+                            self._connected_at = time.time()
+                            self._circuit_breaker.record_success()
+                            logger.info("IBKR health check: reconnected successfully")
+                        except Exception as exc:
+                            logger.warning("IBKR health check reconnect failed: %s", exc)
+                    else:
+                        logger.warning("IBKR circuit breaker open, skipping reconnect attempt")
+            except asyncio.CancelledError:
+                return
+            except Exception:
+                logger.debug("IBKR health check error", exc_info=True)
 
     async def subscribe_ticker(self, contract: Any, generic_tick_list: str = "", snapshot: bool = False) -> Any:
         self._require_connected()
@@ -347,6 +416,10 @@ class IBKRClient:
             state=self._reconnect_mgr.state.name.lower(),
             timestamp=time.time(),
         )
+
+    @property
+    def circuit_breaker_state(self) -> str:
+        return self._circuit_breaker.state
 
     async def get_account_values(self) -> Dict[str, Any]:
         self._require_connected()
