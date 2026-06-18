@@ -26,6 +26,7 @@ Or as an async context manager:
 """
 
 import asyncio
+import random
 import logging
 from typing import List, Optional
 
@@ -108,9 +109,14 @@ class GreeksWatchdog:
     # ---- Internal ----
 
     async def _watch_loop(self) -> None:
-        """Main loop: sleep then check, forever."""
+        """Main loop: sleep then check, forever.
+        
+        Uses ±10% jitter on the interval to prevent synchronized polling
+        when multiple watchdog instances run concurrently.
+        """
         while True:
-            await asyncio.sleep(self._interval)
+            jitter = self._interval * 0.1 * (random.random() * 2 - 1)  # ±10%
+            await asyncio.sleep(max(1.0, self._interval + jitter))
             try:
                 await self._check_greeks()
             except asyncio.CancelledError:

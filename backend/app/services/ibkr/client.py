@@ -12,6 +12,7 @@ but packaged for the FastAPI backend:
 from __future__ import annotations
 
 import asyncio
+import random
 import logging
 import os
 import socket
@@ -350,10 +351,15 @@ class IBKRClient:
         self._connected_at = None
 
     async def _periodic_health_check(self) -> None:
-        """Background task that checks connection health and triggers reconnect if stale."""
+        """Background task that checks connection health and triggers reconnect if stale.
+        
+        Uses ±15% jitter on the 30s interval to avoid synchronized health checks
+        when multiple client instances are running.
+        """
         while True:
             try:
-                await asyncio.sleep(30)
+                jitter = 30 * 0.15 * (random.random() * 2 - 1)  # ±15% of 30s
+                await asyncio.sleep(max(5.0, 30 + jitter))
                 if not self.is_connected:
                     logger.warning("IBKR health check: connection lost, triggering reconnect")
                     self._circuit_breaker.record_failure()
