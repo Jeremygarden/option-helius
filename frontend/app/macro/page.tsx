@@ -49,7 +49,47 @@ export default function MacroPage() {
     fetchData();
   }, []);
 
-  if (loading) return <div className="p-8 animate-pulse text-[var(--accent-blue)] font-mono">LOADING_DATA_STREAM...</div>;
+  // Helper to extract a specific indicator value from macroData
+  function getIndicatorValue(id: string): string | null {
+    if (!macroData?.warning_indicators?.indicators) return null;
+    const ind = macroData.warning_indicators.indicators.find((i: any) => i.id === id);
+    return ind ? ind.value_display : null;
+  }
+
+  // Build summary cards from real data when available, fall back to static values
+  const summaryCards = [
+    {
+      label: "VIX INDEX",
+      value: getIndicatorValue("vix") ?? "14.50",
+      change: null,
+      color: "text-[var(--accent-green)]"
+    },
+    {
+      label: "YIELD CURVE (10Y-2Y)",
+      value: getIndicatorValue("yield_curve") ?? "+15bps",
+      change: null,
+      color: "text-[var(--accent-orange)]"
+    },
+    {
+      label: "DXY INDEX",
+      value: getIndicatorValue("dxy") ?? "98.5",
+      change: null,
+      color: "text-[var(--accent-blue)]"
+    },
+    {
+      label: "HY OAS",
+      value: getIndicatorValue("hy_oas") ?? "278bps",
+      change: null,
+      color: "text-[var(--accent-green)]"
+    },
+  ];
+
+  if (loading) return (
+    <div className="p-8 flex flex-col gap-2">
+      <div className="animate-pulse text-[var(--accent-blue)] font-mono text-sm">LOADING_DATA_STREAM...</div>
+      <div className="h-2 w-64 bg-[var(--bg-surface)] rounded animate-pulse" />
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-4 pb-8">
@@ -65,24 +105,20 @@ export default function MacroPage() {
         )}
       </div>
 
-      {macroData?.run_risk && (
-        <RunRiskPanel />
-      )}
+      {/* RunRiskPanel always renders — it has its own mock data and gracefully shows it */}
+      <RunRiskPanel />
 
       <BacktestTable />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "VIX INDEX", value: "14.50", change: "-2.1%", color: "text-accent-green" },
-          { label: "US 10Y YIELD", value: "4.25%", change: "+0.5%", color: "text-accent-red" },
-          { label: "DXY INDEX", value: "104.2", change: "+0.1%", color: "text-[var(--accent-blue)]" },
-          { label: "GOLD", value: "$2350", change: "+1.2%", color: "text-accent-green" },
-        ].map((item) => (
+        {summaryCards.map((item) => (
           <div key={item.label} className="card">
             <span className="text-[10px] text-[var(--accent-blue)] uppercase font-bold tracking-wide font-mono">{item.label}</span>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-xl font-bold font-mono">{item.value}</span>
-              <span className={`text-xs font-bold font-mono ${item.color}`}>{item.change}</span>
+              {item.change && (
+                <span className={`text-xs font-bold font-mono ${item.color}`}>{item.change}</span>
+              )}
             </div>
           </div>
         ))}
