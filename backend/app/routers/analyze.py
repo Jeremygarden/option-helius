@@ -4,12 +4,14 @@ from ..mock.options_chain import get_mock_chain
 from ..mock.ai_analysis import get_ai_analysis
 from ..services.scenarios import get_all_scenarios
 from ..core.cache import cached
+from ..core.validation import normalize_optional_expiry, normalize_ticker, validate_numeric_range, validate_positions_payload
 
 router = APIRouter()
 
 @router.get("/{ticker}")
 @cached("bsm_calculation")
 async def analyze_options(ticker: str):
+    ticker = normalize_ticker(ticker)
     data = get_mock_chain(ticker, "2025-06-21")
     return {
         "ticker": ticker,
@@ -19,9 +21,19 @@ async def analyze_options(ticker: str):
 
 @router.post("/scenarios/{ticker}")
 async def get_scenarios(ticker: str, positions: List[Dict[str, Any]] = Body(...)):
-    results = get_all_scenarios(positions, position_max_risk=1000)
+    normalize_ticker(ticker)
+    validated_positions = validate_positions_payload(positions)
+    results = get_all_scenarios(validated_positions, position_max_risk=1000)
     return results
 
 @router.get("/ai/{ticker}")
 async def ai_evaluate(ticker: str, strategy: str, strike: float, expiry: str):
+    ticker = normalize_ticker(ticker)
+    strategy = strategy.strip()
+    if not strategy or len(strategy) > 64:
+        from ..core.errors import validation_error
+
+        raise validation_error("strategy must be 1-64 characters", code="INVALID_STRATEGY")
+    strike = validate_numeric_range(strike, field="strike", minimum=0.01, maximum=1_000_000)
+    expiry = normalize_optional_expiry(expiry) or expiry
     return get_ai_analysis(ticker, strategy, strike, expiry)

@@ -2,6 +2,7 @@ import logging
 
 from fastapi import APIRouter, Query, Request
 
+from ..core.validation import normalize_optional_expiry, normalize_ticker
 from ..services import options_service
 from ..services.options_service import (
     OptionChainFetcher,
@@ -39,6 +40,7 @@ def _internal_error(message: str):
 async def list_expirations(request: Request, ticker: str):
     """List all available expiration dates for a ticker."""
 
+    ticker = normalize_ticker(ticker)
     _sync_service_overrides_for_tests()
     return await list_expiration_dates(request, ticker)
 
@@ -57,6 +59,8 @@ async def get_chain(
     Filtered to ATM ± atm_pct (default ±30%) to reduce payload size.
     """
 
+    ticker = normalize_ticker(ticker)
+    expiry = normalize_optional_expiry(expiry)
     _sync_service_overrides_for_tests()
     return await get_chain_data(request, ticker, expiry, strike_radius, atm_pct)
 
@@ -65,6 +69,7 @@ async def get_chain(
 async def get_options_summary(ticker: str):
     """Summary: spot, max pain, PCR, expected move, ATM IV, IV Rank, IV Percentile, GEX."""
 
+    ticker = normalize_ticker(ticker)
     try:
         return await get_options_summary_data(ticker)
     except Exception as exc:
@@ -76,6 +81,8 @@ async def get_options_summary(ticker: str):
 async def get_gex_data(ticker: str, expiry: str = Query(None)):
     """Gamma Exposure by strike (in $M)."""
 
+    ticker = normalize_ticker(ticker)
+    expiry = normalize_optional_expiry(expiry)
     try:
         return await get_gex_data_result(ticker, expiry)
     except Exception:
@@ -87,6 +94,7 @@ async def get_gex_data(ticker: str, expiry: str = Query(None)):
 async def get_iv_surface_data(request: Request, ticker: str):
     """IV surface across all expirations (for 3D chart)."""
 
+    ticker = normalize_ticker(ticker)
     _sync_service_overrides_for_tests()
     return await get_iv_surface_data_result(request, ticker)
 
@@ -95,6 +103,7 @@ async def get_iv_surface_data(request: Request, ticker: str):
 async def get_iv_stats(ticker: str):
     """IV Rank and IV Percentile for a ticker."""
 
+    ticker = normalize_ticker(ticker)
     return await get_iv_stats_data(ticker)
 
 
@@ -102,4 +111,5 @@ async def get_iv_stats(ticker: str):
 async def get_spot(ticker: str):
     """Get current spot price."""
 
+    ticker = normalize_ticker(ticker)
     return get_spot_data(ticker)

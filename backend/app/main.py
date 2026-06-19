@@ -10,6 +10,8 @@ from .mock.options_chain import get_mock_chain
 from .core.cache import close_redis, init_redis
 from .core.config import get_settings, validate_ibkr_startup
 from .core.db import close_db_pool, get_database_settings, init_db_pool
+from .core.middleware import InMemoryRateLimitMiddleware, RequestSizeLimitMiddleware
+from .core.validation import normalize_ticker
 from .services.db_schema import init_timescale_schema
 from .services.scheduler import MacroScheduler
 from .services.ibkr import IBKRDependencyError, OptionChainFetcher, create_client_from_settings
@@ -150,6 +152,8 @@ async def lifespan(application: FastAPI):
 
 app = FastAPI(title="Options Helius API", lifespan=lifespan)
 
+app.add_middleware(InMemoryRateLimitMiddleware, limit=120, window_seconds=60)
+app.add_middleware(RequestSizeLimitMiddleware, max_body_bytes=1_048_576)
 
 app.add_middleware(
     CORSMiddleware,
@@ -176,6 +180,7 @@ async def root():
 
 @app.websocket("/ws/chain/{ticker}")
 async def websocket_endpoint(websocket: WebSocket, ticker: str):
+    ticker = normalize_ticker(ticker)
     await websocket.accept()
     try:
         while True:

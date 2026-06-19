@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from ..services.notification_service import NotificationService
 from ..core.errors import upstream_unavailable
+from ..core.validation import validate_webhook_url
 
 router = APIRouter()
 notification_service = NotificationService()
@@ -11,11 +12,20 @@ class NotificationTestRequest(BaseModel):
     webhook_url: str
     discord_user_id: Optional[str] = None
 
+    def __init__(self, **data):
+        super().__init__(**data)
+        self.webhook_url = validate_webhook_url(self.webhook_url)
+
 class NotificationSettingsRequest(BaseModel):
     discord_webhook: Optional[str] = None
     discord_user_id: Optional[str] = None
     weekly_picks_enabled: bool
     macro_alert_enabled: bool
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        if self.discord_webhook:
+            self.discord_webhook = validate_webhook_url(self.discord_webhook, field="discord_webhook")
 
 @router.post("/test")
 async def test_notification(request: NotificationTestRequest):

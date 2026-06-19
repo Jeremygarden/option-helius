@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from ..services.strategy_scorer import scan_ticker
 from ..services.options_scanner import get_direction, get_iv_environment
 from ..core.errors import upstream_unavailable, internal_error
+from ..core.validation import normalize_ticker
 
 router = APIRouter(prefix="/api/scanner", tags=["scanner"])
 
@@ -9,7 +10,7 @@ router = APIRouter(prefix="/api/scanner", tags=["scanner"])
 @router.get("/{ticker}")
 async def scan(ticker: str):
     """Full scan: direction + IV + strategy filter + scored candidates."""
-    ticker = ticker.upper()
+    ticker = normalize_ticker(ticker)
     try:
         result = scan_ticker(ticker)
         return result
@@ -22,7 +23,7 @@ async def scan(ticker: str):
 @router.get("/{ticker}/direction")
 async def direction_only(ticker: str):
     """Just the direction analysis."""
-    ticker = ticker.upper()
+    ticker = normalize_ticker(ticker)
     try:
         d = get_direction(ticker)
         return {

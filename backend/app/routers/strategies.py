@@ -1,13 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from typing import List, Dict, Any
 from ..services.strategy_selector import StrategySelector
+from ..core.validation import normalize_ticker
 
 router = APIRouter()
 selector = StrategySelector()
 
 @router.get("/{ticker}", response_model=List[Dict[str, Any]])
 async def get_strategies(ticker: str):
-    if ticker.upper() == "NVDA":
+    ticker = normalize_ticker(ticker)
+    if ticker == "NVDA":
         iv_rank = 78
         skew = 6.5
         net_gex = 1200000
@@ -35,6 +37,11 @@ async def get_strategies(ticker: str):
 
 @router.get("/{ticker}/detail/{strategy_id}")
 async def get_strategy_detail(ticker: str, strategy_id: str):
+    ticker = normalize_ticker(ticker)
+    if not strategy_id or len(strategy_id) > 80:
+        from ..core.errors import validation_error
+
+        raise validation_error("strategy_id must be 1-80 characters", code="INVALID_STRATEGY")
     iv_rank = 78
     skew = 6.5
     net_gex = 1200000

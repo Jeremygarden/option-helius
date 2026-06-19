@@ -4,6 +4,7 @@ from datetime import date, timedelta
 from typing import Any, Dict, List, Optional
 
 from ..mock.picks import get_mock_picks
+from ..core.validation import normalize_ticker, parse_ticker_list
 WATCHLIST = ["SPY", "QQQ", "NVDA", "TSLA", "AAPL", "META", "MSFT"]
 DEFAULT_TICKERS = ["NVDA", "SPY", "AAPL", "TSLA", "QQQ"]
 
@@ -143,7 +144,7 @@ def get_picks_response(tickers: Optional[List[str]] = None) -> Dict[str, Any]:
 def parse_tickers(tickers: Optional[str]) -> Optional[List[str]]:
     """Normalize a comma-separated ticker query param for service calls."""
 
-    return [t.strip().upper() for t in tickers.split(",") if t.strip()] if tickers else None
+    return parse_ticker_list(tickers)
 
 
 async def get_cached_picks_response(tickers: Optional[str] = None) -> Dict[str, Any]:
@@ -167,7 +168,7 @@ async def get_cached_picks_response(tickers: Optional[str] = None) -> Dict[str, 
 def scan_single_ticker_result(ticker: str) -> Dict[str, Any]:
     """Run live strategy scan for one ticker, falling back to picks payload on error."""
 
-    normalized = ticker.upper()
+    normalized = normalize_ticker(ticker)
     try:
         from ..services.strategy_scorer import scan_ticker
 

@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from ..mock.options_chain import get_mock_chain
 from ..mock.macro import get_mock_macro
 from ..core.cache import cached
+from ..core.validation import normalize_ticker, validate_numeric_range
 from ..services.scenarios import get_all_scenarios, scenario_pnl
 
 router = APIRouter()
@@ -9,6 +10,7 @@ router = APIRouter()
 @router.get("/{ticker}")
 @cached("options_chain")
 async def get_report(ticker: str):
+    ticker = normalize_ticker(ticker)
     chain_data = get_mock_chain(ticker, "2025-06-21")
     macro_data = get_mock_macro()
 
@@ -58,6 +60,11 @@ async def get_custom_scenario(
     days: int = Query(1, alias="dt"),
     rate_change: float = Query(0, alias="dr")
 ):
+    ticker = normalize_ticker(ticker)
+    price_change = validate_numeric_range(price_change, field="ds", minimum=-100, maximum=100)
+    iv_change = validate_numeric_range(iv_change, field="dv", minimum=-5, maximum=5)
+    days = int(validate_numeric_range(days, field="dt", minimum=0, maximum=3650))
+    rate_change = validate_numeric_range(rate_change, field="dr", minimum=-1, maximum=1)
     spot_price = 580.0  # REVIEW: should come from real data source
     mock_positions = [
         {
