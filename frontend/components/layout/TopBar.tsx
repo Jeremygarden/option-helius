@@ -42,12 +42,12 @@ export default function TopBar() {
 
         {/* Ticker strip */}
         <div
-          className="hidden md:flex items-center gap-4 rounded-lg px-3 py-1.5 border border-[var(--accent-blue)]"
+          className="hidden md:flex items-center gap-3 rounded-lg px-3 py-1.5 border border-[var(--border-default)] shadow-sm"
           style={{ background: "var(--bg-surface)" }}
         >
           {TICKERS.map((t, i) => (
-            <div key={t.sym} className="flex items-center gap-4.5">
-              {i > 0 && <div className="w-px h-3.5 bg-[var(--accent-blue)]" />}
+            <div key={t.sym} className="flex items-center gap-1.5">
+              {i > 0 && <div className="w-px h-3.5 bg-[var(--border-default)]" />}
               <span className="text-[11px] font-mono" style={{ color: "var(--text-muted)" }}>
                 {t.sym}
               </span>
@@ -79,7 +79,7 @@ export default function TopBar() {
             type="text"
             placeholder="搜索标的..."
             defaultValue="NVDA"
-            className="w-36 rounded-lg py-1.5 pl-8 pr-3 text-[12px] font-mono border border-[var(--border-default)] transition-all focus:outline-none focus:border-[var(--accent-blue)] focus:w-48"
+            className="w-36 rounded-lg py-1.5 pl-8 pr-3 text-[12px] font-mono border border-[var(--border-default)] transition-all placeholder:text-[var(--text-placeholder)] focus:outline-none focus:border-[var(--accent-blue)] focus:ring-2 focus:ring-[var(--accent-blue)]/30 focus:w-48"
             style={{
               background: "var(--bg-surface)",
               color: "var(--text-primary)",
@@ -90,31 +90,13 @@ export default function TopBar() {
         {/* Action icon buttons */}
         <div className="flex items-center gap-4">
           <button
-            className="p-1.5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
-            style={{ color: "var(--text-muted)" }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
-              (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.background = "transparent";
-              (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
-            }}
+            className="p-1.5 rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 focus-visible:outline-none"
             aria-label="通知"
           >
             <Bell size={16} />
           </button>
           <button
-            className="p-1.5 rounded-lg transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
-            style={{ color: "var(--text-muted)" }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement).style.background = "var(--bg-elevated)";
-              (e.currentTarget as HTMLElement).style.color = "var(--text-primary)";
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement).style.background = "transparent";
-              (e.currentTarget as HTMLElement).style.color = "var(--text-muted)";
-            }}
+            className="p-1.5 rounded-lg text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)] focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 focus-visible:outline-none"
             aria-label="设置"
           >
             <Settings size={16} />
@@ -122,8 +104,9 @@ export default function TopBar() {
 
           {/* Avatar */}
           <div
-            className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-mono font-bold ml-1 border border-[var(--border-default)] cursor-pointer"
-            style={{ background: "var(--bg-elevated)", color: "var(--text-secondary)" }}
+            className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-mono font-bold ml-1 border border-[var(--border-default)] bg-[var(--bg-elevated)] text-[var(--text-secondary)] cursor-pointer transition-colors hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)]"
+            role="button"
+            aria-label="User profile"
           >
             JJ
           </div>
