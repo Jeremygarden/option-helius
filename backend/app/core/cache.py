@@ -38,20 +38,56 @@ CACHE_TTL = {
 }
 
 
-async def get_redis() -> Optional[Any]:
+async def init_redis() -> Optional[Any]:
+    """Initialize and ping the shared Redis client.
+
+    Redis remains optional for local/test deployments. Failures are logged and
+    callers transparently behave as cache misses.
+    """
+
     global redis_client
     if redis is None:
+        logger.info("redis.asyncio not installed; Redis cache disabled")
         return None
-    if redis_client is None:
-        try:
-            redis_client = redis.from_url(REDIS_URL, decode_responses=True, socket_connect_timeout=2)
-            # Test connection
-            await redis_client.ping()
-            logger.info(f"Redis connected: {REDIS_URL}")
-        except Exception as e:
-            logger.warning(f"Redis unavailable ({e}), using in-memory cache fallback")
-            redis_client = None
+    if redis_client is not None:
+        return redis_client
+    try:
+        redis_client = redis.from_url(
+            REDIS_URL,
+            decode_responses=True,
+            socket_connect_timeout=2,
+            socket_timeout=2,
+            health_check_interval=30,
+        )
+        await redis_client.ping()
+        logger.info("Redis connected: %s", REDIS_URL)
+    except Exception as e:
+        logger.warning("Redis unavailable (%s), using cache-miss fallback", e)
+        redis_client = None
     return redis_client
+
+
+async def close_redis() -> None:
+    """Close the shared Redis client during application shutdown."""
+
+    global redis_client
+    if redis_client is None:
+        return
+    try:
+        close = getattr(redis_client, "aclose", None) or getattr(redis_client, "close", None)
+        if close is not None:
+            result = close()
+            if hasattr(result, "__await__"):
+                await result
+        logger.info("Redis connection closed")
+    except Exception:
+        logger.exception("Redis close failed")
+    finally:
+        redis_client = None
+
+
+async def get_redis() -> Optional[Any]:
+    return await init_redis()
 
 
 async def get_cached(key: str) -> Optional[Any]:

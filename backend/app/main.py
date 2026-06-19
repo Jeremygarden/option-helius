@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
@@ -5,6 +7,7 @@ import json
 import logging
 from .routers import options, sentiment, macro, picks, report, analyze, strategies, notifications, scanner, health
 from .mock.options_chain import get_mock_chain
+from .core.cache import close_redis, init_redis
 from .core.config import get_settings, validate_ibkr_startup
 from .core.db import close_db_pool, get_database_settings, init_db_pool
 from .services.db_schema import init_timescale_schema
@@ -13,7 +16,6 @@ from .services.ibkr import IBKRDependencyError, OptionChainFetcher, create_clien
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Options Helius API")
 macro_scheduler = MacroScheduler()
 
 
@@ -104,22 +106,49 @@ async def shutdown_database_lifecycle(application: FastAPI) -> None:
     application.state.db_pool = None
 
 
-@app.on_event("startup")
-async def validate_optional_ibkr_config() -> None:
-    """Start optional providers without breaking fallback-only deployments."""
+async def startup_redis_lifecycle(application: FastAPI) -> None:
+    """Initialize optional Redis cache before services start using it."""
 
-    await startup_database_lifecycle(app)
-    await startup_ibkr_lifecycle(app)
+    application.state.redis_client = await init_redis()
+
+
+async def shutdown_redis_lifecycle(application: FastAPI) -> None:
+    """Close optional Redis cache during shutdown."""
+
+    await close_redis()
+    application.state.redis_client = None
+
+
+async def startup_application(application: FastAPI) -> None:
+    """Start all application providers in dependency order."""
+
+    await startup_redis_lifecycle(application)
+    await startup_database_lifecycle(application)
+    await startup_ibkr_lifecycle(application)
     macro_scheduler.start()
 
 
-@app.on_event("shutdown")
-async def shutdown_optional_ibkr_client() -> None:
-    """Disconnect optional provider lifecycles."""
+async def shutdown_application(application: FastAPI) -> None:
+    """Shutdown all application providers in reverse dependency order."""
 
-    await shutdown_ibkr_lifecycle(app)
-    await shutdown_database_lifecycle(app)
-    macro_scheduler.shutdown()
+    try:
+        macro_scheduler.shutdown()
+    finally:
+        await shutdown_ibkr_lifecycle(application)
+        await shutdown_database_lifecycle(application)
+        await shutdown_redis_lifecycle(application)
+
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    await startup_application(application)
+    try:
+        yield
+    finally:
+        await shutdown_application(application)
+
+
+app = FastAPI(title="Options Helius API", lifespan=lifespan)
 
 
 app.add_middleware(
