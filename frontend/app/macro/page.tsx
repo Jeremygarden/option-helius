@@ -123,7 +123,8 @@ export default function MacroPage() {
           <button
             onClick={() => setRetryCount(c => c + 1)}
             disabled={loading}
-            className="h-8 w-8 flex items-center justify-center rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)] active:scale-95 disabled:opacity-50"
+            className="h-9 w-9 flex items-center justify-center rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] text-[var(--text-secondary)] transition hover:bg-[var(--bg-base)] hover:text-[var(--text-primary)] active:scale-95 shadow-sm focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 focus-visible:outline-none disabled:opacity-50"
+            aria-label="Refresh macro data"
             title="Refresh macro data"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />

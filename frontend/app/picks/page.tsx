@@ -289,7 +289,7 @@ const PrimaryButton = ({ children, onClick, disabled, loading, icon: Icon }: any
     type="button"
     onClick={onClick}
     disabled={disabled}
-    className="bg-[var(--accent-blue)] hover:brightness-110 text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 whitespace-nowrap transition-all shadow-lg shadow-blue-900/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)] outline-none"
+    className="bg-[var(--accent-blue)] hover:brightness-110 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 whitespace-nowrap transition-all shadow-md shadow-[var(--accent-blue)]/20 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)] outline-none"
   >
     {Icon && <Icon size={16} className={loading ? "animate-spin" : ""} />}
     {children}
