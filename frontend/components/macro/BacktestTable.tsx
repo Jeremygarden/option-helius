@@ -57,24 +57,24 @@ const BacktestTable: React.FC<{ data?: BacktestEvent[] }> = ({ data = [] }) => {
   };
 
   return (
-    <div className="mt-8 overflow-hidden rounded-lg border border-slate-700 bg-slate-900/50">
-      <div className="px-4 py-3 border-b border-slate-700 flex justify-between items-center">
+    <div className="mt-8 overflow-hidden rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)]">
+      <div className="px-4 py-3 border-b border-[var(--border-default)] flex justify-between items-center">
         <div>
-          <h3 className="text-lg font-medium text-slate-100">4模型历史回测对比 (Multi-Model Backtest)</h3>
-          <p className="text-xs text-slate-400 mt-1">
+          <h3 className="text-sm font-bold text-[var(--text-primary)] uppercase tracking-wide font-sans">4模型历史回测对比 (Multi-Model Backtest)</h3>
+          <p className="text-xs text-[var(--text-muted)] mt-1">
             对比不同指标权重与阈值组合在过去 100 年重大市场波动中的预警表现。
           </p>
         </div>
         <button 
           onClick={() => setShowFalsePositivesOnly(!showFalsePositivesOnly)}
-          className={`px-3 py-1 rounded text-xs transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none ${showFalsePositivesOnly ? 'bg-blue-600 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+          className={`px-3 py-1 rounded text-xs transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 outline-none ${showFalsePositivesOnly ? 'bg-[var(--accent-blue)] text-white' : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:bg-[var(--bg-base)] hover:text-[var(--text-primary)] border border-[var(--border-default)]'}`}
         >
           {showFalsePositivesOnly ? '显示全部事件' : '仅显示误报分析 (2011/2015)'}
         </button>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="bg-slate-800 text-slate-300">
+          <thead className="bg-[var(--bg-elevated)] text-[var(--text-secondary)]">
             <tr>
               <th className="px-4 py-2 font-medium">时间</th>
               <th className="px-4 py-2 font-medium">事件</th>
@@ -86,11 +86,11 @@ const BacktestTable: React.FC<{ data?: BacktestEvent[] }> = ({ data = [] }) => {
               <th className="px-4 py-2 font-medium">1年后回报</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800">
+          <tbody className="divide-y divide-[var(--border-muted)]">
             {filteredData.map((row, idx) => (
-              <tr key={idx} className="hover:bg-slate-800/50 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none">
-                <td className="px-4 py-2 text-slate-400">{row.date}</td>
-                <td className="px-4 py-2 font-medium text-slate-200">{row.event}</td>
+              <tr key={idx} className="hover:bg-[var(--bg-elevated)]/40 transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 outline-none">
+                <td className="px-4 py-2 text-[var(--text-muted)] tabular-nums font-mono text-xs">{row.date}</td>
+                <td className="px-4 py-2 font-medium text-[var(--text-primary)] text-xs">{row.event}</td>
                 
                 {/* Model A */}
                 <td className="px-4 py-2">
@@ -128,13 +128,13 @@ const BacktestTable: React.FC<{ data?: BacktestEvent[] }> = ({ data = [] }) => {
             ))}
           </tbody>
           {stats && (
-            <tfoot className="bg-slate-800/50 font-bold border-t border-slate-700">
+            <tfoot className="bg-[var(--bg-elevated)]/60 font-bold border-t border-[var(--border-default)]">
               <tr>
-                <td className="px-4 py-3 text-slate-300" colSpan={2}>模型准确率 (Accuracy)</td>
-                <td className="px-4 py-3 text-blue-400">{stats.model_a}</td>
-                <td className="px-4 py-3 text-blue-400">{stats.model_b}</td>
-                <td className="px-4 py-3 text-blue-400">{stats.model_c}</td>
-                <td className="px-4 py-3 text-[var(--accent-green)]">{stats.model_d}</td>
+                <td className="px-4 py-3 text-[var(--text-secondary)] uppercase tracking-wide text-xs" colSpan={2}>模型准确率 (Accuracy)</td>
+                <td className="px-4 py-3 text-[var(--accent-blue)] tabular-nums font-mono">{stats.model_a}</td>
+                <td className="px-4 py-3 text-[var(--accent-blue)] tabular-nums font-mono">{stats.model_b}</td>
+                <td className="px-4 py-3 text-[var(--accent-blue)] tabular-nums font-mono">{stats.model_c}</td>
+                <td className="px-4 py-3 text-[var(--accent-green)] tabular-nums font-mono">{stats.model_d}</td>
                 <td className="px-4 py-3" colSpan={2}></td>
               </tr>
             </tfoot>

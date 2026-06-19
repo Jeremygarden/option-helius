@@ -7,10 +7,10 @@ import { ChainResponse } from "@/lib/chainData";
 type OIVolChartProps = { chain?: ChainResponse | null; loading?: boolean };
 type Mode = "bars" | "heatmap";
 
-const COLOR_CALL = "#58a6ff";       // accent-blue
-const COLOR_PUT = "#f06292";        // accent-pink
-const COLOR_CALL_LIGHT = "#7cc4ff"; // lighter blue for volume
-const COLOR_PUT_LIGHT = "#f7b3d0";  // lighter pink for volume
+const COLOR_CALL = "#3fb950";       // accent-green (bullish call OI)
+const COLOR_PUT = "#f85149";        // accent-red (bearish put OI)
+const COLOR_CALL_LIGHT = "#3fb95066"; // dimmed green for call volume
+const COLOR_PUT_LIGHT = "#f8514966";  // dimmed red for put volume
 const COLOR_GRID = "#21262d";       // border-muted
 const COLOR_AXIS = "#8b949e";       // text-secondary
 
