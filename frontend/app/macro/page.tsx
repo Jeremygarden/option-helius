@@ -93,7 +93,7 @@ export default function MacroPage() {
     <div className="flex flex-col gap-4 pb-8">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold font-sans">宏观概览
-          <span className="text-[var(--accent-blue)] text-base font-normal ml-2">Macro Dashboard</span>
+          <span className="text-[var(--text-muted)] text-base font-normal ml-2 font-mono uppercase tracking-wider">Macro Dashboard</span>
         </h1>
       </div>
       {/* Skeleton loading state for each section */}
@@ -111,7 +111,7 @@ export default function MacroPage() {
     <div className="flex flex-col gap-4 pb-8">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl font-bold font-sans">宏观概览
-          <span className="text-[var(--accent-blue)] text-base font-normal ml-2">Macro Dashboard</span>
+          <span className="text-[var(--text-muted)] text-base font-normal ml-2 font-mono uppercase tracking-wider">Macro Dashboard</span>
         </h1>
         <div className="flex items-center gap-2">
           {error && (
@@ -139,11 +139,11 @@ export default function MacroPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map((item) => (
           <div key={item.label} className="card">
-            <span className="text-[10px] text-[var(--accent-blue)] uppercase font-bold tracking-wide font-mono">{item.label}</span>
+            <span className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wide font-mono">{item.label}</span>
             <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-xl font-bold font-mono">{item.value}</span>
+              <span className={`text-xl font-bold font-mono tabular-nums ${item.color}`}>{item.value}</span>
               {item.change && (
-                <span className={`text-xs font-bold font-mono ${item.color}`}>{item.change}</span>
+                <span className="text-xs font-bold font-mono text-[var(--text-secondary)]">{item.change}</span>
               )}
             </div>
           </div>
@@ -152,28 +152,29 @@ export default function MacroPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 card">
-           <h3 className="text-sm font-semibold mb-4 font-sans">收益率曲线 / Yield Curve (1M - 30Y)</h3>
+           <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--text-secondary)] mb-4 font-sans">收益率曲线 <span className="text-[var(--text-muted)]">/ Yield Curve (1M - 30Y)</span></h3>
            <div className="h-64 border-l border-b border-[var(--border-default)] relative rounded">
-              <div className="absolute inset-0 flex items-center justify-center text-[var(--accent-blue)] text-4xl font-bold uppercase rotate-12">
-                 Coming Soon
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--text-muted)] gap-2">
+                 <span className="text-xs font-mono uppercase tracking-widest text-[var(--text-muted)]">Yield curve visualization</span>
+                 <span className="text-2xl font-bold uppercase text-[var(--text-secondary)] tracking-tight">Coming Soon</span>
               </div>
            </div>
         </div>
         <div className="card">
-           <h3 className="text-sm font-semibold mb-4 font-sans">当前市场状态 / Market Regime</h3>
+           <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-[var(--text-secondary)] mb-4 font-sans">当前市场状态 <span className="text-[var(--text-muted)]">/ Market Regime</span></h3>
            <div className="flex flex-col gap-4 mt-8">
               <div className="flex flex-col items-center">
-                 <div className="w-32 h-32 rounded-full border-4 border-accent-teal flex items-center justify-center text-accent-teal font-bold p-4 transition-all">
+                 <div className="w-32 h-32 rounded-full border-4 border-accent-teal/60 bg-accent-teal/5 flex items-center justify-center text-center text-accent-teal font-bold font-mono text-xs px-3 transition-all">
                     Low Vol Expansion
                  </div>
-                 <span className="mt-4 text-sm font-medium">Risk-On Mode</span>
+                 <span className="mt-4 text-sm font-medium text-[var(--text-primary)]">Risk-On Mode</span>
               </div>
               <div className="space-y-4 mt-4">
                  <div className="flex justify-between text-xs">
-                    <span className="text-[var(--accent-blue)]">Bullish Prob.</span>
-                    <span className="text-accent-green font-mono">78%</span>
+                    <span className="text-[var(--text-muted)] font-mono uppercase tracking-wider">Bullish Prob.</span>
+                    <span className="text-[var(--accent-green)] font-mono font-bold tabular-nums">78%</span>
                  </div>
-                 <div className="w-full h-1 bg-[var(--accent-blue)] rounded-full overflow-hidden">
+                 <div className="w-full h-1.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
                     <div className="h-full bg-accent-teal transition-all" style={{ width: '78%' }} />
                  </div>
               </div>

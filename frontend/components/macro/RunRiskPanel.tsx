@@ -508,7 +508,7 @@ export default function RunRiskPanel() {
   const nuclearAlert = sentinels.filter(s => s.triggered).length >= 2;
 
   return (
-    <div className="space-y-4 p-4 bg-[var(--bg-base)] min-h-screen text-white font-mono">
+    <div className="space-y-4 p-4 bg-[var(--bg-base)] rounded-2xl border border-[var(--border-default)] text-[var(--text-primary)] font-mono">
       {/* Nuclear Alert at the very top if triggered */}
       {nuclearAlert && (
         <div className="rounded-2xl border-2 border-red-500 bg-red-950/80 p-4 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)] mb-4">
@@ -550,7 +550,7 @@ export default function RunRiskPanel() {
           {/* Score bar */}
           <div className="w-full mt-3 h-2 bg-gray-800 rounded-full overflow-hidden">
             <div className="h-full rounded-full transition-all duration-700"
-              style={{ width: `${data.score}%`, background: `linear-gradient(to right, var(--accent-blue), var(--accent-blue), var(--accent-blue), var(--accent-blue))` }} />
+              style={{ width: `${data.score}%`, background: `linear-gradient(to right, var(--accent-green) 0%, var(--accent-yellow) 33%, var(--accent-orange) 66%, var(--accent-red) 100%)` }} />
           </div>
           <div className="flex justify-between w-full text-[10px] text-gray-600 mt-0.5">
             <span>🟢 安全</span><span>🟡 警戒</span><span>🟠 预警</span><span>🔴 危险</span>
