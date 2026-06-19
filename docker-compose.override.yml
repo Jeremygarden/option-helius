@@ -19,6 +19,7 @@ services:
     image: option-helius-ibgateway:latest
     container_name: ibgateway
     restart: unless-stopped
+    init: true
     environment:
       - IBKR_USERNAME=${IBKR_USERNAME:-}
       - IBKR_PASSWORD=${IBKR_PASSWORD:-}
@@ -28,8 +29,8 @@ services:
       - TZ=${TZ:-America/New_York}
       - VNC_PASSWORD=${VNC_PASSWORD:-changeme123}
     ports:
-      - "${PAPER_PORT:-4002}:4002"
-      - "${VNC_PORT:-6080}:6080"
+      - "127.0.0.1:${PAPER_PORT:-4002}:4002"
+      - "127.0.0.1:${VNC_PORT:-6080}:6080"
     volumes:
       - ibgateway-settings:/home/ibgateway/.java
       - ibgateway-ibc:/home/ibgateway/ibc
@@ -41,6 +42,14 @@ services:
       start_period: 90s
     networks:
       - option-helius-net
+    mem_limit: 2g
+    cpus: "1.00"
+    pids_limit: 512
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   ibgateway-settings:

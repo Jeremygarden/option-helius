@@ -1,11 +1,19 @@
+x-default-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   backend:
     build: ./backend
+    restart: unless-stopped
+    init: true
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       - REDIS_URL=redis://redis:6379/0
-      - DATABASE_URL=postgres://postgres:postgres@timescaledb:5432/postgres
+      - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD:-postgres}@timescaledb:5432/postgres
       - FLASHALPHA_API_KEY=${FLASHALPHA_API_KEY:-}
       - ALPHAVANTAGE_API_KEY=${ALPHAVANTAGE_API_KEY:-}
       - IBKR_ENABLED=${IBKR_ENABLED:-false}
@@ -26,11 +34,17 @@ services:
       start_period: 30s
     networks:
       - option-helius-net
+    mem_limit: 1g
+    cpus: "1.00"
+    pids_limit: 512
+    logging: *default-logging
 
   frontend:
     build: ./frontend
+    restart: unless-stopped
+    init: true
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:8000
     depends_on:
@@ -38,11 +52,19 @@ services:
         condition: service_healthy
     networks:
       - option-helius-net
+    mem_limit: 512m
+    cpus: "0.75"
+    pids_limit: 256
+    logging: *default-logging
 
   redis:
     image: redis:alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1"]
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -50,21 +72,38 @@ services:
       retries: 5
     networks:
       - option-helius-net
+    mem_limit: 256m
+    cpus: "0.50"
+    pids_limit: 128
+    logging: *default-logging
 
   timescaledb:
     image: timescale/timescaledb:latest-pg15
+    restart: unless-stopped
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB:-postgres}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-postgres}"]
       interval: 5s
       timeout: 3s
       retries: 10
     networks:
       - option-helius-net
+    mem_limit: 2g
+    cpus: "1.50"
+    pids_limit: 256
+    logging: *default-logging
 
 networks:
   option-helius-net:
     driver: bridge
+    internal: false
+
+volumes:
+  redis-data:
+  timescaledb-data:
