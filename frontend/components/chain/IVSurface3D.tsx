@@ -5,17 +5,26 @@ import { useMemo, useState } from "react";
 import type { Layout } from "plotly.js";
 import { IVSurfacePoint, formatIV } from "@/lib/chainData";
 
-const Plot = dynamic(() => import("react-plotly.js"), {
-  ssr: false,
-  loading: () => (
-    <div
-      className="flex h-full items-center justify-center text-xs font-mono"
-      style={{ color: "var(--text-muted)" }}
-    >
-      Loading 3D surface…
-    </div>
-  ),
-});
+const Plot = dynamic(
+  async () => {
+    const [{ default: createPlotlyComponent }, Plotly] = await Promise.all([
+      import("react-plotly.js/factory"),
+      import("plotly.js-dist-min"),
+    ]);
+    return createPlotlyComponent(Plotly);
+  },
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="flex h-full items-center justify-center text-xs font-mono"
+        style={{ color: "var(--text-muted)" }}
+      >
+        Loading 3D surface…
+      </div>
+    ),
+  },
+);
 
 type Mode = "3d" | "money" | "table";
 type IVSurface3DProps = { data: IVSurfacePoint[]; spot?: number; loading?: boolean };

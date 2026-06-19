@@ -1,7 +1,28 @@
-.venv
-__pycache__
-*.pyc
-*.pyo
+# VCS / editor
 .git
+.gitignore
 *.md
-.pytest_cache
+.env
+.env.*
+!.env.example
+
+# Python caches and local envs
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+
+# Tests and local artifacts are not needed in runtime images
+tests/
+logs/
+*.log
+
+# Docker metadata
+Dockerfile*
+docker-compose*.yml

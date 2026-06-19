@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   // Proxy /api/* requests to the backend service when inside Docker
   // NEXT_PUBLIC_API_URL is set to http://backend:8000 in docker-compose
   // But browser-side fetch can't resolve 'backend' hostname.
