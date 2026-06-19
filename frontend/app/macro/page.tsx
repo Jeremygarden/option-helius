@@ -139,7 +139,7 @@ export default function MacroPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {summaryCards.map((item) => (
-          <div key={item.label} className="card">
+          <div key={item.label} className="card card-hover">
             <span className="text-[10px] text-[var(--text-muted)] uppercase font-bold tracking-wide font-mono">{item.label}</span>
             <div className="flex items-baseline gap-2 mt-1">
               <span className={`text-xl font-bold font-mono tabular-nums ${item.color}`}>{item.value}</span>
