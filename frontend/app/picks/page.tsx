@@ -325,8 +325,8 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
       {/* Header Info */}
       <div className="px-6 py-5 border-b border-[var(--border-default)] flex items-center justify-between">
         <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
-          <h2 className="text-2xl font-black font-mono tracking-tighter text-[var(--accent-blue)] font-sans">
-            {pick.ticker} <span className="text-[var(--accent-blue)] font-bold text-xs ml-2 tracking-widest uppercase font-mono">{pick.strategyName || meta.cn}</span>
+          <h2 className="text-2xl font-black font-mono tracking-tighter text-[var(--text-primary)] font-sans">
+            {pick.ticker} <span className="text-[var(--text-muted)] font-bold text-xs ml-2 tracking-widest uppercase font-mono">{pick.strategyName || meta.cn}</span>
           </h2>
           <div 
             className="px-2.5 py-1 rounded-lg text-[10px] font-black font-mono border"
@@ -337,12 +337,12 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
         </div>
         <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
           <div className="text-right">
-            <div className="text-[10px] text-[var(--accent-blue)] font-black tracking-[0.2em] uppercase mb-1">Target Price</div>
-            <div className="text-lg font-black font-mono text-[var(--accent-blue)] leading-none tabular-nums font-mono">{pick.target || "--"}</div>
+            <div className="text-[10px] text-[var(--text-muted)] font-black tracking-[0.2em] uppercase mb-1">Target Price</div>
+            <div className="text-lg font-black font-mono text-[var(--color-call)] leading-none tabular-nums">{pick.target || "--"}</div>
           </div>
           <div className="text-right border-l border-[var(--border-default)] pl-8">
-            <div className="text-[10px] text-[var(--accent-blue)] font-black tracking-[0.2em] uppercase mb-1">Stop Loss</div>
-            <div className="text-lg font-black font-mono text-[var(--accent-blue)] leading-none tabular-nums font-mono">{pick.stop || "--"}</div>
+            <div className="text-[10px] text-[var(--text-muted)] font-black tracking-[0.2em] uppercase mb-1">Stop Loss</div>
+            <div className="text-lg font-black font-mono text-[var(--color-put)] leading-none tabular-nums">{pick.stop || "--"}</div>
           </div>
         </div>
       </div>
@@ -357,17 +357,17 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
             { label: "Capital Req.", value: pick.capitalText || "--", sub: "Margin Needed", color: "var(--text-primary)" },
           ].map(m => (
             <div key={m.label} className="p-4 rounded-lg bg-[var(--bg-base)] border border-[var(--border-default)]">
-              <div className="text-[10px] font-bold text-[var(--accent-blue)] tracking-widest uppercase mb-1 font-mono">{m.label}</div>
-              <div className="text-lg font-bold font-mono mb-1 font-mono" style={{ color: m.color }}>{m.value}</div>
-              <div className="text-[10px] text-[var(--accent-blue)] font-mono">{m.sub}</div>
+              <div className="text-[10px] font-bold text-[var(--text-muted)] tracking-widest uppercase mb-1 font-mono">{m.label}</div>
+              <div className="text-lg font-bold font-mono mb-1 tabular-nums" style={{ color: m.color }}>{m.value}</div>
+              <div className="text-[10px] text-[var(--text-muted)] font-mono">{m.sub}</div>
             </div>
           ))}
         </div>
 
         {/* Middle: Greeks 6-grid */}
         <div className="lg:col-span-3">
-          <div className="text-[10px] font-bold text-[var(--accent-blue)] tracking-widest uppercase mb-3">Greeks Analysis</div>
-          <div className="grid grid-cols-2 gap-px bg-[var(--accent-blue)] border border-[var(--border-default)] rounded-lg overflow-hidden">
+          <div className="text-[10px] font-bold text-[var(--text-muted)] tracking-widest uppercase mb-3">Greeks Analysis</div>
+          <div className="grid grid-cols-2 gap-px bg-[var(--border-default)] border border-[var(--border-default)] rounded-lg overflow-hidden">
             {[
               { label: "Delta", value: fmtNum(greeks.delta, 3) },
               { label: "Gamma", value: fmtNum(greeks.gamma, 4) },
@@ -377,8 +377,8 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
               { label: "Rho", value: "0.002" },
             ].map(g => (
               <div key={g.label} className="bg-[var(--bg-surface)] p-4">
-                <div className="text-[9px] text-[var(--accent-blue)] uppercase font-bold mb-1 font-mono">{g.label}</div>
-                <div className="text-xs font-bold font-mono text-[var(--accent-blue)] font-mono">{g.value}</div>
+                <div className="text-[9px] text-[var(--text-muted)] uppercase font-bold mb-1 font-mono">{g.label}</div>
+                <div className="text-xs font-bold font-mono tabular-nums text-[var(--text-primary)]">{g.value}</div>
               </div>
             ))}
           </div>
@@ -386,13 +386,13 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
 
         {/* Right: Recommendation */}
         <div className="lg:col-span-4 flex flex-col">
-          <div className="text-[10px] font-bold text-[var(--accent-blue)] tracking-widest uppercase mb-3">Recommendation Insight</div>
-          <div className="flex-1 p-4 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-default)] text-xs leading-relaxed text-[var(--accent-blue)]">
+          <div className="text-[10px] font-bold text-[var(--text-muted)] tracking-widest uppercase mb-3">Recommendation Insight</div>
+          <div className="flex-1 p-4 rounded-lg bg-[var(--bg-elevated)] border border-[var(--border-default)] text-xs leading-relaxed text-[var(--text-secondary)]">
             <p className="mb-3">
               <strong className="text-[var(--accent-blue)] font-mono">Signal:</strong> {pick.signalText}
             </p>
             <p>
-              <strong className="text-[var(--accent-blue)]">Scenario:</strong> High IV Rank suggests a premium-selling advantage. Maintain position until 50% profit or 21 days to expiration.
+              <strong className="text-[var(--accent-blue)] font-mono">Scenario:</strong> High IV Rank suggests a premium-selling advantage. Maintain position until 50% profit or 21 days to expiration.
             </p>
           </div>
         </div>
@@ -433,13 +433,13 @@ function ScannerSummaryCard({
           <h2 className="text-sm font-black text-[var(--accent-blue)] uppercase tracking-wider font-sans">
             Market Scanner
           </h2>
-          <p className="text-[10px] font-bold text-[var(--accent-blue)] mt-0.5 font-mono">
+          <p className="text-[10px] font-bold text-[var(--text-muted)] mt-0.5 font-mono">
             {weekStart && weekEnd ? `${fmtDate(weekStart)} → ${fmtDate(weekEnd)}` : "Live Ticker Analysis"}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-1 md:grid-cols-4 lg:grid-cols-1 md:grid-cols-7 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 gap-2">
         {scanner.map(item => {
           const t = (item.ticker || "").toUpperCase();
           const isSelected = t === selected;
@@ -454,8 +454,8 @@ function ScannerSummaryCard({
                 borderColor: isSelected ? "var(--accent-blue)" : "var(--border-default)",
               }}
             >
-              <span className="font-mono font-black text-xs text-[var(--accent-blue)] mb-1 font-mono">{t}</span>
-              <span className="font-mono text-[9px] font-bold text-[var(--accent-blue)] tabular-nums font-mono">
+              <span className={`font-mono font-black text-xs mb-1 tabular-nums ${isSelected ? 'text-[var(--accent-blue)]' : 'text-[var(--text-primary)]'}`}>{t}</span>
+              <span className="font-mono text-[9px] font-bold tabular-nums text-[var(--text-muted)]">
                 {fmtNum(item.price, 1)}
               </span>
               <div className="mt-2 w-full h-1 bg-[var(--bg-base)] rounded-full overflow-hidden">
@@ -490,15 +490,15 @@ function FilterBar({
             key={f.value}
             type="button"
             onClick={() => setStrategyFilter(f.value)}
-            className={`whitespace-nowrap px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-4 overflow-x-auto no-scrollbar ${
+            className={`whitespace-nowrap px-3 py-1.5 rounded-md text-[11px] font-bold transition-all inline-flex items-center gap-1.5 ${
               strategyFilter === f.value
                 ? "bg-[var(--bg-elevated)] text-[var(--accent-blue)] border border-[var(--accent-blue)] shadow-sm"
-                : "text-[var(--accent-blue)] hover:text-[var(--accent-blue)]"
+                : "text-[var(--text-secondary)] border border-transparent hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
             }`}
           >
             {f.label.toUpperCase()}
             {f.value !== "all" && (
-              <span className={`font-mono text-[10px] ${strategyFilter === f.value ? "text-[var(--accent-blue)]" : "text-[var(--accent-blue)]"}`}>
+              <span className={`font-mono text-[10px] tabular-nums ${strategyFilter === f.value ? "text-[var(--accent-blue)]" : "text-[var(--text-muted)]"}`}>
                 {counts[f.value] ?? 0}
               </span>
             )}
@@ -513,10 +513,10 @@ function FilterBar({
             key={tag}
             type="button"
             onClick={() => setTagFilter(tag)}
-            className={`px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+            className={`px-3 py-1.5 rounded-md text-[11px] font-bold transition-all ${
               tagFilter === tag
                 ? "bg-[var(--bg-elevated)] text-[var(--accent-blue)] border border-[var(--accent-blue)] shadow-sm"
-                : "text-[var(--accent-blue)] hover:text-[var(--accent-blue)]"
+                : "text-[var(--text-secondary)] border border-transparent hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]"
             }`}
           >
             {tag.toUpperCase()}
@@ -529,12 +529,12 @@ function FilterBar({
         <select
           value={sortMode}
           onChange={e => setSortMode(e.target.value as "score" | "ticker")}
-          className="appearance-none bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg px-4 py-2 pr-10 text-[11px] font-bold text-[var(--accent-blue)] outline-none hover:border-[var(--accent-blue)] transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none cursor-pointer shadow-sm"
+          className="appearance-none bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-md px-3 py-1.5 pr-9 text-[11px] font-bold text-[var(--text-primary)] hover:border-[var(--accent-blue)] hover:text-[var(--accent-blue)] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)] focus-visible:outline-none outline-none cursor-pointer shadow-sm"
         >
           <option value="score">SORT BY: SCORE</option>
           <option value="ticker">SORT BY: TICKER</option>
         </select>
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--accent-blue)]">
+        <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--text-muted)]">
           <SlidersHorizontal size={12} />
         </div>
       </div>
@@ -714,7 +714,7 @@ function PicksPageInner() {
             <h1 className="text-2xl font-black tracking-tight text-[var(--accent-blue)] font-sans">
               TOP PICKS
             </h1>
-            <div className="flex flex-wrap gap-4.5">
+            <div className="flex flex-wrap gap-2">
               {WATCHLIST.map(t => (
                 <button
                   key={t}
@@ -722,7 +722,7 @@ function PicksPageInner() {
                   className={`px-2 py-0.5 rounded border text-[10px] font-bold font-mono transition-all ${
                     selectedTicker === t
                       ? "bg-[var(--accent-blue)]/10 border-[var(--accent-blue)] text-[var(--accent-blue)] shadow-[0_0_10px_rgba(88,166,255,0.2)]"
-                      : "bg-[var(--bg-elevated)] border-[var(--border-default)] text-[var(--accent-blue)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)]"
+                      : "bg-[var(--bg-elevated)] border-[var(--border-default)] text-[var(--text-secondary)] hover:text-[var(--accent-blue)] hover:border-[var(--accent-blue)]"
                   }`}
                 >
                   {t}
@@ -730,7 +730,7 @@ function PicksPageInner() {
               ))}
             </div>
           </div>
-          <p className="text-sm text-[var(--accent-blue)] font-medium">
+          <p className="text-sm text-[var(--text-secondary)] font-normal">
             AI-driven option strategies based on real-time volatility surface analysis.
           </p>
         </div>
@@ -747,21 +747,21 @@ function PicksPageInner() {
 
       {/* ── Scanner Summary Section ── */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-        <div className="lg:col-span-4 space-y-4">
+        <div className="md:col-span-12 lg:col-span-4 space-y-4">
           <ScannerSummaryStats picks={picks} bullish={bullishCount} bearish={bearishCount} />
           <div className="p-4 rounded-lg bg-[var(--bg-base)] border border-[var(--border-default)] flex items-center justify-between shadow-inner">
-            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar.5">
+            <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
               <div className="relative flex">
                 <div className="w-2 h-2 rounded-full bg-[var(--accent-blue)] animate-ping absolute" />
                 <div className="w-2 h-2 rounded-full bg-[var(--accent-blue)] relative" />
               </div>
-              <span className="text-[11px] font-black text-[var(--accent-blue)] uppercase tracking-[0.15em]">System Status: Optimal</span>
+              <span className="text-[11px] font-black text-[var(--text-secondary)] uppercase tracking-[0.15em]">System Status: Optimal</span>
             </div>
-            <span className="text-[9px] font-mono font-bold text-[var(--accent-blue)] bg-[var(--bg-surface)] px-2 py-0.5 rounded border border-[var(--border-default)]">v2.4.1</span>
+            <span className="text-[9px] font-mono font-bold text-[var(--text-muted)] bg-[var(--bg-surface)] px-2 py-0.5 rounded border border-[var(--border-default)]">v2.4.1</span>
           </div>
         </div>
         
-        <div className="lg:col-span-8">
+        <div className="md:col-span-12 lg:col-span-8">
           <ScannerSummaryCard
             scanner={scanner}
             selected={selectedTicker}
@@ -808,17 +808,17 @@ function PicksPageInner() {
             Recommended Strategies ({displayPicks.length})
           </h3>
           <div className="flex items-center gap-4 overflow-x-auto no-scrollbar">
-            <span className="flex items-center gap-4 overflow-x-auto no-scrollbar.5 text-[10px] font-bold text-[var(--accent-blue)]">
-              <span className="w-2 h-2 rounded bg-var(--color-call)" /> BULLISH
+            <span className="flex items-center gap-4 overflow-x-auto no-scrollbar text-[10px] font-bold text-[var(--text-secondary)]">
+              <span className="w-2 h-2 rounded bg-[var(--color-call)]" /> BULLISH
             </span>
-            <span className="flex items-center gap-4 overflow-x-auto no-scrollbar.5 text-[10px] font-bold text-[var(--accent-blue)]">
-              <span className="w-2 h-2 rounded bg-var(--color-put)" /> BEARISH
+            <span className="flex items-center gap-4 overflow-x-auto no-scrollbar text-[10px] font-bold text-[var(--text-secondary)]">
+              <span className="w-2 h-2 rounded bg-[var(--color-put)]" /> BEARISH
             </span>
           </div>
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 md:grid-cols-4 gap-4 font-mono">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 font-mono">
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
@@ -842,7 +842,7 @@ function PicksPageInner() {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {displayPicks.map((pick, idx) => (
               <div
                 key={pick.id || `${pick.ticker}-${idx}`}
@@ -903,17 +903,17 @@ function ScannerSummaryStats({ picks, bullish, bearish }: { picks: any[], bullis
       <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none" />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
-        <div className="text-left">
-          <div className="text-3xl font-black font-mono text-[var(--accent-blue)] tracking-tighter font-mono">{picks.length}</div>
-          <div className="text-[10px] font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] mt-1">Total</div>
+        <div className="text-left px-2">
+          <div className="text-3xl font-black font-mono text-[var(--text-primary)] tracking-tighter tabular-nums">{picks.length}</div>
+          <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mt-1">Total</div>
         </div>
-        <div className="text-left border-x border-[var(--border-default)]">
-          <div className="text-3xl font-black font-mono text-[var(--accent-blue)] tracking-tighter font-mono">{bullish}</div>
-          <div className="text-[10px] font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] mt-1">Bullish</div>
+        <div className="text-left px-4 border-x border-[var(--border-default)]">
+          <div className="text-3xl font-black font-mono text-[var(--color-call)] tracking-tighter tabular-nums">{bullish}</div>
+          <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mt-1">Bullish</div>
         </div>
-        <div className="text-left">
-          <div className="text-3xl font-black font-mono text-[var(--accent-blue)] tracking-tighter font-mono">{bearish}</div>
-          <div className="text-[10px] font-bold text-[var(--accent-blue)] uppercase tracking-[0.2em] mt-1">Bearish</div>
+        <div className="text-left px-2">
+          <div className="text-3xl font-black font-mono text-[var(--color-put)] tracking-tighter tabular-nums">{bearish}</div>
+          <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-[0.2em] mt-1">Bearish</div>
         </div>
       </div>
     </div>
