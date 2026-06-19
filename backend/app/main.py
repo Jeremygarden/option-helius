@@ -6,6 +6,8 @@ import logging
 from .routers import options, sentiment, macro, picks, report, analyze, strategies, notifications, scanner, health
 from .mock.options_chain import get_mock_chain
 from .core.config import get_settings, validate_ibkr_startup
+from .core.db import close_db_pool, get_database_settings, init_db_pool
+from .services.db_schema import init_timescale_schema
 from .services.scheduler import MacroScheduler
 from .services.ibkr import IBKRDependencyError, OptionChainFetcher, create_client_from_settings
 
@@ -75,19 +77,48 @@ async def shutdown_ibkr_lifecycle(application: FastAPI) -> None:
         application.state.ibkr_fetcher = None
 
 
+async def startup_database_lifecycle(application: FastAPI) -> None:
+    """Initialize optional TimescaleDB pool and schema with bounded timeouts."""
+
+    settings = get_database_settings()
+    application.state.db_settings = settings
+    application.state.db_pool = None
+    if not settings.enabled:
+        return
+
+    try:
+        pool = await init_db_pool(settings)
+        application.state.db_pool = pool
+        if pool is not None:
+            await init_timescale_schema(timeout=settings.command_timeout)
+            logger.info("TimescaleDB schema verified")
+    except Exception as exc:
+        logger.warning("TimescaleDB startup failed; Redis/upstream paths remain active (%s)", exc)
+        application.state.db_startup_error = str(exc)
+
+
+async def shutdown_database_lifecycle(application: FastAPI) -> None:
+    """Close optional TimescaleDB pool during shutdown."""
+
+    await close_db_pool()
+    application.state.db_pool = None
+
+
 @app.on_event("startup")
 async def validate_optional_ibkr_config() -> None:
-    """Start optional IBKR provider lifecycle without breaking fallbacks."""
+    """Start optional providers without breaking fallback-only deployments."""
 
+    await startup_database_lifecycle(app)
     await startup_ibkr_lifecycle(app)
     macro_scheduler.start()
 
 
 @app.on_event("shutdown")
 async def shutdown_optional_ibkr_client() -> None:
-    """Disconnect optional IBKR provider lifecycle."""
+    """Disconnect optional provider lifecycles."""
 
     await shutdown_ibkr_lifecycle(app)
+    await shutdown_database_lifecycle(app)
     macro_scheduler.shutdown()
 
 
