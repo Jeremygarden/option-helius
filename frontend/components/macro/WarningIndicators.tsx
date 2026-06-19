@@ -29,23 +29,23 @@ interface MacroData {
 
 const SectionHeader: React.FC<{ icon: string; title: string; subtitle: string; score: number }> = ({ icon, title, subtitle, score }) => {
   const getScoreColor = (s: number) => {
-    if (s > 70) return 'text-red-500';
-    if (s > 55) return 'text-orange-500';
-    if (s > 40) return 'text-yellow-500';
-    return 'text-green-500';
+    if (s > 70) return 'text-[var(--accent-red)]';
+    if (s > 55) return 'text-[var(--accent-orange)]';
+    if (s > 40) return 'text-[var(--accent-yellow)]';
+    return 'text-[var(--accent-green)]';
   };
 
   return (
-    <div className="flex items-center justify-between mb-4 border-b border-slate-700 pb-2">
-      <div className="flex items-center gap-4">
-        <span className="text-xl font-mono">{icon}</span>
+    <div className="flex items-center justify-between mb-4 border-b border-[var(--border-default)] pb-2">
+      <div className="flex items-center gap-3">
+        <span className="text-xl font-mono" aria-hidden="true">{icon}</span>
         <div>
-          <h2 className="text-white font-bold font-sans">{title}</h2>
-          <p className="text-slate-400 text-[10px] font-mono">{subtitle}</p>
+          <h2 className="text-[var(--text-primary)] text-sm font-bold font-sans uppercase tracking-wide">{title}</h2>
+          <p className="text-[var(--text-muted)] text-[10px] font-mono mt-0.5">{subtitle}</p>
         </div>
       </div>
-      <div className={`text-sm font-mono font-bold ${getScoreColor(score)}`}>
-        {score} / 100
+      <div className={`text-sm font-mono font-bold tabular-nums ${getScoreColor(score)}`}>
+        {score} <span className="text-[var(--text-muted)] font-normal">/ 100</span>
       </div>
     </div>
   );
@@ -54,10 +54,10 @@ const SectionHeader: React.FC<{ icon: string; title: string; subtitle: string; s
 const IndicatorCard: React.FC<{ indicator: Indicator }> = ({ indicator }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'red': return 'bg-red-500';
-      case 'orange': return 'bg-orange-500';
-      case 'yellow': return 'bg-yellow-500';
-      default: return 'bg-green-500';
+      case 'red': return 'bg-[var(--accent-red)]';
+      case 'orange': return 'bg-[var(--accent-orange)]';
+      case 'yellow': return 'bg-[var(--accent-yellow)]';
+      default: return 'bg-[var(--accent-green)]';
     }
   };
 
@@ -65,39 +65,39 @@ const IndicatorCard: React.FC<{ indicator: Indicator }> = ({ indicator }) => {
     const now = new Date();
     const updated = new Date(updatedAt);
     const diffHours = (now.getTime() - updated.getTime()) / (1000 * 60 * 60);
-    if (diffHours < 2) return { label: '🟢', color: 'text-green-500' };
-    if (diffHours < 25) return { label: '🟡', color: 'text-yellow-500' };
-    return { label: '🔴', color: 'text-red-500' };
+    if (diffHours < 2) return { label: '🟢', color: 'text-[var(--accent-green)]' };
+    if (diffHours < 25) return { label: '🟡', color: 'text-[var(--accent-yellow)]' };
+    return { label: '🔴', color: 'text-[var(--accent-red)]' };
   };
 
   const staleness = getStalenessInfo(indicator.updated_at);
 
   return (
-    <div className="bg-slate-800 border border-slate-700 rounded-lg p-4 relative overflow-hidden flex flex-col justify-between">
-      <div className="flex justify-between items-start mb-1">
-        <div>
-          <h3 className="text-slate-200 text-xs font-bold font-sans">{indicator.name}</h3>
-          <p className="text-slate-500 text-[9px] font-mono font-mono">{indicator.name_en}</p>
+    <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4 relative overflow-hidden flex flex-col justify-between transition-colors hover:border-[var(--accent-blue)]/40">
+      <div className="flex justify-between items-start mb-1 gap-2">
+        <div className="min-w-0">
+          <h3 className="text-[var(--text-primary)] text-xs font-bold font-sans truncate">{indicator.name}</h3>
+          <p className="text-[var(--text-muted)] text-[9px] font-mono truncate mt-0.5">{indicator.name_en}</p>
         </div>
-        <span title="数据新鲜度">{staleness.label}</span>
+        <span title="数据新鲜度" aria-label="数据新鲜度">{staleness.label}</span>
       </div>
-      
+
       <div className="my-2">
-        <div className="text-xl font-bold text-white leading-none font-mono">
+        <div className="text-xl font-bold text-[var(--text-primary)] leading-none font-mono tabular-nums">
           {indicator.value_display}
         </div>
       </div>
 
-      <div className="w-full bg-slate-700 h-1 rounded-full mt-1 overflow-hidden">
-        <div 
-          className={`h-full ${getStatusColor(indicator.status)}`} 
+      <div className="w-full bg-[var(--bg-elevated)] h-1 rounded-full mt-1 overflow-hidden">
+        <div
+          className={`h-full ${getStatusColor(indicator.status)} transition-all duration-300`}
           style={{ width: `${indicator.severity_pct}%` }}
         />
       </div>
 
-      <div className="flex justify-between items-center mt-2 text-[9px] text-slate-500">
-        <span>{indicator.data_source}</span>
-        <span>{new Date(indicator.updated_at).toLocaleDateString()}</span>
+      <div className="flex justify-between items-center mt-2 text-[9px] text-[var(--text-muted)] font-mono">
+        <span className="truncate">{indicator.data_source}</span>
+        <span className="tabular-nums">{new Date(indicator.updated_at).toLocaleDateString()}</span>
       </div>
     </div>
   );
@@ -116,16 +116,16 @@ export const WarningIndicators: React.FC<{ data: MacroData }> = ({ data }) => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {Object.entries(data.categories).map(([key, cat]) => (
         <div key={key}>
-          <SectionHeader 
-            icon={categoryConfigs[key]?.icon || "🔹"} 
-            title={cat.name} 
+          <SectionHeader
+            icon={categoryConfigs[key]?.icon || "🔹"}
+            title={cat.name}
             subtitle={categoryConfigs[key]?.subtitle || ""}
             score={cat.score}
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {cat.indicators.map(ind => (
               <IndicatorCard key={ind.id} indicator={ind} />
             ))}

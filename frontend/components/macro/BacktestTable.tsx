@@ -51,9 +51,9 @@ const BacktestTable: React.FC<{ data?: BacktestEvent[] }> = ({ data = [] }) => {
   }, [data]);
 
   const getScoreStyle = (score: number, redThr: number) => {
-    if (score > redThr) return "bg-red-500/20 text-[var(--accent-red)] font-bold border border-red-500/30";
-    if (score > orangeThreshold) return "bg-orange-500/20 text-orange-400 border border-orange-500/30";
-    return "bg-green-500/10 text-[var(--accent-green)] border border-green-500/20";
+    if (score > redThr) return "bg-[var(--accent-red)]/20 text-[var(--accent-red)] font-bold border border-[var(--accent-red)]/30";
+    if (score > orangeThreshold) return "bg-[var(--accent-orange)]/20 text-[var(--accent-orange)] border border-[var(--accent-orange)]/30";
+    return "bg-[var(--accent-green)]/10 text-[var(--accent-green)] border border-green-500/20";
   };
 
   return (

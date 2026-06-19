@@ -20,41 +20,43 @@ const RefreshStatus: React.FC<RefreshStatusProps> = ({ status, onRefreshDaily, o
 
   const dailyStatus = Object.values(status).filter(s => s.tier === 'daily');
   const allDailyUpdated = dailyStatus.every(s => !s.is_stale && s.last_updated);
-  
+
   return (
-    <div className="bg-slate-900 border border-slate-700 rounded-lg p-4 text-sm text-slate-300">
-      <div className="mb-3 font-semibold text-slate-100 flex items-center justify-between">
+    <div className="bg-[var(--bg-surface)] border border-[var(--border-default)] rounded-lg p-4 text-sm text-[var(--text-secondary)] shadow-sm">
+      <div className="mb-3 font-bold text-[var(--text-primary)] flex items-center justify-between text-xs uppercase tracking-wide">
         <span>数据刷新状态</span>
-        <span className="text-xs font-normal text-slate-500">综合指数: 每周刷新 | 下次刷新: 周一 09:00</span>
+        <span className="text-[11px] font-normal text-[var(--text-muted)] normal-case tracking-normal">
+          综合指数: 每周刷新 | 下次: 周一 09:00
+        </span>
       </div>
-      
-      <div className="space-y-4 mb-4">
+
+      <div className="space-y-2.5 mb-4">
         <div className="flex justify-between items-center">
-          <span>日频指标:</span>
-          <span className={allDailyUpdated ? "text-[var(--accent-green)]" : "text-yellow-400"}>
+          <span className="text-[var(--text-secondary)]">日频指标:</span>
+          <span className={allDailyUpdated ? "text-[var(--accent-green)] font-medium" : "text-[var(--accent-yellow)] font-medium"}>
             {allDailyUpdated ? "✅ 今日已更新" : "⚠️ 部分指标待更新"}
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <span>月频指标:</span>
-          <span className="text-[var(--accent-green)]">✅ 本月已更新</span>
+          <span className="text-[var(--text-secondary)]">月频指标:</span>
+          <span className="text-[var(--accent-green)] font-medium">✅ 本月已更新</span>
         </div>
-        <div className="flex justify-between items-center text-slate-500">
-          <span>季频指标:</span>
-          <span>🟡 上次: 04-01, 距下次更新: 37天</span>
+        <div className="flex justify-between items-center">
+          <span className="text-[var(--text-muted)]">季频指标:</span>
+          <span className="text-[var(--text-muted)]">🟡 上次: 04-01, 距下次更新: 37天</span>
         </div>
       </div>
 
-      <div className="flex gap-4">
-        <button 
+      <div className="flex gap-3">
+        <button
           onClick={onRefreshDaily}
-          className="flex-1 py-1.5 px-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
+          className="flex-1 py-2 px-3 bg-[var(--bg-elevated)] hover:bg-[var(--bg-base)] hover:text-[var(--text-primary)] border border-[var(--border-default)] rounded-lg text-xs font-medium text-[var(--text-secondary)] transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 focus-visible:outline-none active:scale-[0.98]"
         >
           🔄 手动刷新日频指标
         </button>
-        <button 
+        <button
           onClick={onRefreshFull}
-          className="flex-1 py-1.5 px-3 bg-red-900/30 hover:bg-red-800/40 border border-red-700/50 text-[var(--accent-red)] rounded text-xs transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none"
+          className="flex-1 py-2 px-3 bg-[var(--accent-red)]/10 hover:bg-[var(--accent-red)]/20 border border-[var(--accent-red)]/40 text-[var(--accent-red)] rounded-lg text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent-red)]/40 focus-visible:outline-none active:scale-[0.98]"
         >
           ⚡ 强制全量刷新 (管理员)
         </button>

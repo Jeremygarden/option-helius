@@ -66,10 +66,10 @@ interface SentinelIndicator {
 
 // ── Color helpers ──────────────────────────────────────────────
 const SIGNAL_COLORS = {
-  1: { bg: "bg-green-900/30", border: "border-green-500", text: "text-[var(--accent-green)]", dot: "bg-green-400" },
-  2: { bg: "bg-yellow-900/30", border: "border-yellow-500", text: "text-yellow-400", dot: "bg-yellow-400" },
-  3: { bg: "bg-orange-900/30", border: "border-orange-500", text: "text-orange-400", dot: "bg-orange-400" },
-  4: { bg: "bg-red-900/30", border: "border-red-500", text: "text-[var(--accent-red)]", dot: "bg-red-400" },
+  1: { bg: "bg-green-900/30", border: "border-green-500", text: "text-[var(--accent-green)]", dot: "bg-[var(--accent-green)]" },
+  2: { bg: "bg-[var(--accent-yellow)]/15", border: "border-[var(--accent-yellow)]", text: "text-[var(--accent-yellow)]", dot: "bg-[var(--accent-yellow)]" },
+  3: { bg: "bg-[var(--accent-orange)]/15", border: "border-[var(--accent-orange)]", text: "text-[var(--accent-orange)]", dot: "bg-[var(--accent-orange)]" },
+  4: { bg: "bg-red-900/30", border: "border-[var(--accent-red)]", text: "text-[var(--accent-red)]", dot: "bg-[var(--accent-red)]" },
 };
 
 // ── Mock Data ──────────────────────────────────────────────────
@@ -183,21 +183,21 @@ function SemiCircleGauge({ score, level }: { score: number; level: number }) {
 function IndicatorCard({ ind }: { ind: IndicatorCard }) {
   const colors = SIGNAL_COLORS[ind.status_level];
   const trendIcon = ind.trend === "up" ? "↑" : ind.trend === "down" ? "↓" : "→";
-  const trendColor = ind.trend === "up" ? "text-[var(--accent-red)]" : ind.trend === "down" ? "text-[var(--accent-green)]" : "text-gray-400";
+  const trendColor = ind.trend === "up" ? "text-[var(--accent-red)]" : ind.trend === "down" ? "text-[var(--accent-green)]" : "text-[var(--text-secondary)]";
   
   return (
-    <div className={`flex-shrink-0 w-36 rounded-lg border ${colors.border} ${colors.bg} p-4 flex flex-col gap-4.5`}>
+    <div className={`flex-shrink-0 w-36 rounded-lg border ${colors.border} ${colors.bg} p-4 flex flex-col gap-2`}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="text-[10px] text-gray-500 font-mono">{ind.category}</span>
+        <span className="text-[10px] text-[var(--text-muted)] font-mono">{ind.category}</span>
         <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${colors.text} bg-[var(--bg-base)]/30`}>
           {ind.status_label}
         </span>
       </div>
       {/* Name */}
       <div>
-        <div className="text-xs text-gray-400 font-mono">{ind.name_zh}</div>
-        <div className="text-[10px] text-gray-600 font-mono">{ind.name_en}</div>
+        <div className="text-xs text-[var(--text-secondary)] font-mono">{ind.name_zh}</div>
+        <div className="text-[10px] text-[var(--text-muted)] font-mono">{ind.name_en}</div>
       </div>
       {/* Value */}
       <div className={`text-xl font-bold font-mono ${colors.text}`}>
@@ -208,11 +208,11 @@ function IndicatorCard({ ind }: { ind: IndicatorCard }) {
       <div className={`text-[10px] ${trendColor}`}>{ind.trend_value}</div>
       {/* Danger score bar */}
       <div className="mt-1">
-        <div className="flex justify-between text-[9px] text-gray-600 mb-0.5">
+        <div className="flex justify-between text-[9px] text-[var(--text-muted)] mb-0.5">
           <span>危险分</span>
           <span className={colors.text}>{ind.danger_score}</span>
         </div>
-        <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-500`}
             style={{ width: `${ind.danger_score}%`, backgroundColor: ind.danger_score > 70 ? "var(--accent-blue)" : ind.danger_score > 50 ? "var(--accent-blue)" : ind.danger_score > 30 ? "var(--accent-blue)" : "var(--accent-blue)" }}
@@ -220,7 +220,7 @@ function IndicatorCard({ ind }: { ind: IndicatorCard }) {
         </div>
       </div>
       {/* Weight contribution */}
-      <div className="text-[9px] text-gray-600">
+      <div className="text-[9px] text-[var(--text-muted)]">
         权重 {(ind.weight * 100).toFixed(1)}% · 贡献 {ind.weighted_contribution.toFixed(1)}分
       </div>
     </div>
@@ -252,10 +252,10 @@ function CategoryFilteredCards({ indicators }: { indicators: IndicatorCard[] }) 
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`flex-shrink-0 px-3 py-1 rounded-full text-xs border transition-all
+            className={`flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-all focus-visible:ring-2 focus-visible:ring-[var(--accent-blue)]/40 focus-visible:outline-none
               ${activeCategory === cat
-                ? "bg-blue-600 border-blue-500 text-white"
-                : "bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500"}`}
+                ? "bg-[var(--accent-blue)] border-[var(--accent-blue)] text-white shadow-sm shadow-[var(--accent-blue)]/20"
+                : "bg-[var(--bg-elevated)] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-[var(--accent-blue)]/40 hover:text-[var(--text-primary)]"}`}
           >
             {cat}
           </button>
@@ -273,13 +273,13 @@ function CategoryFilteredCards({ indicators }: { indicators: IndicatorCard[] }) 
       <div className="mt-3 grid grid-cols-4 gap-4">
         {[
           { label: "🔴 极高危", count: statusCounts.level4, color: "text-[var(--accent-red)]" },
-          { label: "🟠 偏高", count: statusCounts.level3, color: "text-orange-400" },
-          { label: "🟡 中等", count: statusCounts.level2, color: "text-yellow-400" },
+          { label: "🟠 偏高", count: statusCounts.level3, color: "text-[var(--accent-orange)]" },
+          { label: "🟡 中等", count: statusCounts.level2, color: "text-[var(--accent-yellow)]" },
           { label: "🟢 正常", count: statusCounts.level1, color: "text-[var(--accent-green)]" },
         ].map(s => (
-          <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-lg p-4 text-left">
+          <div key={s.label} className="bg-[var(--bg-surface)] border border-[var(--border-muted)] rounded-lg p-4 text-left">
             <div className={`text-xl font-bold ${s.color}`}>{s.count}</div>
-            <div className="text-[10px] text-gray-500 font-mono">{s.label}</div>
+            <div className="text-[10px] text-[var(--text-muted)] font-mono">{s.label}</div>
           </div>
         ))}
       </div>
@@ -291,18 +291,18 @@ function SentinelCard({ s }: { s: SentinelIndicator }) {
   const isNearThreshold = s.proximity_pct >= 80 && !s.triggered;
   
   const cardClass = s.triggered
-    ? "border-red-500 bg-red-950/60 shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+    ? "border-[var(--accent-red)] bg-[var(--accent-red)]/10 shadow-[0_0_20px_rgba(239,68,68,0.3)]"
     : isNearThreshold
-    ? "border-orange-500 bg-orange-950/30"
-    : "border-gray-700 bg-gray-900/50";
+    ? "border-[var(--accent-orange)] bg-[var(--accent-orange)]/10"
+    : "border-[var(--border-default)] bg-[var(--bg-surface)]/50";
 
-  const valueClass = s.triggered ? "text-red-300" : isNearThreshold ? "text-orange-300" : "text-gray-100";
+  const valueClass = s.triggered ? "text-[var(--accent-red)]" : isNearThreshold ? "text-[var(--accent-orange)]" : "text-[var(--text-primary)]";
   
   const barColor = s.triggered || s.proximity_pct >= 95
-    ? "bg-red-500"
-    : s.proximity_pct >= 80 ? "bg-orange-500"
-    : s.proximity_pct >= 60 ? "bg-yellow-500"
-    : "bg-green-500";
+    ? "bg-[var(--accent-red)]"
+    : s.proximity_pct >= 80 ? "bg-[var(--accent-orange)]"
+    : s.proximity_pct >= 60 ? "bg-[var(--accent-yellow)]"
+    : "bg-[var(--accent-green)]";
 
   return (
     <div className={`rounded-lg border-2 p-4 transition-all duration-500 ${cardClass} ${s.triggered ? "animate-pulse" : ""}`}>
@@ -310,19 +310,19 @@ function SentinelCard({ s }: { s: SentinelIndicator }) {
       <div className="flex items-start justify-between mb-3">
         <div>
           <div className="text-lg font-mono">{s.icon}</div>
-          <div className="text-sm font-bold text-gray-200 mt-0.5 font-mono">{s.title}</div>
-          <div className="text-[11px] text-gray-500 font-mono">{s.subtitle}</div>
+          <div className="text-sm font-bold text-[var(--text-primary)] mt-0.5 font-mono">{s.title}</div>
+          <div className="text-[11px] text-[var(--text-muted)] font-mono">{s.subtitle}</div>
         </div>
-        <div className={`flex items-center gap-4.5 text-xs px-2 py-1 rounded-full border
+        <div className={`flex items-center gap-2 text-xs px-2 py-1 rounded-full border
           ${s.triggered
-            ? "border-red-500 text-red-300 bg-red-950"
+            ? "border-[var(--accent-red)] text-[var(--accent-red)] bg-red-950"
             : isNearThreshold
-            ? "border-orange-500 text-orange-300 bg-orange-950/50"
+            ? "border-[var(--accent-orange)] text-[var(--accent-orange)] bg-orange-950/50"
             : "border-green-700 text-[var(--accent-green)] bg-green-950/30"}`}>
           {s.triggered ? (
-            <><span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse inline-block" />已触发</>
+            <><span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-red)] animate-pulse inline-block" />已触发</>
           ) : (
-            <><span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />未触发</>
+            <><span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-green)] inline-block" />未触发</>
           )}
         </div>
       </div>
@@ -331,19 +331,19 @@ function SentinelCard({ s }: { s: SentinelIndicator }) {
       <div className={`text-3xl font-black font-mono mb-1 ${valueClass}`}>
         {s.display}
       </div>
-      <div className="text-[11px] text-gray-500 mb-3">
-        触发阈值：<span className="text-gray-300 font-mono font-mono">{s.threshold_display}</span>
+      <div className="text-[11px] text-[var(--text-muted)] mb-3">
+        触发阈值：<span className="text-[var(--text-secondary)] font-mono font-mono">{s.threshold_display}</span>
       </div>
 
       {/* Proximity progress bar */}
       <div className="mb-2">
-        <div className="flex justify-between text-[10px] text-gray-600 mb-1">
+        <div className="flex justify-between text-[10px] text-[var(--text-muted)] mb-1">
           <span>接近程度</span>
-          <span className={s.proximity_pct >= 80 ? "text-orange-400" : "text-gray-500"}>
+          <span className={s.proximity_pct >= 80 ? "text-[var(--accent-orange)]" : "text-[var(--text-muted)]"}>
             {Math.min(100, s.proximity_pct).toFixed(0)}%
           </span>
         </div>
-        <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+        <div className="h-2 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full transition-all duration-700 ${barColor} ${s.triggered ? "animate-pulse" : ""}`}
             style={{ width: `${Math.min(100, s.proximity_pct)}%` }}
@@ -352,14 +352,14 @@ function SentinelCard({ s }: { s: SentinelIndicator }) {
       </div>
 
       {/* Distance */}
-      <div className={`text-xs font-mono mb-2 ${s.triggered ? "text-[var(--accent-red)]" : "text-gray-400"}`}>
+      <div className={`text-xs font-mono mb-2 ${s.triggered ? "text-[var(--accent-red)]" : "text-[var(--text-secondary)]"}`}>
         {s.distance}
       </div>
 
       {/* Lead time + description */}
-      <div className="border-t border-gray-800 pt-2 mt-1 space-y-0.5">
-        <div className="text-[10px] text-blue-400">⏱ {s.lead_time}</div>
-        <div className="text-[10px] text-gray-600 leading-relaxed font-mono">{s.description}</div>
+      <div className="border-t border-[var(--border-muted)] pt-2 mt-1 space-y-0.5">
+        <div className="text-[10px] text-[var(--accent-blue)] font-mono">⏱ {s.lead_time}</div>
+        <div className="text-[10px] text-[var(--text-muted)] leading-relaxed font-mono">{s.description}</div>
       </div>
     </div>
   );
@@ -373,15 +373,15 @@ function SentinelSection({ sentinels }: { sentinels: SentinelIndicator[] }) {
     <div className="space-y-4 font-mono">
       {/* Nuclear alert banner — only shows when 2+ triggered */}
       {nuclearAlert && (
-        <div className="rounded-lg border-2 border-red-500 bg-red-950/80 p-4 animate-pulse">
-          <div className="flex items-center gap-4 text-red-300 font-bold text-sm">
+        <div className="rounded-lg border-2 border-[var(--accent-red)] bg-[var(--accent-red)]/10 p-4 animate-pulse">
+          <div className="flex items-center gap-4 text-[var(--accent-red)] font-bold text-sm">
             <span className="text-xl">🚨</span>
             <span>最高警戒 — {triggeredCount}/3 哨兵触发 · 综合分已失效 · 立即行动</span>
           </div>
           <div className="mt-2 text-[var(--accent-red)] text-xs font-mono">
             {sentinels.filter(s => s.triggered).map(s => s.subtitle).join(" + ")} 同时触发
           </div>
-          <div className="mt-1 text-red-500 text-xs">
+          <div className="mt-1 text-[var(--accent-red)] text-xs">
             历史数据：两哨兵同时触发后，市场平均在 2-8 个月内崩盘 20%+
           </div>
         </div>
@@ -390,13 +390,13 @@ function SentinelSection({ sentinels }: { sentinels: SentinelIndicator[] }) {
       {/* Section header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <span className="text-sm font-bold text-gray-200">⚡ 三大哨兵指标</span>
-          <span className="text-[11px] text-gray-500">任意两个触发 → 立即升级警戒（不管综合分）</span>
+          <span className="text-sm font-bold text-[var(--text-primary)]">⚡ 三大哨兵指标</span>
+          <span className="text-[11px] text-[var(--text-muted)]">任意两个触发 → 立即升级警戒（不管综合分）</span>
         </div>
         <div className={`text-xs px-2 py-0.5 rounded-full border font-mono
           ${triggeredCount === 0 ? "border-green-700 text-[var(--accent-green)] bg-green-950/30" :
-            triggeredCount === 1 ? "border-orange-600 text-orange-400 bg-orange-950/30" :
-            "border-red-500 text-red-300 bg-red-950/50 animate-pulse"}`}>
+            triggeredCount === 1 ? "border-[var(--accent-orange)] text-[var(--accent-orange)] bg-[var(--accent-orange)]/10" :
+            "border-[var(--accent-red)] text-[var(--accent-red)] bg-red-950/50 animate-pulse"}`}>
           {triggeredCount}/3 触发
         </div>
       </div>
@@ -407,11 +407,11 @@ function SentinelSection({ sentinels }: { sentinels: SentinelIndicator[] }) {
       </div>
 
       {/* Distance summary bar */}
-      <div className="flex gap-4 text-[11px] text-gray-500 px-1">
+      <div className="flex gap-4 text-[11px] text-[var(--text-muted)] px-1">
         {sentinels.map(s => (
           <span key={s.id}>
-            <span className="text-gray-600 font-mono">{s.subtitle}: </span>
-            <span className={s.triggered ? "text-[var(--accent-red)] font-semibold" : "text-gray-400"}>
+            <span className="text-[var(--text-muted)] font-mono">{s.subtitle}: </span>
+            <span className={s.triggered ? "text-[var(--accent-red)] font-semibold" : "text-[var(--text-secondary)]"}>
               {s.distance}
             </span>
           </span>
@@ -432,12 +432,12 @@ export default function RunRiskPanel() {
 
   const sc = SIGNAL_COLORS[data.signal_level as keyof typeof SIGNAL_COLORS] || SIGNAL_COLORS[1];
   const regimeColors: Record<string, string> = {
-    bull_late: "text-orange-400",
-    rate_shock: "text-yellow-400",
+    bull_late: "text-[var(--accent-orange)]",
+    rate_shock: "text-[var(--accent-yellow)]",
     credit_stress: "text-[var(--accent-red)]",
-    vol_spike: "text-purple-400",
+    vol_spike: "text-[var(--accent-purple)]",
     normal: "text-[var(--accent-green)]",
-    mixed: "text-gray-400",
+    mixed: "text-[var(--text-secondary)]",
   };
   const regimeEmoji: Record<string, string> = {
     bull_late: "🟠", rate_shock: "🟡", credit_stress: "🔴", vol_spike: "🟣", normal: "🟢", mixed: "⚪"
@@ -511,22 +511,22 @@ export default function RunRiskPanel() {
     <div className="space-y-4 p-4 bg-[var(--bg-base)] rounded-2xl border border-[var(--border-default)] text-[var(--text-primary)] font-mono">
       {/* Nuclear Alert at the very top if triggered */}
       {nuclearAlert && (
-        <div className="rounded-2xl border-2 border-red-500 bg-red-950/80 p-4 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)] mb-4">
-          <div className="flex items-center gap-4 text-red-300 font-black text-xl">
+        <div className="rounded-2xl border-2 border-[var(--accent-red)] bg-[var(--accent-red)]/10 p-4 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)] mb-4">
+          <div className="flex items-center gap-4 text-[var(--accent-red)] font-black text-xl">
             <span className="text-3xl">🚨</span>
             <span>最高警戒 — {sentinels.filter(s => s.triggered).length}/3 哨兵触发 · 综合分已失效 · 立即行动</span>
           </div>
           <div className="mt-3 text-[var(--accent-red)] text-sm font-medium font-mono">
             {sentinels.filter(s => s.triggered).map(s => s.subtitle).join(" + ")} 同时触发
           </div>
-          <div className="mt-2 text-red-500 text-sm">
+          <div className="mt-2 text-[var(--accent-red)] text-sm">
             历史数据：两哨兵同时触发后，市场平均在 2-8 个月内崩盘 20%+
           </div>
         </div>
       )}
       {/* Section Title */}
       <div className="flex items-center gap-4 mb-2">
-        <span className="text-lg font-bold text-gray-100">📊 逃顶危险指数</span>
+        <span className="text-lg font-bold text-[var(--text-primary)]">📊 逃顶危险指数</span>
         <span className={`text-xs px-2 py-0.5 rounded-full border ${sc.border} ${sc.text} ${sc.bg}`}>
           实时监控
         </span>
@@ -548,29 +548,29 @@ export default function RunRiskPanel() {
           </div>
           
           {/* Score bar */}
-          <div className="w-full mt-3 h-2 bg-gray-800 rounded-full overflow-hidden">
+          <div className="w-full mt-3 h-2 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
             <div className="h-full rounded-full transition-all duration-700"
               style={{ width: `${data.score}%`, background: `linear-gradient(to right, var(--accent-green) 0%, var(--accent-yellow) 33%, var(--accent-orange) 66%, var(--accent-red) 100%)` }} />
           </div>
-          <div className="flex justify-between w-full text-[10px] text-gray-600 mt-0.5">
+          <div className="flex justify-between w-full text-[10px] text-[var(--text-muted)] mt-0.5">
             <span>🟢 安全</span><span>🟡 警戒</span><span>🟠 预警</span><span>🔴 危险</span>
           </div>
 
           {/* Dynamic score */}
-          <div className="mt-4 w-full rounded-lg bg-[var(--bg-base)]/30 border border-gray-800 p-4 space-y-4">
+          <div className="mt-4 w-full rounded-lg bg-[var(--bg-base)]/30 border border-[var(--border-muted)] p-4 space-y-4">
             <div className="flex justify-between text-xs">
-              <span className="text-gray-400">当前市场环境</span>
-              <span className={`font-semibold ${regimeColors[data.regime] || "text-gray-300"}`}>
+              <span className="text-[var(--text-secondary)]">当前市场环境</span>
+              <span className={`font-semibold ${regimeColors[data.regime] || "text-[var(--text-secondary)]"}`}>
                 {regimeEmoji[data.regime]} {data.regime_label}
               </span>
             </div>
             <div className="flex justify-between text-xs">
-              <span className="text-gray-400">置信度</span>
-              <span className="text-gray-300 font-mono">{(data.regime_confidence * 100).toFixed(0)}%</span>
+              <span className="text-[var(--text-secondary)]">置信度</span>
+              <span className="text-[var(--text-secondary)] font-mono">{(data.regime_confidence * 100).toFixed(0)}%</span>
             </div>
             <div className="flex justify-between text-xs">
-              <span className="text-gray-400">动态加权分</span>
-              <span className="text-gray-200 font-mono font-mono">
+              <span className="text-[var(--text-secondary)]">动态加权分</span>
+              <span className="text-[var(--text-primary)] font-mono font-mono">
                 {data.dynamic_score.toFixed(1)}
                 <span className={`ml-1 text-[10px] ${data.regime_impact >= 0 ? "text-[var(--accent-red)]" : "text-[var(--accent-green)]"}`}>
                   {data.regime_impact >= 0 ? "+" : ""}{data.regime_impact.toFixed(1)}
@@ -581,9 +581,9 @@ export default function RunRiskPanel() {
 
           {/* Top risks */}
           <div className="mt-3 w-full">
-            <div className="text-[11px] text-gray-500 mb-1.5">主要风险来源</div>
+            <div className="text-[11px] text-[var(--text-muted)] mb-1.5">主要风险来源</div>
             {data.top_risks.map((r, i) => (
-              <div key={i} className="flex items-start gap-4.5 text-[11px] text-gray-300 mb-1">
+              <div key={i} className="flex items-start gap-2 text-[11px] text-[var(--text-secondary)] mb-1">
                 <span className="text-[var(--accent-red)] mt-0.5">▸</span>
                 <span>{r}</span>
               </div>
@@ -592,15 +592,15 @@ export default function RunRiskPanel() {
         </div>
 
         {/* RIGHT: Action Checklist */}
-        <div className="rounded-2xl border border-gray-700 bg-gray-900/50 p-4 flex flex-col gap-4">
-          <div className="text-sm font-semibold text-gray-200 font-mono">⚡ 行动建议</div>
+        <div className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-surface)]/50 p-4 flex flex-col gap-4">
+          <div className="text-sm font-semibold text-[var(--text-primary)] font-mono">⚡ 行动建议</div>
           
           {/* Regime evidence */}
-          <div className="rounded-lg bg-[var(--bg-base)]/40 border border-gray-800 p-4">
-            <div className="text-[11px] text-gray-500 mb-2">环境识别依据</div>
-            <div className="flex flex-wrap gap-4.5">
+          <div className="rounded-lg bg-[var(--bg-base)]/40 border border-[var(--border-muted)] p-4">
+            <div className="text-[11px] text-[var(--text-muted)] mb-2">环境识别依据</div>
+            <div className="flex flex-wrap gap-2">
               {data.regime_evidence.map((e, i) => (
-                <span key={i} className="text-[10px] bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full border border-gray-700 font-mono">
+                <span key={i} className="text-[10px] bg-[var(--bg-elevated)] text-[var(--text-secondary)] px-2 py-0.5 rounded-full border border-[var(--border-default)] font-mono">
                   {e}
                 </span>
               ))}
@@ -611,7 +611,7 @@ export default function RunRiskPanel() {
           <div className="space-y-4">
             {data.action_checklist.map((item, i) => {
               const icon = item.type === "do" ? "✅" : item.type === "watch" ? "⚠️" : "❌";
-              const textColor = item.type === "do" ? "text-green-300" : item.type === "watch" ? "text-yellow-300" : "text-red-300";
+              const textColor = item.type === "do" ? "text-green-300" : item.type === "watch" ? "text-yellow-300" : "text-[var(--accent-red)]";
               return (
                 <div key={i} className="flex items-start gap-4 text-sm">
                   <span className="mt-0.5 flex-shrink-0 font-mono">{icon}</span>
@@ -623,16 +623,16 @@ export default function RunRiskPanel() {
 
           {/* Trip wires */}
           <div>
-            <div className="text-[11px] text-gray-500 mb-2">🚨 升级触发条件（任一触发→立即提升警戒）</div>
+            <div className="text-[11px] text-[var(--text-muted)] mb-2">🚨 升级触发条件（任一触发→立即提升警戒）</div>
             <div className="space-y-4.5">
               {data.trip_wires.map((tw, i) => (
                 <div key={i} className={`flex items-center justify-between rounded-lg px-3 py-2 text-xs border
-                  ${tw.triggered ? "bg-red-900/40 border-red-600 text-red-300" : "bg-gray-800/50 border-gray-700 text-gray-400"}`}>
+                  ${tw.triggered ? "bg-red-900/40 border-red-600 text-[var(--accent-red)]" : "bg-[var(--bg-elevated)]/50 border-[var(--border-default)] text-[var(--text-secondary)]"}`}>
                   <div>
-                    <span className={tw.triggered ? "text-red-300 font-semibold" : "text-gray-300"}>{tw.condition}</span>
-                    <span className="text-gray-600 ml-2 text-[10px] font-mono">{tw.description}</span>
+                    <span className={tw.triggered ? "text-[var(--accent-red)] font-semibold" : "text-[var(--text-secondary)]"}>{tw.condition}</span>
+                    <span className="text-[var(--text-muted)] ml-2 text-[10px] font-mono">{tw.description}</span>
                   </div>
-                  <span className={`font-mono text-[11px] ${tw.triggered ? "text-red-300" : "text-[var(--accent-green)]"}`}>
+                  <span className={`font-mono text-[11px] ${tw.triggered ? "text-[var(--accent-red)]" : "text-[var(--accent-green)]"}`}>
                     {tw.triggered ? "⚡已触发" : `现值 ${tw.current_value}`}
                   </span>
                 </div>
@@ -643,15 +643,15 @@ export default function RunRiskPanel() {
       </div>
 
       {/* SENTINEL SECTION */}
-      <div className="rounded-2xl border border-gray-800 bg-gray-900/30 p-4">
+      <div className="rounded-2xl border border-[var(--border-muted)] bg-[var(--bg-surface)]/30 p-4">
         <SentinelSection sentinels={sentinels} />
       </div>
 
       {/* BOTTOM: 18 Factor Cards */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-semibold text-gray-300">📈 18大指标详情</span>
-          <span className="text-[11px] text-gray-600">按贡献度排序 · 横向滑动查看全部</span>
+          <span className="text-sm font-semibold text-[var(--text-secondary)]">📈 18大指标详情</span>
+          <span className="text-[11px] text-[var(--text-muted)]">按贡献度排序 · 横向滑动查看全部</span>
         </div>
         
         {/* Category filter tabs */}

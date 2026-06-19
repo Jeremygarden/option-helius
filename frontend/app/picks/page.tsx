@@ -319,7 +319,7 @@ function DetailPanel({ pick }: { pick: StrategyPick }) {
 
   return (
     <div 
-      className="mb-6 rounded-2xl border border-[var(--border-default)] overflow-hidden transition-all duration-300 animate-[slideDown_0.3s_ease-out_both] shadow-2xl"
+      className="mb-6 rounded-2xl border border-[var(--border-default)] overflow-hidden transition-all duration-200 animate-[slideDown_0.25s_ease-out_both] shadow-lg shadow-black/30"
       style={{ background: "var(--bg-surface)" }}
     >
       {/* Header Info */}
@@ -859,9 +859,9 @@ function PicksPageInner() {
             ))}
             {displayPicks.length === 0 && (
               <div className="col-span-full py-32 flex flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border-default)] bg-[var(--bg-base)] relative overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-blue-500/5 rounded-full blur-[100px]" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-[var(--accent-blue)]/5 rounded-full blur-[100px] pointer-events-none" />
                 <div className="relative z-10 flex flex-col items-center">
-                  <div className="w-20 h-20 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] flex items-center justify-center mb-6 text-[var(--accent-blue)] shadow-2xl">
+                  <div className="w-20 h-20 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] flex items-center justify-center mb-6 text-[var(--accent-blue)] shadow-md shadow-black/30">
                     <SlidersHorizontal size={32} />
                   </div>
                   <h3 className="text-lg font-black text-[var(--accent-blue)] mb-2 tracking-tight font-sans">No Matching Strategies Found</h3>
@@ -898,9 +898,9 @@ function PicksPageInner() {
 /* ─── Helper Components ─── */
 function ScannerSummaryStats({ picks, bullish, bearish }: { picks: any[], bullish: number, bearish: number }) {
   return (
-    <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] shadow-xl relative overflow-hidden group font-mono">
+    <div className="p-4 rounded-2xl bg-[var(--bg-surface)] border border-[var(--border-default)] shadow-lg shadow-black/30 relative overflow-hidden group font-mono">
       {/* Background decoration */}
-      <div className="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 outline-none" />
+      <div className="absolute -right-4 -top-4 w-24 h-24 bg-[var(--accent-blue)]/5 rounded-full blur-3xl group-hover:bg-[var(--accent-blue)]/10 transition-colors pointer-events-none" />
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 relative z-10">
         <div className="text-left px-2">
