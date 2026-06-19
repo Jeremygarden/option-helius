@@ -20,6 +20,7 @@ responses_stub.JSONResponse = type("JSONResponse", (), {})
 sys.modules.setdefault("fastapi.responses", responses_stub)
 
 from app.core.errors import APIError
+from app.core.logging import RequestContextMiddleware, get_request_id
 from app.core.middleware import InMemoryRateLimitMiddleware, RequestSizeLimitMiddleware
 from app.core.validation import normalize_ticker, parse_ticker_list, validate_positions_payload, validate_webhook_url
 
@@ -103,5 +104,27 @@ def test_request_size_limit_rejects_large_declared_body():
         messages = await _collect_response(app, scope=_http_scope(headers=[(b"content-length", b"6")]))
         assert messages[0]["status"] == 413
         assert b"REQUEST_TOO_LARGE" in messages[1]["body"]
+
+    asyncio.run(scenario())
+
+
+def test_request_context_middleware_propagates_request_id_and_header():
+    async def scenario():
+        seen_request_ids = []
+
+        async def app(scope, receive, send):
+            seen_request_ids.append(get_request_id())
+            await send({"type": "http.response.start", "status": 204, "headers": []})
+            await send({"type": "http.response.body", "body": b""})
+
+        middleware = RequestContextMiddleware(app)
+        messages = await _collect_response(
+            middleware,
+            scope=_http_scope(headers=[(b"x-request-id", b"test-request-1")]),
+        )
+
+        assert seen_request_ids == ["test-request-1"]
+        assert dict(messages[0]["headers"])[b"x-request-id"] == b"test-request-1"
+        assert get_request_id() is None
 
     asyncio.run(scenario())

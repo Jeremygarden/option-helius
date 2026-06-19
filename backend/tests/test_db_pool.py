@@ -21,6 +21,7 @@ def test_database_settings_bounds(monkeypatch):
     assert settings.statement_timeout_ms == 100
     assert settings.command_timeout == 0.1
     assert settings.idle_in_transaction_session_timeout_ms == 1000
+    assert settings.slow_query_ms == 500.0
 
 
 async def _fake_init(connection):
@@ -76,3 +77,20 @@ def test_schema_defines_query_friendly_indexes():
     assert "idx_chain_data_gin" in ddl
     assert "idx_composite_score_time_desc" in ddl
     assert "idx_api_query_performance_name_time_desc" in ddl
+
+
+def test_slow_query_metric_emits_warning(monkeypatch, caplog):
+    import asyncio
+    import logging
+    from app.core import db
+
+    monkeypatch.setattr(db, "_pool_settings", db.DatabaseSettings(url="postgres://example", slow_query_ms=1.0))
+
+    async def scenario():
+        with caplog.at_level(logging.WARNING, logger="app.core.db"):
+            await db._record_query_metrics("SELECT * FROM options_chain_snapshots", 12.5, 3, 2.0)
+
+    asyncio.run(scenario())
+
+    assert any(record.event == "slow_query" for record in caplog.records)
+    assert any("options_chain_snapshots" in record.query for record in caplog.records)

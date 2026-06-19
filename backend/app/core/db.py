@@ -9,9 +9,12 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import Any, AsyncIterator, Iterable, Optional, Sequence
+
+from .logging import get_request_id
 
 try:  # pragma: no cover - tests may stub optional deps
     import asyncpg
@@ -32,6 +35,7 @@ class DatabaseSettings:
     statement_timeout_ms: int = 5_000
     idle_in_transaction_session_timeout_ms: int = 10_000
     max_inactive_connection_lifetime: float = 300.0
+    slow_query_ms: float = 500.0
 
     @property
     def enabled(self) -> bool:
@@ -75,6 +79,7 @@ def get_database_settings() -> DatabaseSettings:
         statement_timeout_ms=statement_timeout_ms,
         idle_in_transaction_session_timeout_ms=max(1_000, _env_int("DB_IDLE_TX_TIMEOUT_MS", 10_000)),
         max_inactive_connection_lifetime=max(30.0, _env_float("DB_MAX_INACTIVE_CONNECTION_LIFETIME", 300.0)),
+        slow_query_ms=max(1.0, _env_float("DB_SLOW_QUERY_MS", 500.0)),
     )
 
 
@@ -84,9 +89,31 @@ _pool_settings: Optional[DatabaseSettings] = None
 
 async def _configure_connection(connection: Any, settings: DatabaseSettings) -> None:
     await connection.execute(
-        "SET statement_timeout = $1; SET idle_in_transaction_session_timeout = $2;",
+        "SET statement_timeout = $1; SET idle_in_transaction_session_timeout = $2; SET application_name = 'option-helius-api';",
         settings.statement_timeout_ms,
         settings.idle_in_transaction_session_timeout_ms,
+    )
+
+
+def _query_label(sql: str) -> str:
+    compact = " ".join(sql.strip().split())
+    return compact[:160]
+
+
+async def _record_query_metrics(sql: str, duration_ms: float, row_count: int | None, timeout: float | None) -> None:
+    settings = _pool_settings
+    if settings is None or duration_ms < settings.slow_query_ms:
+        return
+    logger.warning(
+        "slow database query",
+        extra={
+            "event": "slow_query",
+            "duration_ms": round(duration_ms, 2),
+            "row_count": row_count,
+            "timeout_seconds": timeout,
+            "query": _query_label(sql),
+            "request_id": get_request_id() or "-",
+        },
     )
 
 
@@ -154,28 +181,42 @@ async def acquire_db(timeout: float | None = None) -> AsyncIterator[Any]:
 
 
 async def fetch(sql: str, *args: Any, timeout: float | None = None) -> list[Any]:
+    start = time.perf_counter()
     async with acquire_db(timeout=timeout) as connection:
-        return await connection.fetch(sql, *args, timeout=timeout)
+        rows = await connection.fetch(sql, *args, timeout=timeout)
+    await _record_query_metrics(sql, (time.perf_counter() - start) * 1000, len(rows), timeout)
+    return rows
 
 
 async def fetchrow(sql: str, *args: Any, timeout: float | None = None) -> Any:
+    start = time.perf_counter()
     async with acquire_db(timeout=timeout) as connection:
-        return await connection.fetchrow(sql, *args, timeout=timeout)
+        row = await connection.fetchrow(sql, *args, timeout=timeout)
+    await _record_query_metrics(sql, (time.perf_counter() - start) * 1000, 1 if row is not None else 0, timeout)
+    return row
 
 
 async def execute(sql: str, *args: Any, timeout: float | None = None) -> str:
+    start = time.perf_counter()
     async with acquire_db(timeout=timeout) as connection:
-        return await connection.execute(sql, *args, timeout=timeout)
+        result = await connection.execute(sql, *args, timeout=timeout)
+    await _record_query_metrics(sql, (time.perf_counter() - start) * 1000, None, timeout)
+    return result
 
 
 async def execute_many(statements: Iterable[str], *, timeout: float | None = None) -> None:
     async with acquire_db(timeout=timeout) as connection:
         for statement in statements:
+            start = time.perf_counter()
             await connection.execute(statement, timeout=timeout)
+            await _record_query_metrics(statement, (time.perf_counter() - start) * 1000, None, timeout)
 
 
 async def copy_records_to_table(table_name: str, records: Sequence[tuple[Any, ...]], columns: Sequence[str]) -> str:
     """COPY helper for high-throughput TimescaleDB ingestion."""
 
+    start = time.perf_counter()
     async with acquire_db() as connection:
-        return await connection.copy_records_to_table(table_name, records=records, columns=columns)
+        result = await connection.copy_records_to_table(table_name, records=records, columns=columns)
+    await _record_query_metrics(f"COPY {table_name}", (time.perf_counter() - start) * 1000, len(records), None)
+    return result

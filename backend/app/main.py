@@ -1,5 +1,9 @@
 from contextlib import asynccontextmanager
 
+from .core.logging import configure_logging
+
+configure_logging()
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 import asyncio
@@ -10,6 +14,7 @@ from .mock.options_chain import get_mock_chain
 from .core.cache import close_redis, init_redis
 from .core.config import get_settings, validate_ibkr_startup
 from .core.db import close_db_pool, get_database_settings, init_db_pool
+from .core.logging import RequestContextMiddleware
 from .core.middleware import InMemoryRateLimitMiddleware, RequestSizeLimitMiddleware
 from .core.validation import normalize_ticker
 from .services.db_schema import init_timescale_schema
@@ -152,6 +157,7 @@ async def lifespan(application: FastAPI):
 
 app = FastAPI(title="Options Helius API", lifespan=lifespan)
 
+app.add_middleware(RequestContextMiddleware)
 app.add_middleware(InMemoryRateLimitMiddleware, limit=120, window_seconds=60)
 app.add_middleware(RequestSizeLimitMiddleware, max_body_bytes=1_048_576)
 
@@ -192,4 +198,4 @@ async def websocket_endpoint(websocket: WebSocket, ticker: str):
             await websocket.send_text(json.dumps(data))
             await asyncio.sleep(5)
     except WebSocketDisconnect:
-        print(f"Client disconnected from {ticker} chain")
+        logger.info("WebSocket client disconnected from %s chain", ticker)
