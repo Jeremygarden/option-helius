@@ -15,24 +15,9 @@ Redis: localhost:6379
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────┐
-│                   Next.js Frontend               │
-│         (期权链 / 情绪 / 宏观 / 可视化)           │
-└──────────────────┬──────────────────────────────┘
-                   │ WebSocket + REST
-┌──────────────────▼──────────────────────────────┐
-│              FastAPI Backend                     │
-│  ┌──────────┐ ┌──────────┐ ┌──────────────────┐ │
-│  │  IBKR    │ │Longbridge│ │  Analytics Layer  │ │
-│  │ Gateway  │ │  Client  │ │ (Greeks/GEX/Pain) │ │
-│  └──────────┘ └──────────┘ └──────────────────┘ │
-└──────┬──────────────────────────────────────────┘
-       │
-┌──────▼──────────────────────────────────────────┐
-│   Redis (cache)  │  TimescaleDB (history)        │
-└─────────────────────────────────────────────────┘
-```
+![Option Helius system architecture](docs/system-architecture.svg)
+
+Editable source: [`docs/system-architecture.drawio`](docs/system-architecture.drawio)
 
 ## Modules
 
